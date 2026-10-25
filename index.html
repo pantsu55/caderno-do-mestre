@@ -1,0 +1,1137 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Caderno">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="icon" href="icon.png">
+<style>
+:root { color-scheme: light; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; }
+img { max-width: 100%; }
+[hidden] { display: none !important; }
+</style>
+<title>Caderno do Mestre</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IM+Fell+English+SC&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* Layout: barra fixa no topo (modo e cenas), Mesa em duas colunas (narrar à esquerda, ambientar à direita) e dock fixo embaixo com Medo e volume. */
+:root {
+  --bg: #E8EBE5;
+  --surface: #F7F8F4;
+  --surface-2: #EDF0EA;
+  --fg: #1B2724;
+  --muted: #55645E;
+  --line: #C5CEC6;
+  --accent: #8F5F0F;
+  --accent-ink: #FFF8E8;
+  --accent-soft: #F0E4C8;
+  --active: #17655E;
+  --active-ink: #F1FBF9;
+  --hp: #A3362B;
+  --fear: #8A2F52;
+  --ok: #2E7D4F;
+  --stage: #070D10;
+  --font-display: 'IM Fell English SC', Georgia, 'Times New Roman', serif;
+  --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111918;
+    --surface: #1A2524;
+    --surface-2: #212E2D;
+    --fg: #E6EAE4;
+    --muted: #95A59F;
+    --line: #2D3C3A;
+    --accent: #D9A94F;
+    --accent-ink: #1B1405;
+    --accent-soft: #3A3020;
+    --active: #4DB3A6;
+    --active-ink: #06201D;
+    --hp: #E2766A;
+    --fear: #D77FA1;
+    --ok: #6CC38A;
+    --stage: #05090B;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #111918;
+  --surface: #1A2524;
+  --surface-2: #212E2D;
+  --fg: #E6EAE4;
+  --muted: #95A59F;
+  --line: #2D3C3A;
+  --accent: #D9A94F;
+  --accent-ink: #1B1405;
+  --accent-soft: #3A3020;
+  --active: #4DB3A6;
+  --active-ink: #06201D;
+  --hp: #E2766A;
+  --fear: #D77FA1;
+  --ok: #6CC38A;
+  --stage: #05090B;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.5;
+  padding-block: 0 56px;
+}
+body.has-dock { padding-block: 0 140px; }
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0 0 auto;
+  height: env(safe-area-inset-top, 0px);
+  z-index: 30;
+  background: var(--bg);
+}
+button, input, select, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; -webkit-tap-highlight-color: transparent; }
+button:disabled { cursor: default; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible, a:focus-visible {
+  outline: 3px solid var(--active);
+  outline-offset: 2px;
+}
+h1, h2, h3, p, figure, ul { margin: 0; }
+ul { padding-left: 1.2em; }
+
+/* barra superior */
+.top {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 20;
+  background: var(--bg);
+  border-bottom: 1px solid var(--line);
+  padding-block: 10px 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.top-in { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 24px; letter-spacing: 0.03em; }
+.brand svg { width: 26px; height: 26px; color: var(--accent); flex: none; }
+.seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.seg button { border: 0; background: transparent; min-height: 44px; padding: 0 22px; font-weight: 700; transition: background 0.12s, color 0.12s; }
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-checked="true"] { background: var(--active); color: var(--active-ink); }
+.scenes { max-width: 1180px; margin: 8px auto 0; display: flex; gap: 8px; overflow-x: auto; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
+.chip { flex: none; border: 1px solid var(--line); background: var(--surface); border-radius: 999px; padding: 4px 14px; min-height: 36px; font-size: 14px; white-space: nowrap; }
+.chip[aria-current="true"] { background: var(--fg); color: var(--bg); border-color: var(--fg); font-weight: 700; }
+.chip:disabled { opacity: 0.55; }
+
+/* conteúdo */
+.wrap { max-width: 1180px; margin: 0 auto; padding-top: 24px; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); display: grid; gap: 24px; }
+.head { display: grid; gap: 10px; }
+.eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+h1 { font-family: var(--font-display); font-weight: 400; font-size: clamp(34px, 5.2vw, 54px); line-height: 1.05; letter-spacing: 0.02em; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 66ch; font-size: 18px; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.tag { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; color: var(--muted); white-space: nowrap; }
+.tag-hot { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.cols { display: grid; gap: 28px; grid-template-columns: minmax(0, 1fr); align-items: start; }
+@media (min-width: 940px) { .cols { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: 36px; } }
+.col { display: grid; gap: 28px; min-width: 0; }
+.panel { display: grid; gap: 12px; min-width: 0; border-top: 1px solid var(--line); padding-top: 14px; }
+.panel-h { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+h2 { font-family: var(--font-display); font-weight: 400; font-size: 24px; letter-spacing: 0.03em; text-wrap: balance; }
+h3 { font-size: 17px; font-weight: 700; }
+.hint { color: var(--muted); font-size: 15px; max-width: 62ch; }
+.count { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--fg); background: transparent; border-radius: 12px; padding: 8px 18px; min-height: 48px; font-weight: 700; text-decoration: none; color: var(--fg); transition: background 0.12s, color 0.12s; }
+.btn:active { background: var(--fg); color: var(--bg); }
+.btn.primary { background: var(--active); border-color: var(--active); color: var(--active-ink); }
+.btn.quiet { border-color: var(--line); background: var(--surface); }
+.btn.sm { min-height: 40px; padding: 4px 14px; font-size: 15px; }
+.btn:disabled { opacity: 0.45; }
+
+/* pips, fichas e marcadores */
+.pips { display: flex; flex-wrap: wrap; gap: 8px; }
+.pip { width: 38px; height: 38px; border-radius: 10px; border: 2px solid var(--line); background: var(--surface); padding: 0; }
+.pip.on { background: var(--hp); border-color: var(--hp); }
+.pip-lg { width: 52px; height: 52px; border-radius: 14px; }
+.pip-lg.on { background: var(--accent); border-color: var(--accent); }
+.pip.stress.on { background: var(--accent); border-color: var(--accent); }
+.done { border: 1px solid var(--accent); background: var(--accent-soft); border-radius: 12px; padding: 12px 14px; font-weight: 700; }
+.countdown .panel-h .btn { margin-left: auto; }
+
+details.note { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+details.note + details.note { margin-top: 10px; }
+details.note summary { list-style: none; padding: 14px 16px; min-height: 52px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
+details.note summary::-webkit-details-marker { display: none; }
+details.note summary::after { content: ""; width: 9px; height: 9px; border-right: 2px solid var(--muted); border-bottom: 2px solid var(--muted); transform: rotate(45deg); flex: none; margin-top: -4px; }
+details.note[open] summary::after { transform: rotate(-135deg); margin-top: 4px; }
+.rich { padding: 0 16px 14px; display: grid; gap: 10px; max-width: 70ch; }
+.rich ul { display: grid; gap: 6px; }
+
+.adv { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 14px 16px; display: grid; gap: 12px; min-width: 0; }
+.adv + .adv { margin-top: 12px; }
+.adv header { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.stats { font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+.toks { display: flex; flex-wrap: wrap; gap: 8px; }
+.tok { width: 46px; height: 46px; border-radius: 50%; border: 2px solid var(--fg); background: var(--surface-2); font-family: var(--font-mono); font-weight: 500; padding: 0; }
+.tok.down { border-color: var(--line); color: var(--muted); background: transparent; }
+.gauge { display: grid; grid-template-columns: 82px minmax(0, 1fr); align-items: center; gap: 10px; }
+.gauge > span { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.feat { display: grid; gap: 6px; font-size: 15px; color: var(--muted); }
+.feat strong { color: var(--fg); }
+
+/* som */
+.music { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-wrap: wrap; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+.m-name { font-weight: 700; }
+.m-terms { font-family: var(--font-mono); font-size: 12.5px; color: var(--muted); }
+.amb-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.amb { display: grid; gap: 4px; min-width: 0; }
+.amb-btn { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 10px 14px; min-height: 66px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; transition: background 0.12s, color 0.12s, border-color 0.12s; }
+.amb-btn .n { font-weight: 700; line-height: 1.2; }
+.amb-btn .st { font-family: var(--font-mono); font-size: 12px; opacity: 0.8; }
+.amb-btn[aria-pressed="true"] { background: var(--active); color: var(--active-ink); border-color: var(--active); }
+input[type="range"] { width: 100%; height: 36px; accent-color: var(--active); margin: 0; }
+.fx-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 520px) { .fx-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.fx { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 12px; min-height: 84px; text-align: left; display: flex; flex-direction: column; justify-content: space-between; gap: 6px; transition: background 0.12s, color 0.12s, border-color 0.12s; }
+.fx.wide { grid-column: 1 / -1; min-height: 64px; }
+.fx:active, .fx.playing { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.fx .n { font-weight: 700; line-height: 1.2; }
+.fx .m { font-family: var(--font-mono); font-size: 12px; opacity: 0.8; }
+
+/* imagens e tela dos jogadores */
+.stage { position: relative; aspect-ratio: 16 / 9; max-width: 100%; border-radius: 12px; border: 1px solid var(--line); background: var(--stage); display: grid; place-items: center; overflow: hidden; }
+.stage img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.stage .empty { color: #8FA19B; font-family: var(--font-mono); font-size: 13px; letter-spacing: 0.08em; text-transform: uppercase; }
+.stage .cap { position: absolute; left: 0; right: 0; bottom: 0; padding: 22px 14px 10px; background: linear-gradient(transparent, rgba(0, 0, 0, 0.75)); color: #F2F4EF; font-size: 14px; }
+.stage .hide { position: absolute; top: 10px; right: 10px; background: rgba(0, 0, 0, 0.55); color: #F2F4EF; border-color: rgba(255, 255, 255, 0.4); }
+.aud { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.aud .lbl { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+.aud .chip[aria-pressed="true"] { background: var(--active); border-color: var(--active); color: var(--active-ink); font-weight: 700; }
+.gallery { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.shot { border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); display: grid; min-width: 0; }
+.shot.on { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent); }
+.shot img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; }
+.shot figcaption { padding: 8px 12px 4px; font-size: 14px; }
+.shot .btn { margin: 4px 10px 10px; }
+.shot .btn[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+/* dock */
+.dock { position: fixed; left: 0; right: 0; bottom: 0; z-index: 25; background: var(--surface); border-top: 1px solid var(--line); padding-top: 10px; padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.dock-in { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; }
+.fear { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.fear-l { font-family: var(--font-display); font-size: 22px; letter-spacing: 0.03em; color: var(--fear); }
+.step { width: 48px; height: 48px; border-radius: 12px; border: 1px solid var(--fg); background: transparent; font-size: 24px; line-height: 1; padding: 0; }
+.step:active { background: var(--fg); color: var(--bg); }
+.fear-v { font-family: var(--font-mono); font-size: 28px; font-weight: 500; min-width: 2ch; text-align: center; font-variant-numeric: tabular-nums; }
+.dots { display: flex; gap: 5px; }
+.dots i { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--line); display: block; }
+.dots i.on { background: var(--fear); border-color: var(--fear); }
+.dock-vol { display: flex; align-items: center; gap: 10px; min-width: 0; flex: 1 1 200px; max-width: 360px; }
+.dock-vol span { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(112px + env(safe-area-inset-bottom, 0px)); background: var(--fg); color: var(--bg); padding: 10px 18px; border-radius: 999px; font-size: 15px; z-index: 40; opacity: 0; pointer-events: none; transition: opacity 0.15s; max-width: calc(100% - 32px); text-align: center; }
+.toast.show { opacity: 1; }
+
+/* preparar */
+.prep-grid { display: grid; gap: 28px; }
+.field { display: grid; gap: 6px; min-width: 0; }
+.field label, .lbl-s { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+input[type="text"], textarea, select { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 46px; }
+textarea { min-height: 120px; resize: vertical; line-height: 1.45; }
+.form-row { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.edit-card { border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 14px; display: grid; gap: 12px; min-width: 0; }
+.edit-card + .edit-card { margin-top: 12px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.cue-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 10px 12px; }
+.cue-row + .cue-row { margin-top: 8px; }
+.cue-row .n { font-weight: 700; flex: 1 1 160px; min-width: 0; }
+.add-row { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; }
+.add-row .field { flex: 1 1 200px; }
+.file-btn { position: relative; overflow: hidden; }
+.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; font-size: 0; }
+.thumbs { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
+.thumb { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 8px; display: grid; gap: 8px; min-width: 0; }
+.thumb img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; border-radius: 8px; display: block; }
+
+
+/* layout v2: título compacto, abas à esquerda, console de som fixo à direita */
+h1 { font-size: clamp(30px, 4.2vw, 44px); }
+.head { gap: 8px; }
+.cols { gap: 24px; }
+@media (min-width: 940px) { .cols { grid-template-columns: minmax(0, 1fr) minmax(360px, 440px); } }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); }
+.tab { border: 0; background: transparent; min-height: 48px; padding: 0 18px; font-weight: 700; color: var(--muted); border-bottom: 3px solid transparent; margin-bottom: -1px; }
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
+.tab-body { display: grid; gap: 12px; padding-top: 14px; min-width: 0; }
+.tab-body .note + .note { margin-top: 0; }
+.tab-body .adv + .adv { margin-top: 0; }
+.console { display: grid; gap: 18px; min-width: 0; align-content: start; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 16px; }
+@media (min-width: 940px) {
+  .console { position: sticky; top: calc(116px + env(safe-area-inset-top, 0px)); max-height: calc(100vh - 116px - 140px - env(safe-area-inset-top, 0px)); overflow-y: auto; overscroll-behavior: contain; }
+}
+.console .music { background: transparent; border: 0; padding: 0; flex-wrap: nowrap; justify-content: flex-start; gap: 14px; }
+.play { border: 0; padding: 0; flex: none; width: 64px; height: 64px; border-radius: 50%; background: var(--active); color: var(--active-ink); display: grid; place-items: center; text-decoration: none; }
+.play svg { width: 30px; height: 30px; margin-left: 3px; }
+.play:active { filter: brightness(0.85); }
+.m-txt { min-width: 0; display: grid; gap: 2px; }
+.lbl-s { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.sub { display: grid; gap: 8px; }
+.sub h2 { font-size: 20px; }
+.amb-row { display: grid; grid-template-columns: minmax(150px, 1fr) minmax(0, 1.2fr); align-items: center; gap: 10px; }
+.console .amb-btn { flex-direction: row; align-items: center; gap: 10px; min-height: 48px; padding: 6px 12px; background: var(--surface-2); }
+.console .amb-btn[aria-pressed="true"] { background: var(--active); border-color: var(--active); color: var(--active-ink); }
+.dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid var(--muted); flex: none; }
+.amb-btn[aria-pressed="true"] .dot { background: var(--active-ink); border-color: var(--active-ink); }
+.console .fx { min-height: 62px; padding: 10px; background: var(--surface-2); }
+.console .fx.wide { min-height: 52px; flex-direction: row; align-items: center; }
+.console .fx:active, .console .fx.playing { background: var(--accent); }
+@media (max-width: 520px) { .amb-row { grid-template-columns: 1fr; } }
+
+.linkbtn { border: 0; background: transparent; color: var(--muted); text-decoration: underline; padding: 8px 0; min-height: 40px; justify-self: start; font-size: 14px; }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c-3.4 0-5.7 2.5-5.7 5.9V12c0 1.7-.6 2.7-1.9 4.2h15.2c-1.3-1.5-1.9-2.5-1.9-4.2V8.4c0-3.4-2.3-5.9-5.7-5.9z" fill="currentColor"/><circle cx="12" cy="19.4" r="1.9" fill="currentColor"/></svg>
+      <span>Caderno do Mestre</span>
+    </div>
+    <div class="seg" role="radiogroup" aria-label="Modo">
+      <button type="button" role="radio" aria-checked="false" data-action="mode" data-mode="prep">Preparar</button>
+      <button type="button" role="radio" aria-checked="true" data-action="mode" data-mode="mesa">Mesa</button>
+    </div>
+  </div>
+  <nav class="scenes" id="scenes" aria-label="Cenas"></nav>
+</header>
+<main class="wrap" id="main"></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<footer class="dock" id="dock" hidden></footer>
+
+<script>
+(function () {
+  'use strict';
+  const $ = function (s, r) { return (r || document).querySelector(s); };
+  const $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  const esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  const inline = function (s) { return esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>'); };
+  function rich(text) {
+    return String(text).split(/\n{2,}/).map(function (b) {
+      const lines = b.split('\n').filter(Boolean);
+      if (!lines.length) return '';
+      if (lines.every(function (l) { return /^\s*-\s+/.test(l); })) {
+        return '<ul>' + lines.map(function (l) { return '<li>' + inline(l.replace(/^\s*-\s+/, '')) + '</li>'; }).join('') + '</ul>';
+      }
+      return '<p>' + lines.map(inline).join('<br>') + '</p>';
+    }).join('');
+  }
+  const safeUrl = function (u) { return /^https:\/\//i.test(u) ? u : '#'; };
+  const fmtDur = function (n) { return n.toFixed(1).replace('.', ',') + ' s'; };
+
+  /* ---------- imagens de exemplo (ilustrações geradas) ---------- */
+  const svg = function (s) { return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s); };
+  const GRAD = '<defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0c1a23"/><stop offset="1" stop-color="#1f4046"/></linearGradient></defs><rect width="640" height="400" fill="url(#g)"/>';
+  const WAVES = '<path d="M0 322 Q80 312 160 322 T320 322 T480 322 T640 322" stroke="#2c5a62" fill="none" stroke-width="2"/><path d="M0 352 Q80 342 160 352 T320 352 T480 352 T640 352" stroke="#1f4249" fill="none" stroke-width="2"/>';
+  const IMG = {
+    moinho: svg('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400">' + GRAD +
+      '<circle cx="520" cy="86" r="52" fill="#e9e3c8" opacity=".12"/><circle cx="520" cy="86" r="32" fill="#e9e3c8" opacity=".92"/>' +
+      '<rect y="300" width="640" height="100" fill="#091317"/>' + WAVES +
+      '<polygon points="170,300 192,140 292,140 314,300" fill="#05090c"/><polygon points="180,142 242,86 304,142" fill="#05090c"/>' +
+      '<rect x="232" y="186" width="22" height="30" fill="#d9a94f"/>' +
+      '<g transform="translate(346 252)" stroke="#05090c" stroke-width="7" fill="none"><circle r="48"/><path d="M-48 0H48M0-48V48M-34-34L34 34M34-34L-34 34"/></g></svg>'),
+    afogados: svg('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400">' + GRAD +
+      '<circle cx="320" cy="76" r="58" fill="#e9e3c8" opacity=".1"/><rect y="226" width="640" height="174" fill="#0a161a"/>' +
+      '<g fill="#05090c"><rect x="92" y="150" width="36" height="76" rx="14"/><circle cx="110" cy="134" r="17"/>' +
+      '<rect x="214" y="166" width="36" height="62" rx="14"/><circle cx="232" cy="150" r="17"/>' +
+      '<rect x="352" y="142" width="36" height="84" rx="14"/><circle cx="370" cy="126" r="17"/>' +
+      '<rect x="470" y="160" width="36" height="68" rx="14"/><circle cx="488" cy="144" r="17"/></g>' +
+      '<path d="M60 232 Q110 224 160 232 T260 232 T360 232 T460 232 T560 232" stroke="#2c5a62" fill="none" stroke-width="2"/>' +
+      '<path d="M0 290 Q80 280 160 290 T320 290 T480 290 T640 290" stroke="#1f4249" fill="none" stroke-width="2"/></svg>'),
+    rolf: svg('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400">' + GRAD +
+      '<circle cx="480" cy="96" r="46" fill="#e9e3c8" opacity=".1"/>' +
+      '<path d="M320 70 C268 70 248 126 248 184 L226 400 H414 L392 184 C392 126 372 70 320 70Z" fill="#05090c"/>' +
+      '<ellipse cx="320" cy="150" rx="26" ry="32" fill="#16262b"/><rect x="266" y="250" width="108" height="9" fill="#0b161a"/>' +
+      '<rect x="338" y="254" width="20" height="28" rx="3" fill="#8f6a2a"/>' +
+      '<path d="M392 230 L520 196" stroke="#05090c" stroke-width="8" stroke-linecap="round"/><path d="M468 176 Q500 196 478 226" stroke="#05090c" stroke-width="6" fill="none" stroke-linecap="round"/></svg>'),
+    sino: svg('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400"><defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#10303a"/><stop offset="1" stop-color="#050d10"/></linearGradient></defs><rect width="640" height="400" fill="url(#g)"/>' +
+      '<g fill="none" stroke="#6fb4ba" stroke-width="2" opacity=".6"><circle cx="150" cy="260" r="9"/><circle cx="178" cy="210" r="5"/><circle cx="500" cy="230" r="11"/><circle cx="470" cy="170" r="6"/><circle cx="520" cy="120" r="4"/></g>' +
+      '<path d="M320 96 C252 96 232 164 232 222 C232 260 212 280 192 300 H448 C428 280 408 260 408 222 C408 164 388 96 320 96Z" fill="#7a5a22"/>' +
+      '<path d="M268 130 C246 160 246 210 252 250" stroke="#b88a36" stroke-width="8" fill="none" opacity=".55" stroke-linecap="round"/>' +
+      '<circle cx="320" cy="320" r="20" fill="#7a5a22"/><path d="M320 96 C298 66 342 44 318 10" stroke="#1d1a12" stroke-width="9" fill="none" stroke-linecap="round"/></svg>')
+  };
+
+  /* ---------- estado ---------- */
+  const KEY = 'caderno-do-mestre-v1';
+  const PLAYERS = ['Ana', 'Bruno', 'Carla'];
+  const SCENES = ['O Quadro de Contratos', 'Sinoeira', null, 'O Dia das Perguntas', 'Brejo adentro', 'A Capela Afogada'];
+  const defaults = function () {
+    return {
+      title: 'A Primeira Noite', place: 'Moinho dos Okk', when: 'Noite 1', kind: 'Combate', time: '45 min', budget: 'Orçamento 5 de 14 pontos',
+      summary: 'O sino toca à meia-noite, Bertrão é chamado para a água, e o grupo enfrenta os Afogados e Rolf, o caçador que veio antes.',
+      notes: [
+        { title: 'A cena', open: true, text: 'O Moinho dos Okk fica na ponta da vila, onde um canal de maré encontra o brejo. A roda gira devagar. Bertrão faz café sem parar, depois reza e depois chora.\n\nÀ meia-noite, um toque abafado vem de baixo d\'água. Bertrão se levanta como sonâmbulo e caminha para a porta que dá para o canal.' },
+        { title: 'Segurar Bertrão', open: true, text: '- Força, Dificuldade 12, ou convencê-lo a voltar (Presença, Dificuldade 14).\n- Se ninguém agir, ele sai e mergulha no canal.' },
+        { title: 'O combate', open: false, text: '- **Os Afogados saem do canal.** Quatro corpos inchados sobem pela margem. Um deles, de cicatriz no queixo, é **Rolf**, o caçador de quem Dona Sedra falou. No cinto, uma plaquinha de madeira com o selo do Posto do Corvo.\n- **O sino ainda toca.** A cada Medo gasto, ele dá um novo toque. No terceiro, os Afogados restantes recuam. Se Rolf cair antes, os demais se desfazem em lama.\n- **Reforços.** Gastando 1 Medo, um segundo grupo sobe do canal.\n- **Afogamento a seco.** Quando o Ataque em Grupo acerta, o alvo faz uma Reação de Força (Dificuldade 12). Em falha, marca 1 Estresse.' },
+        { title: 'Depois do combate', open: false, text: '**Se Bertrão for salvo:** ele desaba e confessa uma parte: "Eu só fiz os nós." Marque 1 ponto em A Confissão para a cena 6.\n\n**Se Bertrão for perdido:** os Afogados o levam, e ele volta na cena 6 como mais um Afogado.\n\n**Fim da cena:** quando o sino se cala, o grupo vê uma luz pequena se afastando pela passarela do brejo: uma vela e uma menina de camisola caminhando sem olhar para trás.' },
+        { title: 'Perguntas para a mesa', open: false, text: '- O que você faz primeiro enquanto o sino toca e Bertrão se levanta como sonâmbulo?\n- O que você reconhece em Rolf, o caçador que veio antes de vocês?\n- O que você vê no rosto de Bertrão quando ele volta a si?' }
+      ],
+      music: { name: 'Tensão crescente', terms: 'horror ambient · dark orchestral tension', url: 'https://open.spotify.com/search/horror%20ambient' },
+      cues: [
+        { id: 'sino', kind: 'fx', src: 'synth' }, { id: 'passos', kind: 'fx', src: 'synth' }, { id: 'batida', kind: 'fx', src: 'synth' },
+        { id: 'trovao', kind: 'fx', src: 'synth' }, { id: 'respingo', kind: 'fx', src: 'synth' }, { id: 'porta', kind: 'fx', src: 'synth' },
+        { id: 'tres', kind: 'fx', src: 'synth' },
+        { id: 'chuva', kind: 'amb', src: 'synth' }, { id: 'vento', kind: 'amb', src: 'synth' }, { id: 'canal', kind: 'amb', src: 'synth' }, { id: 'roda', kind: 'amb', src: 'synth' }
+      ],
+      images: [
+        { id: 'i1', caption: 'O moinho à noite', src: IMG.moinho },
+        { id: 'i2', caption: 'Os Afogados saem do canal', src: IMG.afogados },
+        { id: 'i3', caption: 'Rolf, o caçador que veio antes', src: IMG.rolf },
+        { id: 'i4', caption: 'O sino debaixo d\'água', src: IMG.sino }
+      ],
+      countdown: { name: 'Toques do sino', max: 3, value: 0, cue: 'sino', done: 'No terceiro toque, os Afogados restantes recuam para o canal.' },
+      fear: 0, vol: 0.8,
+      adv: { afogados: [0, 0, 0, 0], rolfHp: 0, rolfStress: 0 }
+    };
+  };
+  function load() {
+    try {
+      const raw = localStorage.getItem(KEY);
+      if (!raw) return null;
+      const base = defaults();
+      return Object.assign(base, JSON.parse(raw), { images: base.images });
+    } catch (e) { return null; }
+  }
+  let S = load() || defaults();
+  function save() {
+    try {
+      const copy = Object.assign({}, S, { images: undefined, cues: S.cues.filter(function (c) { return c.src === 'synth'; }) });
+      localStorage.setItem(KEY, JSON.stringify(copy));
+    } catch (e) { /* sem armazenamento */ }
+  }
+  let mode = 'mesa', tab = 'notas', revealed = null, audience = ['todos'];
+  const active = {}, levels = {}, fileBuffers = {};
+  const main = $('#main'), dock = $('#dock');
+
+
+  /* ---------- Spotify (login PKCE + Web API, sem servidor) ---------- */
+  const SP = {
+    clientId: '69eea9091c12429581bf220133d0b732',
+    scopes: 'user-modify-playback-state user-read-playback-state',
+    enabled: /\.github\.io$/.test(location.hostname)
+  };
+  let spPlaying = false;
+  const spRedirect = function () { return location.origin + location.pathname.replace(/index\.html$/, ''); };
+  const spStore = {
+    get: function () { try { return JSON.parse(localStorage.getItem('cdm-spotify') || 'null'); } catch (e) { return null; } },
+    set: function (v) { try { localStorage.setItem('cdm-spotify', JSON.stringify(v)); } catch (e) { /* sem armazenamento */ } },
+    clear: function () { try { localStorage.removeItem('cdm-spotify'); } catch (e) { /* sem armazenamento */ } }
+  };
+  function b64url(buf) {
+    let t = '';
+    new Uint8Array(buf).forEach(function (b) { t += String.fromCharCode(b); });
+    return btoa(t).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  }
+  async function spLogin() {
+    const verifier = b64url(crypto.getRandomValues(new Uint8Array(48)));
+    const challenge = b64url(await crypto.subtle.digest('SHA-256', new TextEncoder().encode(verifier)));
+    try { localStorage.setItem('cdm-verifier', verifier); } catch (e) { /* sem armazenamento */ }
+    const q = new URLSearchParams({
+      client_id: SP.clientId, response_type: 'code', redirect_uri: spRedirect(),
+      code_challenge_method: 'S256', code_challenge: challenge, scope: SP.scopes
+    });
+    location.href = 'https://accounts.spotify.com/authorize?' + q.toString();
+  }
+  async function spToken(params) {
+    const r = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, body: new URLSearchParams(params)
+    });
+    if (!r.ok) throw new Error('token');
+    const j = await r.json(), old = spStore.get() || {};
+    spStore.set({ access: j.access_token, refresh: j.refresh_token || old.refresh, exp: Date.now() + (j.expires_in - 60) * 1000 });
+  }
+  async function spHandleCallback() {
+    const p = new URLSearchParams(location.search);
+    if (!p.has('code') && !p.has('error')) return;
+    const code = p.get('code');
+    history.replaceState(null, '', spRedirect());
+    if (!code) { toast('Login do Spotify cancelado.'); return; }
+    let v = null;
+    try { v = localStorage.getItem('cdm-verifier'); } catch (e) { /* sem armazenamento */ }
+    try {
+      await spToken({ client_id: SP.clientId, grant_type: 'authorization_code', code: code, redirect_uri: spRedirect(), code_verifier: v });
+      toast('Spotify conectado.');
+    } catch (e) { toast('Não consegui conectar ao Spotify. Tente de novo.'); }
+  }
+  async function spAccess() {
+    const t = spStore.get();
+    if (!t) return null;
+    if (Date.now() < t.exp) return t.access;
+    try {
+      await spToken({ client_id: SP.clientId, grant_type: 'refresh_token', refresh_token: t.refresh });
+      return spStore.get().access;
+    } catch (e) { spStore.clear(); return null; }
+  }
+  async function spApi(method, path, body) {
+    const tok = await spAccess();
+    if (!tok) return { status: 401 };
+    try {
+      const r = await fetch('https://api.spotify.com/v1' + path, {
+        method: method, headers: { Authorization: 'Bearer ' + tok, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined
+      });
+      let j = null;
+      try { j = await r.json(); } catch (e) { /* sem corpo */ }
+      return { status: r.status, json: j };
+    } catch (e) { return { status: 0 }; }
+  }
+  function spParse(u) {
+    const t = String(u || '').trim();
+    const m = t.match(/open\.spotify\.com\/(?:intl-[a-z-]+\/)?(track|playlist|album|artist|episode|show)\/([A-Za-z0-9]+)/) || t.match(/^spotify:(track|playlist|album|artist|episode|show):([A-Za-z0-9]+)$/);
+    return m ? { type: m[1], uri: 'spotify:' + m[1] + ':' + m[2] } : null;
+  }
+  const spOk = function (st) { return st >= 200 && st < 300; };
+  async function spToggle() {
+    if (!spStore.get()) { spLogin(); return; }
+    if (spPlaying) {
+      const r = await spApi('PUT', '/me/player/pause');
+      if (spOk(r.status) || r.status === 403) { spPlaying = false; render(); } else toast('Não consegui pausar (erro ' + r.status + ').');
+      return;
+    }
+    const it = spParse(S.music.url);
+    if (!it) { toast('Em Preparar, cole um link de playlist, álbum ou faixa do Spotify.'); return; }
+    const body = (it.type === 'track' || it.type === 'episode') ? { uris: [it.uri] } : { context_uri: it.uri };
+    let r = await spApi('PUT', '/me/player/play', body);
+    if (r.status === 404) {
+      const d = await spApi('GET', '/me/player/devices');
+      const list = (d.json && d.json.devices) || [];
+      const pick = list.filter(function (x) { return x.type === 'Tablet'; })[0] || list[0];
+      if (!pick) { toast('Abra o app do Spotify no iPad, toque em qualquer música e tente de novo.'); return; }
+      r = await spApi('PUT', '/me/player/play?device_id=' + encodeURIComponent(pick.id), body);
+    }
+    if (spOk(r.status)) { spPlaying = true; render(); return; }
+    if (r.status === 401) { spStore.clear(); render(); toast('A conexão com o Spotify expirou. Conecte de novo.'); return; }
+    if (r.status === 403) { toast('O Spotify recusou. É preciso ter Premium.'); return; }
+    toast('Não consegui tocar (erro ' + r.status + ').');
+  }
+  function musicHtml() {
+    const pause = '<path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/>', playI = '<path d="M8 5.5v13l11-6.5z" fill="currentColor"/>';
+    const txt = '<div class="m-txt"><p class="lbl-s">Música · Spotify</p><p class="m-name">' + esc(S.music.name) + '</p><p class="m-terms">' + esc(S.music.terms) + '</p>';
+    if (!SP.enabled) {
+      return '<div class="music"><a class="play" href="' + esc(safeUrl(S.music.url)) + '" target="_blank" rel="noopener noreferrer" aria-label="Abrir ' + esc(S.music.name) + ' no Spotify"><svg viewBox="0 0 24 24" aria-hidden="true">' + playI + '</svg></a>' + txt + '</div></div>';
+    }
+    const on = !!spStore.get();
+    return '<div class="music"><button type="button" class="play" data-action="spToggle" aria-label="' + (on ? (spPlaying ? 'Pausar' : 'Tocar') + ' ' + esc(S.music.name) : 'Conectar ao Spotify') + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + (spPlaying ? pause : playI) + '</svg></button>' +
+      txt + (on ? '<button type="button" class="linkbtn" data-action="spOut">Desconectar Spotify</button>' : '<button type="button" class="btn primary sm" data-action="spToggle">Conectar Spotify</button>') + '</div></div>';
+  }
+
+  function setPath(obj, path, value) {
+    const k = path.split('.');
+    let o = obj;
+    for (let i = 0; i < k.length - 1; i++) o = o[k[i]];
+    o[k[k.length - 1]] = value;
+  }
+  let toastT = null;
+  function toast(msg) {
+    const t = $('#toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(toastT);
+    toastT = setTimeout(function () { t.classList.remove('show'); }, 2800);
+  }
+
+  /* ---------- áudio ---------- */
+  const AS = navigator.audioSession || null;
+  function setSession(type) { if (!AS) return; try { AS.type = type; } catch (e) { /* recusado */ } }
+  let ctx = null, master = null, fxBus = null, noiseBuf = null;
+
+  function makeNoise() {
+    const len = ctx.sampleRate * 3;
+    const b = ctx.createBuffer(1, len, ctx.sampleRate);
+    const d = b.getChannelData(0);
+    let b0 = 0, b1 = 0, b2 = 0;
+    for (let i = 0; i < len; i++) {
+      const w = Math.random() * 2 - 1;
+      b0 = 0.99765 * b0 + w * 0.0990460;
+      b1 = 0.96300 * b1 + w * 0.2965164;
+      b2 = 0.57000 * b2 + w * 1.0526913;
+      d[i] = (b0 + b1 + b2 + w * 0.1848) * 0.25;
+    }
+    return b;
+  }
+  function ensure() {
+    if (!ctx) {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      ctx = new AC();
+      master = ctx.createGain();
+      master.gain.value = S.vol;
+      master.connect(ctx.destination);
+      fxBus = ctx.createGain();
+      fxBus.connect(master);
+      noiseBuf = makeNoise();
+    }
+    if (ctx.state !== 'running') ctx.resume();
+  }
+  function noise(loop) { const s = ctx.createBufferSource(); s.buffer = noiseBuf; s.loop = !!loop; return s; }
+  function rampTo(param, v, tc) {
+    const now = ctx.currentTime;
+    param.cancelScheduledValues(now);
+    param.setValueAtTime(param.value, now);
+    param.setTargetAtTime(v, now, tc);
+  }
+  function env(g, t, peak, att, dec) {
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak, t + att);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + att + dec);
+  }
+  function nburst(t, type, freq, q, peak, att, dec) {
+    const s = noise(false), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    f.type = type; f.frequency.value = freq; f.Q.value = q;
+    env(g, t, peak, att, dec);
+    s.connect(f); f.connect(g); g.connect(fxBus);
+    s.start(t, Math.random() * 1.5, att + dec + 0.02);
+  }
+  function tone(t, f0, f1, peak, att, dec, type) {
+    const o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type || 'sine';
+    o.frequency.setValueAtTime(f0, t);
+    if (f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + att + dec * 0.4);
+    env(g, t, peak, att, dec);
+    o.connect(g); g.connect(fxBus);
+    o.start(t); o.stop(t + att + dec + 0.05);
+  }
+  function thump(t, f, level) { tone(t, f * 1.6, f, 0.7 * level, 0.01, 0.21); nburst(t, 'lowpass', 900, 0.7, 0.28 * level, 0.005, 0.085); }
+  function bell(t) {
+    const lp = ctx.createBiquadFilter();
+    lp.type = 'lowpass'; lp.frequency.value = 800;
+    lp.connect(fxBus);
+    [[1, 1], [2, 0.5], [2.76, 0.4], [5.4, 0.2]].forEach(function (p, i) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine'; o.frequency.value = 196 * p[0];
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.5 * p[1], t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 4 / (1 + i * 0.4));
+      o.connect(g); g.connect(lp);
+      o.start(t); o.stop(t + 4.1);
+    });
+  }
+  function steps(t) { for (let i = 0; i < 5; i++) thump(t + i * 0.52 + Math.random() * 0.04, i % 2 ? 95 : 82, 0.35 + 0.65 * (i / 4)); }
+  function knocks(t) {
+    [0, 0.34, 0.68].forEach(function (d) {
+      tone(t + d, 210, 120, 0.8, 0.004, 0.16, 'triangle');
+      nburst(t + d, 'bandpass', 1100, 1.2, 0.5, 0.003, 0.057);
+    });
+  }
+  function thunder(t) {
+    const s = noise(true), lp = ctx.createBiquadFilter(), g = ctx.createGain();
+    lp.type = 'lowpass';
+    lp.frequency.setValueAtTime(2500, t);
+    lp.frequency.exponentialRampToValueAtTime(140, t + 3.2);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(0.9, t + 0.04);
+    g.gain.exponentialRampToValueAtTime(0.35, t + 0.5);
+    g.gain.linearRampToValueAtTime(0.5, t + 1.1);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + 4.2);
+    s.connect(lp); lp.connect(g); g.connect(fxBus);
+    s.start(t); s.stop(t + 4.3);
+  }
+  function splash(t) {
+    nburst(t, 'bandpass', 1400, 0.8, 0.5, 0.01, 0.45);
+    tone(t, 140, 70, 0.5, 0.01, 0.3);
+    for (let i = 0; i < 4; i++) nburst(t + 0.25 + i * 0.09 + Math.random() * 0.05, 'highpass', 2500, 0.7, 0.15, 0.003, 0.05);
+  }
+  function creak(t) {
+    const o = ctx.createOscillator(), vib = ctx.createOscillator(), vg = ctx.createGain(), f = ctx.createBiquadFilter(), g = ctx.createGain();
+    o.type = 'sawtooth';
+    o.frequency.setValueAtTime(140, t);
+    o.frequency.linearRampToValueAtTime(260, t + 0.7);
+    o.frequency.linearRampToValueAtTime(190, t + 1.5);
+    vib.frequency.value = 23; vg.gain.value = 18;
+    vib.connect(vg); vg.connect(o.frequency);
+    f.type = 'bandpass'; f.Q.value = 5;
+    f.frequency.setValueAtTime(700, t);
+    f.frequency.linearRampToValueAtTime(1400, t + 1.5);
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(0.35, t + 0.15);
+    g.gain.linearRampToValueAtTime(0.25, t + 1.2);
+    g.gain.linearRampToValueAtTime(0.0001, t + 1.7);
+    o.connect(f); f.connect(g); g.connect(fxBus);
+    o.start(t); vib.start(t); o.stop(t + 1.8); vib.stop(t + 1.8);
+  }
+
+  function buildRain(out, stops) {
+    const s = noise(true), hp = ctx.createBiquadFilter(), lp = ctx.createBiquadFilter();
+    hp.type = 'highpass'; hp.frequency.value = 900;
+    lp.type = 'lowpass'; lp.frequency.value = 6500;
+    s.connect(hp); hp.connect(lp); lp.connect(out);
+    s.start();
+    stops.push(function () { s.stop(); });
+  }
+  function buildWind(out, stops) {
+    const s = noise(true), bp = ctx.createBiquadFilter(), lfo = ctx.createOscillator(), lg = ctx.createGain(), ag = ctx.createGain(), lfo2 = ctx.createOscillator(), lg2 = ctx.createGain();
+    bp.type = 'bandpass'; bp.Q.value = 0.9; bp.frequency.value = 450;
+    lfo.frequency.value = 0.13; lg.gain.value = 280;
+    lfo.connect(lg); lg.connect(bp.frequency);
+    ag.gain.value = 0.65;
+    lfo2.frequency.value = 0.21; lg2.gain.value = 0.35;
+    lfo2.connect(lg2); lg2.connect(ag.gain);
+    s.connect(bp); bp.connect(ag); ag.connect(out);
+    s.start(); lfo.start(); lfo2.start();
+    stops.push(function () { s.stop(); lfo.stop(); lfo2.stop(); });
+  }
+  function buildCanal(out, stops) {
+    const s = noise(true), bp = ctx.createBiquadFilter(), lfo = ctx.createOscillator(), lg = ctx.createGain();
+    bp.type = 'bandpass'; bp.Q.value = 0.8; bp.frequency.value = 320;
+    lfo.frequency.value = 0.17; lg.gain.value = 120;
+    lfo.connect(lg); lg.connect(bp.frequency);
+    s.connect(bp); bp.connect(out);
+    s.start(); lfo.start();
+    let alive = true, timer = null;
+    const plop = function () {
+      if (!alive) return;
+      const t = ctx.currentTime, f = 500 + Math.random() * 700;
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(f, t);
+      o.frequency.exponentialRampToValueAtTime(f * 0.45, t + 0.07);
+      env(g, t, 0.25, 0.005, 0.085);
+      o.connect(g); g.connect(out);
+      o.start(t); o.stop(t + 0.1);
+      timer = setTimeout(plop, 300 + Math.random() * 1800);
+    };
+    plop();
+    stops.push(function () { alive = false; clearTimeout(timer); s.stop(); lfo.stop(); });
+  }
+  function buildMill(out, stops) {
+    const s = noise(true), lp = ctx.createBiquadFilter(), g0 = ctx.createGain();
+    lp.type = 'lowpass'; lp.frequency.value = 180; g0.gain.value = 0.7;
+    s.connect(lp); lp.connect(g0); g0.connect(out);
+    s.start();
+    let alive = true, timer = null;
+    const turn = function () {
+      if (!alive) return;
+      const t = ctx.currentTime;
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(70, t);
+      o.frequency.exponentialRampToValueAtTime(48, t + 0.2);
+      env(g, t, 0.5, 0.02, 0.33);
+      o.connect(g); g.connect(out);
+      o.start(t); o.stop(t + 0.4);
+      const c = noise(false), bp = ctx.createBiquadFilter(), cg = ctx.createGain();
+      bp.type = 'bandpass'; bp.Q.value = 6;
+      bp.frequency.setValueAtTime(260, t);
+      bp.frequency.linearRampToValueAtTime(380, t + 0.5);
+      cg.gain.setValueAtTime(0.0001, t);
+      cg.gain.linearRampToValueAtTime(0.18, t + 0.1);
+      cg.gain.linearRampToValueAtTime(0.0001, t + 0.55);
+      c.connect(bp); bp.connect(cg); cg.connect(out);
+      c.start(t, Math.random() * 1.5, 0.6);
+      timer = setTimeout(turn, 1600 + Math.random() * 200);
+    };
+    turn();
+    stops.push(function () { alive = false; clearTimeout(timer); s.stop(); });
+  }
+
+  const LIB = {
+    sino: { label: 'Sino abafado', kind: 'fx', dur: 4.2, play: bell },
+    passos: { label: 'Passos molhados', kind: 'fx', dur: 2.6, play: steps },
+    batida: { label: 'Batida na porta', kind: 'fx', dur: 1, play: knocks },
+    trovao: { label: 'Trovão', kind: 'fx', dur: 4.3, play: thunder },
+    respingo: { label: 'Algo sai da água', kind: 'fx', dur: 1.2, play: splash },
+    porta: { label: 'Porta rangendo', kind: 'fx', dur: 1.8, play: creak },
+    tres: { label: 'Os três toques do sino', kind: 'fx', dur: 11, wide: true, play: function (t) { bell(t); bell(t + 3.4); bell(t + 6.8); } },
+    chuva: { label: 'Chuva fina', kind: 'amb', k: 1.4, level: 0.6, build: buildRain },
+    vento: { label: 'Vento', kind: 'amb', k: 1.8, level: 0.4, build: buildWind },
+    canal: { label: 'Água de canal', kind: 'amb', k: 1.6, level: 0.6, build: buildCanal },
+    roda: { label: 'Roda do moinho', kind: 'amb', k: 1.3, level: 0.5, build: buildMill }
+  };
+  const label = function (c) { return c.src === 'synth' ? LIB[c.id].label : c.label; };
+  const dur = function (c) { return c.src === 'synth' ? LIB[c.id].dur : (fileBuffers[c.id] ? fileBuffers[c.id].duration : 1); };
+  const ambK = function (c) { return c.src === 'file' ? 1 : LIB[c.id].k; };
+  const ambLevel = function (c) { if (levels[c.id] == null) levels[c.id] = c.src === 'file' ? 0.6 : LIB[c.id].level; return levels[c.id]; };
+  const findCue = function (id) { return S.cues.filter(function (c) { return c.id === id; })[0]; };
+
+  function playFx(c) {
+    ensure();
+    const t = ctx.currentTime + 0.03;
+    if (c.src === 'file') {
+      const b = ctx.createBufferSource();
+      b.buffer = fileBuffers[c.id];
+      b.connect(fxBus);
+      b.start(t);
+    } else {
+      LIB[c.id].play(t);
+    }
+    const btn = $('[data-action="fx"][data-id="' + c.id + '"]');
+    if (btn) { btn.classList.add('playing'); setTimeout(function () { btn.classList.remove('playing'); }, Math.min(dur(c), 4) * 1000); }
+  }
+  function startAmb(c, level) {
+    const out = ctx.createGain(), stops = [];
+    out.gain.value = 0;
+    out.connect(master);
+    if (c.src === 'file') {
+      const s = ctx.createBufferSource();
+      s.buffer = fileBuffers[c.id]; s.loop = true;
+      s.connect(out); s.start();
+      stops.push(function () { s.stop(); });
+    } else {
+      LIB[c.id].build(out, stops);
+    }
+    const now = ctx.currentTime;
+    out.gain.setValueAtTime(0.0001, now);
+    out.gain.linearRampToValueAtTime(level, now + 0.8);
+    return { out: out, stops: stops };
+  }
+  function stopAmb(id) {
+    const a = active[id];
+    if (!a) return;
+    delete active[id];
+    rampTo(a.out.gain, 0, 0.15);
+    setTimeout(function () {
+      a.stops.forEach(function (fn) { try { fn(); } catch (e) { /* já parado */ } });
+      try { a.out.disconnect(); } catch (e) { /* já solto */ }
+    }, 900);
+  }
+  function toggleAmb(id) {
+    const c = findCue(id);
+    if (!c) return;
+    if (active[id]) { stopAmb(id); return; }
+    ensure();
+    active[id] = startAmb(c, ambLevel(c) * ambK(c));
+  }
+  function stopAll() {
+    Object.keys(active).forEach(stopAmb);
+    if (ctx) {
+      try { fxBus.disconnect(); } catch (e) { /* já solto */ }
+      fxBus = ctx.createGain();
+      fxBus.connect(master);
+    }
+  }
+
+  /* ---------- telas ---------- */
+  function pipRow(key, n, count, extra) {
+    let h = '';
+    for (let i = 0; i < n; i++) {
+      h += '<button type="button" class="pip ' + (extra || '') + (i < count ? ' on' : '') + '" data-action="pip" data-key="' + key + '" data-i="' + i + '" aria-pressed="' + (i < count) + '" aria-label="' + (i + 1) + ' de ' + n + '"></button>';
+    }
+    return '<div class="pips">' + h + '</div>';
+  }
+  function renderCountdown() {
+    const cd = S.countdown;
+    let pips = '';
+    for (let i = 0; i < cd.max; i++) {
+      pips += '<button type="button" class="pip pip-lg' + (i < cd.value ? ' on' : '') + '" data-action="pip" data-key="cd" data-i="' + i + '" aria-pressed="' + (i < cd.value) + '" aria-label="' + esc(cd.name) + ': ' + (i + 1) + '"></button>';
+    }
+    return '<section class="panel countdown"><div class="panel-h"><h2>' + esc(cd.name) + '</h2><span class="count">' + cd.value + ' de ' + cd.max + '</span><button type="button" class="btn quiet sm" data-action="cdReset">Zerar</button></div>' +
+      '<div class="pips">' + pips + '</div>' +
+      (cd.value >= cd.max ? '<p class="done">' + esc(cd.done) + '</p>' : '') + '</section>';
+  }
+  function renderAdv() {
+    const a = S.adv;
+    const toks = a.afogados.map(function (d, i) {
+      return '<button type="button" class="tok' + (d ? ' down' : '') + '" data-action="tok" data-i="' + i + '" aria-pressed="' + (!!d) + '" aria-label="Afogado ' + (i + 1) + (d ? ', derrotado' : '') + '">' + (d ? '×' : (i + 1)) + '</button>';
+    }).join('');
+    return '<article class="adv"><header><h3>Afogados</h3><span class="tag">Lacaio</span></header>' +
+      '<p class="stats">Dif. 10 · Atq +0 · 2 de dano físico, em grupo</p>' +
+      '<div class="toks">' + toks + '</div>' +
+      '<div class="row"><button type="button" class="btn quiet sm" data-action="reinforce"' + (a.afogados.length >= 8 ? ' disabled' : '') + '>Reforço: mais 4 Afogados (1 Medo)</button></div>' +
+      '<ul class="feat"><li><strong>Lacaio (4).</strong> Cai com qualquer dano. A cada 4 de dano, derrote mais um.</li><li><strong>Ataque em Grupo.</strong> Uma jogada compartilhada; cada acerto causa 2 físico, somados.</li><li><strong>Afogamento a seco.</strong> Reação de Força (Dif. 12) ou 1 Estresse.</li></ul></article>' +
+      '<article class="adv"><header><h3>Rolf, o Caçador Afogado</h3><span class="tag">Líder</span></header>' +
+      '<p class="stats">Dif. 12 · Limiares 7/13 · Atq +2 · 1d8+2 físico</p>' +
+      '<div class="gauge"><span>PV</span>' + pipRow('rolfHp', 6, a.rolfHp) + '</div>' +
+      '<div class="gauge"><span>Estresse</span>' + pipRow('rolfStress', 3, a.rolfStress, 'stress') + '</div>' +
+      '<ul class="feat"><li><strong>Convocar os Afogados</strong> (1 Medo). Um grupo sobe do canal.</li><li><strong>Balestra enferrujada.</strong> Longe, 1d8+2 físico.</li><li><strong>Arrastar.</strong> Corpo a corpo, 1d6+2. Em sucesso, o alvo fica Preso (Dif. 12).</li><li><strong>Cai em lama.</strong> Se Rolf cai, os demais Afogados se desfazem.</li></ul></article>';
+  }
+  function audText() { return audience.indexOf('todos') >= 0 ? 'todos' : audience.join(', '); }
+  const TABS = [['notas', 'Notas'], ['adv', 'Adversários'], ['img', 'Imagens']];
+  function renderMesa() {
+    const fx = S.cues.filter(function (c) { return c.kind === 'fx'; });
+    const amb = S.cues.filter(function (c) { return c.kind === 'amb'; });
+    let body = '';
+    if (tab === 'notas') {
+      body = S.notes.map(function (n, i) {
+        return '<details class="note" data-note="' + i + '"' + (n.open ? ' open' : '') + '><summary>' + esc(n.title) + '</summary><div class="rich">' + rich(n.text) + '</div></details>';
+      }).join('');
+    } else if (tab === 'adv') {
+      body = renderAdv();
+    } else {
+      const rev = S.images.filter(function (im) { return im.id === revealed; })[0];
+      const stage = rev
+        ? '<img src="' + rev.src + '" alt="' + esc(rev.caption) + '"><div class="cap">Para ' + esc(audText()) + ': ' + esc(rev.caption) + '</div><button type="button" class="btn sm hide" data-action="hide">Esconder</button>'
+        : '<p class="empty">Nada revelado</p>';
+      const aud = ['todos'].concat(PLAYERS).map(function (p) {
+        const on = audience.indexOf(p) >= 0;
+        return '<button type="button" class="chip" data-action="aud" data-id="' + esc(p) + '" aria-pressed="' + on + '">' + (p === 'todos' ? 'Todos' : esc(p)) + '</button>';
+      }).join('');
+      const gallery = S.images.map(function (im) {
+        const on = revealed === im.id;
+        return '<figure class="shot' + (on ? ' on' : '') + '"><img src="' + im.src + '" alt="' + esc(im.caption) + '"><figcaption>' + esc(im.caption) + '</figcaption><button type="button" class="btn sm" data-action="reveal" data-id="' + im.id + '" aria-pressed="' + on + '">' + (on ? 'Revelada' : 'Revelar') + '</button></figure>';
+      }).join('');
+      body = '<div class="stage" aria-live="polite">' + stage + '</div>' +
+        '<div class="aud" role="group" aria-label="Para quem revelar"><span class="lbl">Revelar para</span>' + aud + '</div>' +
+        '<p class="hint">Tela dos jogadores simulada. Na versão final, a imagem aparece no celular de quem você escolher.</p>' +
+        '<div class="gallery">' + gallery + '</div>';
+    }
+    const tabs = TABS.map(function (t) {
+      return '<button type="button" role="tab" class="tab" aria-selected="' + (tab === t[0]) + '" data-action="tab" data-id="' + t[0] + '">' + t[1] + '</button>';
+    }).join('');
+    const ambs = amb.map(function (c) {
+      const on = !!active[c.id];
+      return '<div class="amb-row"><button type="button" class="amb-btn" data-action="amb" data-id="' + c.id + '" aria-pressed="' + on + '"><span class="dot" aria-hidden="true"></span><span class="n">' + esc(label(c)) + '</span></button>' +
+        '<input type="range" min="0" max="1" step="0.01" value="' + ambLevel(c) + '" data-vol="' + c.id + '" aria-label="Volume: ' + esc(label(c)) + '"></div>';
+    }).join('');
+    const fxs = fx.map(function (c) {
+      return '<button type="button" class="fx' + (c.src === 'synth' && LIB[c.id].wide ? ' wide' : '') + '" data-action="fx" data-id="' + c.id + '"><span class="n">' + esc(label(c)) + '</span><span class="m">' + fmtDur(dur(c)) + '</span></button>';
+    }).join('');
+    return '<section class="head"><p class="eyebrow">Cena 3 de 6 · ' + esc(S.when) + ' · ' + esc(S.place) + '</p><h1>' + esc(S.title) + '</h1>' +
+      '<div class="tags"><span class="tag tag-hot">' + esc(S.kind) + '</span><span class="tag">' + esc(S.time) + '</span><span class="tag">' + esc(S.budget) + '</span></div></section>' +
+      '<div class="cols"><div class="col">' + renderCountdown() +
+      '<section class="panel"><div class="tabs" role="tablist" aria-label="Seções da cena">' + tabs + '</div><div class="tab-body">' + body + '</div></section></div>' +
+      '<aside class="console" aria-label="Som">' +
+      musicHtml() +
+      '<section class="sub"><h2>Ambientes</h2>' + ambs + '</section>' +
+      '<section class="sub"><h2>Efeitos</h2><div class="fx-grid">' + fxs + '</div></section></aside></div>';
+  }
+
+  const KINDS = ['Combate', 'Investigação', 'Social', 'Exploração', 'Clímax'];
+  function inp(label, path, value) {
+    return '<div class="field"><label for="f-' + path + '">' + label + '</label><input type="text" id="f-' + path + '" data-bind="' + path + '" value="' + esc(value) + '"></div>';
+  }
+  function area(label, path, value, rows) {
+    return '<div class="field"><label for="f-' + path + '">' + label + '</label><textarea id="f-' + path + '" data-bind="' + path + '" rows="' + (rows || 4) + '">' + esc(value) + '</textarea></div>';
+  }
+  function renderPrep() {
+    const present = {};
+    S.cues.forEach(function (c) { if (c.src === 'synth') present[c.id] = 1; });
+    const libOpts = Object.keys(LIB).filter(function (k) { return !present[k]; }).map(function (k) {
+      return '<option value="' + k + '">' + esc(LIB[k].label) + ' (' + (LIB[k].kind === 'fx' ? 'efeito' : 'ambiente') + ')</option>';
+    }).join('');
+    const notes = S.notes.map(function (n, i) {
+      return '<div class="edit-card">' + inp('Título da nota', 'notes.' + i + '.title', n.title) + area('Texto', 'notes.' + i + '.text', n.text, 5) +
+        '<div class="row"><button type="button" class="btn quiet sm" data-action="noteUp" data-i="' + i + '"' + (i === 0 ? ' disabled' : '') + '>Subir</button><button type="button" class="btn quiet sm" data-action="noteDown" data-i="' + i + '"' + (i === S.notes.length - 1 ? ' disabled' : '') + '>Descer</button><button type="button" class="btn quiet sm" data-action="noteDel" data-i="' + i + '">Remover</button></div></div>';
+    }).join('');
+    const cues = S.cues.map(function (c) {
+      return '<div class="cue-row"><span class="n">' + esc(label(c)) + '</span><span class="tag">' + (c.kind === 'fx' ? 'Efeito' : 'Ambiente') + '</span><span class="tag">' + (c.src === 'file' ? 'Seu arquivo' : 'Sintetizado') + '</span>' +
+        '<button type="button" class="btn quiet sm" data-action="cueTest" data-id="' + c.id + '">' + (c.kind === 'fx' ? 'Ouvir' : 'Ouvir 4 s') + '</button><button type="button" class="btn quiet sm" data-action="cueDel" data-id="' + c.id + '">Remover</button></div>';
+    }).join('');
+    const imgs = S.images.map(function (im, i) {
+      return '<div class="thumb"><img src="' + im.src + '" alt="' + esc(im.caption) + '"><div class="field"><label for="f-images.' + i + '.caption">Legenda</label><input type="text" id="f-images.' + i + '.caption" data-bind="images.' + i + '.caption" value="' + esc(im.caption) + '"></div><button type="button" class="btn quiet sm" data-action="imgDel" data-id="' + im.id + '">Remover</button></div>';
+    }).join('');
+    const cdCue = ['<option value="">Nenhum</option>'].concat(S.cues.filter(function (c) { return c.kind === 'fx'; }).map(function (c) {
+      return '<option value="' + c.id + '"' + (S.countdown.cue === c.id ? ' selected' : '') + '>' + esc(label(c)) + '</option>';
+    })).join('');
+    const maxOpts = [2, 3, 4, 5, 6].map(function (n) { return '<option value="' + n + '"' + (S.countdown.max === n ? ' selected' : '') + '>' + n + '</option>'; }).join('');
+    const kindOpts = KINDS.map(function (k) { return '<option' + (S.kind === k ? ' selected' : '') + '>' + k + '</option>'; }).join('');
+    return '<section class="head"><p class="eyebrow">Preparar · Cena 3 de 6</p><h1>Monte a cena</h1><p class="lede">Tudo o que você edita aqui aparece na Mesa. Textos ficam guardados neste aparelho. Imagens e sons anexados valem só para esta sessão neste protótipo.</p></section>' +
+      '<div class="prep-grid">' +
+      '<section class="panel"><h2>Cena</h2><div class="form-row">' + inp('Título', 'title', S.title) + inp('Local', 'place', S.place) + inp('Momento', 'when', S.when) +
+      '<div class="field"><label for="f-kind">Tipo</label><select id="f-kind" data-bind="kind">' + kindOpts + '</select></div>' + inp('Duração', 'time', S.time) + inp('Orçamento de combate', 'budget', S.budget) + '</div>' + area('Resumo', 'summary', S.summary, 3) + '</section>' +
+      '<section class="panel"><h2>Notas</h2><p class="hint">Use **negrito** e linhas começando com "- " para listas.</p><div>' + notes + '</div><div class="row"><button type="button" class="btn quiet" data-action="noteAdd">Adicionar nota</button></div></section>' +
+      '<section class="panel"><h2>Música</h2><div class="form-row">' + inp('Nome', 'music.name', S.music.name) + inp('Termos de busca', 'music.terms', S.music.terms) + inp('Link do Spotify (playlist, álbum ou faixa)', 'music.url', S.music.url) + '</div></section>' +
+      '<section class="panel"><h2>Sons</h2><div>' + cues + '</div>' +
+      '<div class="add-row"><div class="field"><label for="add-lib">Adicionar da biblioteca</label><select id="add-lib">' + (libOpts || '<option value="">Tudo já está na cena</option>') + '</select></div><button type="button" class="btn quiet" data-action="cueAdd"' + (libOpts ? '' : ' disabled') + '>Adicionar</button></div>' +
+      '<div class="add-row"><div class="field"><label for="new-kind">Seu arquivo de áudio será</label><select id="new-kind"><option value="fx">Efeito (toca uma vez)</option><option value="amb">Ambiente (em loop)</option></select></div><label class="btn quiet file-btn">Anexar áudio<input type="file" id="file-audio" accept="audio/*"></label></div>' +
+      '<p class="hint">Aceita mp3, m4a e wav. Baixe efeitos de fontes livres, como o Freesound.</p></section>' +
+      '<section class="panel"><h2>Imagens</h2><div class="thumbs">' + imgs + '</div><div class="row"><label class="btn quiet file-btn">Anexar imagem<input type="file" id="file-img" accept="image/*"></label></div></section>' +
+      '<section class="panel"><h2>Contagem</h2><div class="form-row">' + inp('Nome', 'countdown.name', S.countdown.name) +
+      '<div class="field"><label for="f-countdown.max">Passos</label><select id="f-countdown.max" data-bind="countdown.max">' + maxOpts + '</select></div>' +
+      '<div class="field"><label for="f-countdown.cue">Som ao avançar</label><select id="f-countdown.cue" data-bind="countdown.cue">' + cdCue + '</select></div></div>' +
+      area('Quando chegar ao fim', 'countdown.done', S.countdown.done, 2) + '</section>' +
+      '<div class="row"><button type="button" class="btn primary" data-action="mode" data-mode="mesa">Ir para a Mesa</button></div></div>';
+  }
+
+  function renderDock() {
+    let dots = '';
+    for (let i = 0; i < 12; i++) dots += '<i class="' + (i < S.fear ? 'on' : '') + '"></i>';
+    dock.innerHTML = '<div class="dock-in"><div class="fear" role="group" aria-label="Medo do Mestre"><span class="fear-l">Medo</span>' +
+      '<button type="button" class="step" data-action="fear" data-d="-1" aria-label="Gastar um Medo">−</button><output class="fear-v" aria-live="polite">' + S.fear + '</output>' +
+      '<button type="button" class="step" data-action="fear" data-d="1" aria-label="Ganhar um Medo">+</button><span class="dots" aria-hidden="true">' + dots + '</span></div>' +
+      '<label class="dock-vol"><span>Volume geral</span><input type="range" id="vol-master" min="0" max="1" step="0.01" value="' + S.vol + '"></label>' +
+      '<button type="button" class="btn" data-action="stop">Parar tudo</button></div>';
+  }
+  function renderScenes() {
+    $('#scenes').innerHTML = SCENES.map(function (n, i) {
+      return i === 2
+        ? '<button type="button" class="chip" aria-current="true">' + (i + 1) + '. ' + esc(S.title) + '</button>'
+        : '<button type="button" class="chip" disabled title="Vazia neste protótipo">' + (i + 1) + '. ' + esc(n) + '</button>';
+    }).join('') + '<button type="button" class="chip" disabled title="Em breve">+ Nova cena</button>';
+  }
+  function render() {
+    document.body.classList.toggle('has-dock', mode === 'mesa');
+    dock.hidden = mode !== 'mesa';
+    $$('[data-mode]', document.querySelector('.seg')).forEach(function (b) { b.setAttribute('aria-checked', b.getAttribute('data-mode') === mode ? 'true' : 'false'); });
+    const cs0 = $('.console'), st0 = cs0 ? cs0.scrollTop : 0;
+    main.innerHTML = mode === 'mesa' ? renderMesa() : renderPrep();
+    const cs1 = $('.console');
+    if (cs1) cs1.scrollTop = st0;
+    if (mode === 'mesa') renderDock();
+  }
+  function commit() { save(); render(); }
+
+  /* ---------- arquivos ---------- */
+  function readFile(f) { return new Promise(function (res, rej) { const r = new FileReader(); r.onload = function () { res(r.result); }; r.onerror = rej; r.readAsDataURL(f); }); }
+  function downscale(url, max) {
+    return new Promise(function (res) {
+      const im = new Image();
+      im.onload = function () {
+        const k = Math.min(1, max / Math.max(im.width, im.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+        c.getContext('2d').drawImage(im, 0, 0, c.width, c.height);
+        try { res(c.toDataURL('image/jpeg', 0.82)); } catch (e) { res(url); }
+      };
+      im.onerror = function () { res(null); };
+      im.src = url;
+    });
+  }
+
+  /* ---------- eventos ---------- */
+  document.addEventListener('click', function (e) {
+    const el = e.target.closest('[data-action]');
+    if (!el) return;
+    const a = el.getAttribute('data-action'), id = el.getAttribute('data-id'), i = Number(el.getAttribute('data-i'));
+    if (a === 'mode') { mode = el.getAttribute('data-mode'); render(); window.scrollTo(0, 0); return; }
+    if (a === 'fear') { S.fear = Math.max(0, Math.min(12, S.fear + Number(el.getAttribute('data-d')))); save(); renderDock(); return; }
+    if (a === 'stop') { stopAll(); render(); return; }
+    if (a === 'fx') { playFx(findCue(id)); return; }
+    if (a === 'amb') { toggleAmb(id); render(); return; }
+    if (a === 'pip') {
+      const key = el.getAttribute('data-key');
+      if (key === 'cd') {
+        const cd = S.countdown, before = cd.value;
+        cd.value = (cd.value === i + 1) ? i : i + 1;
+        if (cd.value > before && cd.cue && findCue(cd.cue)) playFx(findCue(cd.cue));
+      } else {
+        S.adv[key] = (S.adv[key] === i + 1) ? i : i + 1;
+      }
+      commit(); return;
+    }
+    if (a === 'cdReset') { S.countdown.value = 0; commit(); return; }
+    if (a === 'tok') { S.adv.afogados[i] = S.adv.afogados[i] ? 0 : 1; commit(); return; }
+    if (a === 'reinforce') {
+      for (let k = 0; k < 4; k++) S.adv.afogados.push(0);
+      const spent = S.fear > 0;
+      if (spent) S.fear -= 1;
+      commit();
+      toast(spent ? 'Reforço chegou. Medo gasto: 1.' : 'Reforço chegou. Você estava sem Medo para gastar.');
+      return;
+    }
+    if (a === 'reveal') { revealed = revealed === id ? null : id; render(); return; }
+    if (a === 'spToggle') { spToggle(); return; }
+    if (a === 'spOut') { spStore.clear(); spPlaying = false; render(); return; }
+    if (a === 'tab') { tab = id; render(); return; }
+    if (a === 'hide') { revealed = null; render(); return; }
+    if (a === 'aud') {
+      if (id === 'todos') audience = ['todos'];
+      else {
+        audience = audience.filter(function (p) { return p !== 'todos'; });
+        const at = audience.indexOf(id);
+        if (at >= 0) audience.splice(at, 1); else audience.push(id);
+        if (!audience.length) audience = ['todos'];
+      }
+      render(); return;
+    }
+    if (a === 'noteAdd') { S.notes.push({ title: 'Nova nota', open: true, text: '' }); commit(); return; }
+    if (a === 'noteDel') { S.notes.splice(i, 1); commit(); return; }
+    if (a === 'noteUp' && i > 0) { const n = S.notes.splice(i, 1)[0]; S.notes.splice(i - 1, 0, n); commit(); return; }
+    if (a === 'noteDown' && i < S.notes.length - 1) { const n = S.notes.splice(i, 1)[0]; S.notes.splice(i + 1, 0, n); commit(); return; }
+    if (a === 'cueTest') {
+      const c = findCue(id);
+      if (c.kind === 'fx') playFx(c);
+      else if (!active[id]) { toggleAmb(id); setTimeout(function () { stopAmb(id); }, 4000); }
+      return;
+    }
+    if (a === 'cueDel') { stopAmb(id); S.cues = S.cues.filter(function (c) { return c.id !== id; }); delete fileBuffers[id]; commit(); return; }
+    if (a === 'cueAdd') {
+      const k = $('#add-lib').value;
+      if (k && LIB[k]) { S.cues.push({ id: k, kind: LIB[k].kind, src: 'synth' }); commit(); }
+      return;
+    }
+    if (a === 'imgDel') { S.images = S.images.filter(function (im) { return im.id !== id; }); if (revealed === id) revealed = null; commit(); return; }
+  });
+
+  document.addEventListener('input', function (e) {
+    const t = e.target;
+    if (t.tagName === 'SELECT') return;
+    if (t.getAttribute('data-bind')) {
+      setPath(S, t.getAttribute('data-bind'), t.value);
+      if (t.getAttribute('data-bind') === 'title') renderScenes();
+      save();
+      return;
+    }
+    if (t.id === 'vol-master') {
+      S.vol = parseFloat(t.value);
+      if (master) rampTo(master.gain, S.vol, 0.03);
+      save();
+      return;
+    }
+    if (t.getAttribute('data-vol')) {
+      const id = t.getAttribute('data-vol'), c = findCue(id);
+      levels[id] = parseFloat(t.value);
+      if (active[id] && c) rampTo(active[id].out.gain, levels[id] * ambK(c), 0.05);
+    }
+  });
+
+  document.addEventListener('change', function (e) {
+    const t = e.target;
+    if (t.tagName === 'SELECT' && t.getAttribute('data-bind')) {
+      const p = t.getAttribute('data-bind');
+      setPath(S, p, p === 'countdown.max' ? Number(t.value) : t.value);
+      if (p === 'countdown.max') S.countdown.value = Math.min(S.countdown.value, S.countdown.max);
+      commit();
+      return;
+    }
+    if (t.id === 'file-audio' && t.files && t.files[0]) {
+      const f = t.files[0], kind = $('#new-kind').value;
+      ensure();
+      f.arrayBuffer().then(function (buf) {
+        return new Promise(function (res, rej) { ctx.decodeAudioData(buf, res, rej); });
+      }).then(function (ab) {
+        const id = 'f' + Date.now();
+        fileBuffers[id] = ab;
+        S.cues.push({ id: id, kind: kind, src: 'file', label: f.name.replace(/\.[^.]+$/, '') });
+        commit();
+        toast('Som adicionado à cena.');
+      }).catch(function () { toast('Não consegui ler este áudio. Tente mp3, m4a ou wav.'); });
+      t.value = '';
+      return;
+    }
+    if (t.id === 'file-img' && t.files && t.files[0]) {
+      const f = t.files[0];
+      readFile(f).then(function (u) { return downscale(u, 1280); }).then(function (u) {
+        if (!u) { toast('Não consegui abrir esta imagem.'); return; }
+        S.images.push({ id: 'u' + Date.now(), caption: f.name.replace(/\.[^.]+$/, ''), src: u });
+        commit();
+        toast('Imagem adicionada à cena.');
+      }).catch(function () { toast('Não consegui abrir esta imagem.'); });
+      t.value = '';
+    }
+  });
+
+  document.addEventListener('toggle', function (e) {
+    const d = e.target;
+    if (d && d.matches && d.matches('details.note')) {
+      const n = S.notes[Number(d.getAttribute('data-note'))];
+      if (n) { n.open = d.open; save(); }
+    }
+  }, true);
+
+  /* ---------- início ---------- */
+  setSession('ambient');
+  renderScenes();
+  render();
+  if (SP.enabled) spHandleCallback().then(render);
+})();
+</script>
+</body>
+</html>
