@@ -295,6 +295,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
 .console .fx:active, .console .fx.playing { background: var(--accent); }
 @media (max-width: 520px) { .amb-row { grid-template-columns: 1fr; } }
 
+.sp-msg { font-size: 14px; margin-top: 4px; }
 .linkbtn { border: 0; background: transparent; color: var(--muted); text-decoration: underline; padding: 8px 0; min-height: 40px; justify-self: start; font-size: 14px; }
 
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
@@ -500,32 +501,38 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
     return m ? { type: m[1], uri: 'spotify:' + m[1] + ':' + m[2] } : null;
   }
   const spOk = function (st) { return st >= 200 && st < 300; };
+  let spMsg = '';
+  function spSay(t) { spMsg = t; render(); }
   async function spToggle() {
-    if (!spStore.get()) { spLogin(); return; }
+    if (!spStore.get()) {
+      spSay('Abrindo o login do Spotify…');
+      try { await spLogin(); } catch (e) { spSay('Não consegui iniciar o login: ' + (e && e.message ? e.message : 'erro')); }
+      return;
+    }
     if (spPlaying) {
       const r = await spApi('PUT', '/me/player/pause');
-      if (spOk(r.status) || r.status === 403) { spPlaying = false; render(); } else toast('Não consegui pausar (erro ' + r.status + ').');
+      spPlaying = false;
+      spSay(spOk(r.status) ? 'Pausado.' : 'Pausa enviada (resposta ' + r.status + ').');
       return;
     }
     const it = spParse(S.music.url);
-    if (!it) { toast('Em Preparar, cole um link de playlist, álbum ou faixa do Spotify.'); return; }
+    if (!it) { spSay('O link não é de playlist, álbum ou faixa do Spotify. Corrija em Preparar.'); return; }
+    spSay('Procurando o Spotify do iPad…');
+    const d = await spApi('GET', '/me/player/devices');
+    if (d.status === 401) { spStore.clear(); spSay('A conexão expirou. Toque em Conectar Spotify.'); return; }
+    if (d.status === 403) { spSay('O Spotify recusou o acesso (403). Adicione seu e-mail em User Management no painel do app e confirme que a conta é Premium.'); return; }
+    if (!spOk(d.status)) { spSay('Não consegui falar com o Spotify (resposta ' + d.status + ').'); return; }
+    const list = (d.json && d.json.devices) || [];
+    if (!list.length) { spSay('Nenhum aparelho Spotify encontrado. Abra o app do Spotify no iPad, toque em qualquer música e tente de novo.'); return; }
+    const pick = list.filter(function (x) { return x.is_active; })[0] || list.filter(function (x) { return x.type === 'Tablet'; })[0] || list[0];
     const body = (it.type === 'track' || it.type === 'episode') ? { uris: [it.uri] } : { context_uri: it.uri };
-    let r = await spApi('PUT', '/me/player/play', body);
-    if (r.status === 404) {
-      const d = await spApi('GET', '/me/player/devices');
-      const list = (d.json && d.json.devices) || [];
-      const pick = list.filter(function (x) { return x.type === 'Tablet'; })[0] || list[0];
-      if (!pick) { toast('Abra o app do Spotify no iPad, toque em qualquer música e tente de novo.'); return; }
-      r = await spApi('PUT', '/me/player/play?device_id=' + encodeURIComponent(pick.id), body);
-    }
-    if (spOk(r.status)) { spPlaying = true; render(); return; }
-    if (r.status === 401) { spStore.clear(); render(); toast('A conexão com o Spotify expirou. Conecte de novo.'); return; }
-    if (r.status === 403) { toast('O Spotify recusou. É preciso ter Premium.'); return; }
-    toast('Não consegui tocar (erro ' + r.status + ').');
+    const r = await spApi('PUT', '/me/player/play?device_id=' + encodeURIComponent(pick.id), body);
+    if (spOk(r.status)) { spPlaying = true; spSay('Tocando em ' + pick.name + '.'); return; }
+    spSay('O Spotify recusou o play (resposta ' + r.status + (r.json && r.json.error && r.json.error.message ? ': ' + r.json.error.message : '') + ').');
   }
   function musicHtml() {
     const pause = '<path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/>', playI = '<path d="M8 5.5v13l11-6.5z" fill="currentColor"/>';
-    const txt = '<div class="m-txt"><p class="lbl-s">Música · Spotify</p><p class="m-name">' + esc(S.music.name) + '</p><p class="m-terms">' + esc(S.music.terms) + '</p>';
+    const txt = '<div class="m-txt"><p class="lbl-s">Música · Spotify</p><p class="m-name">' + esc(S.music.name) + '</p><p class="m-terms">' + esc(S.music.terms) + '</p>' + (spMsg ? '<p class="sp-msg" role="status">' + esc(spMsg) + '</p>' : '');
     if (!SP.enabled) {
       return '<div class="music"><a class="play" href="' + esc(safeUrl(S.music.url)) + '" target="_blank" rel="noopener noreferrer" aria-label="Abrir ' + esc(S.music.name) + ' no Spotify"><svg viewBox="0 0 24 24" aria-hidden="true">' + playI + '</svg></a>' + txt + '</div></div>';
     }
