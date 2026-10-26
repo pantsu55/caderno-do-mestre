@@ -309,7 +309,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
   <div class="top-in">
     <div class="brand">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c-3.4 0-5.7 2.5-5.7 5.9V12c0 1.7-.6 2.7-1.9 4.2h15.2c-1.3-1.5-1.9-2.5-1.9-4.2V8.4c0-3.4-2.3-5.9-5.7-5.9z" fill="currentColor"/><circle cx="12" cy="19.4" r="1.9" fill="currentColor"/></svg>
-      <span>Caderno do Mestre</span><span class="ver" id="ver">versão 0.04</span>
+      <span>Caderno do Mestre</span><span class="ver" id="ver">versão 0.05</span>
     </div>
     <div class="seg" role="radiogroup" aria-label="Modo">
       <button type="button" role="radio" aria-checked="false" data-action="mode" data-mode="prep">Preparar</button>
@@ -575,12 +575,23 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
     if (spOk(r.status)) { spSay('Comando enviado para ' + pick.name + '…'); st = await check(); }
     if (!playing(st)) {
       spSay('Tentando de novo, ativando o aparelho…');
-      const t = await spApi('PUT', '/me/player', { device_ids: [pick.id], play: false });
+      const t = await spApi('PUT', '/me/player', { device_ids: [pick.id], play: true });
       log.push('ativar ' + t.status + errOf(t));
       await wait(1500);
       r = await spApi('PUT', '/me/player/play' + q, Object.assign({ position_ms: 0 }, body));
       log.push('play ' + r.status + errOf(r));
       if (spOk(r.status)) st = await check();
+    }
+    if (!playing(st) && it.type === 'track') {
+      spSay('Tentando pela fila do Spotify…');
+      const dq = '&device_id=' + encodeURIComponent(pick.id);
+      const qa = await spApi('POST', '/me/player/queue?uri=' + encodeURIComponent(it.uri) + dq);
+      log.push('fila ' + qa.status + errOf(qa));
+      if (spOk(qa.status)) {
+        const nx = await spApi('POST', '/me/player/next?device_id=' + encodeURIComponent(pick.id));
+        log.push('próxima ' + nx.status + errOf(nx));
+        if (spOk(nx.status)) st = await check();
+      }
     }
     if (playing(st)) { spPlaying = true; spSay('Tocando em ' + (st.json.device ? st.json.device.name : pick.name) + '.'); return; }
     spPlaying = false;
