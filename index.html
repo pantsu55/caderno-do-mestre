@@ -309,7 +309,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
   <div class="top-in">
     <div class="brand">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c-3.4 0-5.7 2.5-5.7 5.9V12c0 1.7-.6 2.7-1.9 4.2h15.2c-1.3-1.5-1.9-2.5-1.9-4.2V8.4c0-3.4-2.3-5.9-5.7-5.9z" fill="currentColor"/><circle cx="12" cy="19.4" r="1.9" fill="currentColor"/></svg>
-      <span>Caderno do Mestre</span><span class="ver" id="ver">versão 0.06</span>
+      <span>Caderno do Mestre</span><span class="ver" id="ver">versão 0.07</span>
     </div>
     <div class="seg" role="radiogroup" aria-label="Modo">
       <button type="button" role="radio" aria-checked="false" data-action="mode" data-mode="prep">Preparar</button>
@@ -595,8 +595,10 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
     }
     if (playing(st)) { spPlaying = true; spSay('Tocando em ' + (st.json.device ? st.json.device.name : pick.name) + '.'); return; }
     spPlaying = false;
+    const dv = await spApi('GET', '/me/player/devices');
+    if (spOk(dv.status) && dv.json) log.push('aparelhos: ' + (dv.json.devices || []).map(function (x) { return x.name + (x.is_active ? ' [ativo]' : ''); }).join(', '));
     const j = st && st.json;
-    spSay('Não começou a tocar em ' + pick.name + '. Tentativas: ' + log.join(' → ') + '. ' + (j ? 'Estado: ' + (j.item ? '"' + j.item.name + '"' : 'sem faixa') + ', pausado.' + (j.device ? ' Aparelho: restrito=' + !!j.device.is_restricted + ', sessão privada=' + !!j.device.is_private_session + '.' : '') + (j.actions && j.actions.disallows ? ' Bloqueado: ' + (Object.keys(j.actions.disallows).join(', ') || 'nada') + '.' : '') : 'O Spotify não informa reprodução ativa.'));
+    spSay('Não começou a tocar em ' + pick.name + '. Tentativas: ' + log.join(' → ') + '. ' + (j ? 'Estado: ' + (j.item ? '"' + j.item.name + '"' : 'sem faixa') + ', pausado.' + (j.device ? ' Aparelho do estado: ' + j.device.name + ' (' + j.device.type + '), restrito=' + !!j.device.is_restricted + ', sessão privada=' + !!j.device.is_private_session + '.' : '') + (j.actions && j.actions.disallows ? ' Bloqueado: ' + (Object.keys(j.actions.disallows).join(', ') || 'nada') + '.' : '') : 'O Spotify não informa reprodução ativa.'));
   }
   function musicHtml() {
     const pause = '<path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/>', playI = '<path d="M8 5.5v13l11-6.5z" fill="currentColor"/>';
