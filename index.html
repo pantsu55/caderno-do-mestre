@@ -309,7 +309,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
   <div class="top-in">
     <div class="brand">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c-3.4 0-5.7 2.5-5.7 5.9V12c0 1.7-.6 2.7-1.9 4.2h15.2c-1.3-1.5-1.9-2.5-1.9-4.2V8.4c0-3.4-2.3-5.9-5.7-5.9z" fill="currentColor"/><circle cx="12" cy="19.4" r="1.9" fill="currentColor"/></svg>
-      <span>Caderno do Mestre</span><span class="ver" id="ver">versão 0.08</span>
+      <span>Caderno do Mestre</span><span class="ver" id="ver">versão 0.09</span>
     </div>
     <div class="seg" role="radiogroup" aria-label="Modo">
       <button type="button" role="radio" aria-checked="false" data-action="mode" data-mode="prep">Preparar</button>
@@ -553,7 +553,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
     if (!list.length) { spSay('Nenhum aparelho Spotify encontrado. Abra o app do Spotify no iPad, toque em qualquer música e tente de novo.'); return; }
     const saved = spDev.get();
     const pick = (saved && (list.filter(function (x) { return x.id === saved.id; })[0] || list.filter(function (x) { return x.name === saved.name; })[0])) || list.filter(function (x) { return x.type === 'Tablet'; })[0] || list.filter(function (x) { return x.type === 'Smartphone'; })[0] || list.filter(function (x) { return x.is_active; })[0] || list[0];
-    const body = (it.type === 'track' || it.type === 'episode') ? { uris: [it.uri] } : { context_uri: it.uri };
+    let body = (it.type === 'track' || it.type === 'episode') ? { uris: [it.uri] } : { context_uri: it.uri };
     const wait = function (ms) { return new Promise(function (res) { setTimeout(res, ms); }); };
     const q = '?device_id=' + encodeURIComponent(pick.id), log = [];
     const check = async function () {
@@ -569,6 +569,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
     const errOf = function (x) { return x && x.json && x.json.error && x.json.error.message ? ' (' + x.json.error.message + ')' : ''; };
     if (it.type === 'track') {
       const tk = await spApi('GET', '/tracks/' + it.uri.split(':')[2] + '?market=from_token');
+      if (spOk(tk.status) && tk.json && tk.json.album && tk.json.album.uri) body = { context_uri: tk.json.album.uri, offset: { uri: it.uri }, position_ms: 0 };
       if (spOk(tk.status) && tk.json) log.push('faixa "' + tk.json.name + '" ' + (tk.json.is_playable === false ? 'INDISPONÍVEL' + (tk.json.restrictions ? ' (' + tk.json.restrictions.reason + ')' : '') : 'ok'));
       else log.push('faixa ' + tk.status + errOf(tk));
     }
