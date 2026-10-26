@@ -297,6 +297,8 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
 @media (max-width: 520px) { .amb-row { grid-template-columns: 1fr; } }
 
 .sp-dev { font-size: 14px; color: var(--muted); }
+.sp-vol { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; align-items: center; margin-top: 6px; }
+.sp-vol span { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 .sp-msg { font-size: 14px; margin-top: 4px; }
 .linkbtn { border: 0; background: transparent; color: var(--muted); text-decoration: underline; padding: 8px 0; min-height: 40px; justify-self: start; font-size: 14px; }
 
@@ -309,7 +311,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
   <div class="top-in">
     <div class="brand">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c-3.4 0-5.7 2.5-5.7 5.9V12c0 1.7-.6 2.7-1.9 4.2h15.2c-1.3-1.5-1.9-2.5-1.9-4.2V8.4c0-3.4-2.3-5.9-5.7-5.9z" fill="currentColor"/><circle cx="12" cy="19.4" r="1.9" fill="currentColor"/></svg>
-      <span>Caderno do Mestre</span><span class="ver" id="ver">versão 0.09</span>
+      <span>Caderno do Mestre</span><span class="ver" id="ver">versão 0.10</span>
     </div>
     <div class="seg" role="radiogroup" aria-label="Modo">
       <button type="button" role="radio" aria-checked="false" data-action="mode" data-mode="prep">Preparar</button>
@@ -433,7 +435,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
     scopes: 'user-modify-playback-state user-read-playback-state',
     enabled: /\.github\.io$/.test(location.hostname)
   };
-  let spPlaying = false, spFailed = false;
+  let spPlaying = false, spFailed = false, spResume = '', spCurDev = null, spVol = 70;
   const spModeGet = function () { try { return localStorage.getItem('cdm-spmode') === 'app' ? 'app' : 'api'; } catch (e) { return 'api'; } };
   const spModeSet = function (m) { try { localStorage.setItem('cdm-spmode', m); } catch (e) { /* sem armazenamento */ } };
   const spRedirect = function () { return location.origin + location.pathname.replace(/index\.html$/, ''); };
@@ -517,6 +519,13 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
     spList = (d.json && d.json.devices) || [];
     spSay(spList.length ? 'Escolha onde tocar.' : 'Nenhum aparelho encontrado. Abra o app do Spotify no iPad e toque em uma música.');
   }
+  async function spSetVol(v) {
+    const dq = spCurDev ? '&device_id=' + encodeURIComponent(spCurDev) : '';
+    const r = await spApi('PUT', '/me/player/volume?volume_percent=' + Math.round(v) + dq);
+    if (spOk(r.status)) return;
+    if (r.status === 403) spSay('Este aparelho não aceita controle de volume pelo Caderno. No iPad, use os botões de volume do aparelho.');
+    else spSay('Não consegui mudar o volume (resposta ' + r.status + ').');
+  }
   function spDevHtml() {
     if (!spStore.get()) return '';
     const sel = spDev.get();
@@ -526,6 +535,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
         return '<button type="button" class="chip" data-action="spDev" data-i="' + i + '" aria-pressed="' + (!!sel && sel.id === x.id) + '">' + esc(x.name) + '</button>';
       }).join('') + '</div>';
     }
+    h += '<label class="sp-vol"><span>Volume Spotify</span><input type="range" id="sp-vol" min="0" max="100" step="1" value="' + spVol + '" aria-label="Volume do Spotify"></label>';
     return h;
   }
   let spMsg = '';
@@ -539,6 +549,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
     if (spPlaying) {
       const r = await spApi('PUT', '/me/player/pause');
       spPlaying = false;
+      if (spOk(r.status)) spResume = S.music.url;
       spSay(spOk(r.status) ? 'Pausado.' : 'Pausa enviada (resposta ' + r.status + ').');
       return;
     }
@@ -553,6 +564,12 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
     if (!list.length) { spSay('Nenhum aparelho Spotify encontrado. Abra o app do Spotify no iPad, toque em qualquer música e tente de novo.'); return; }
     const saved = spDev.get();
     const pick = (saved && (list.filter(function (x) { return x.id === saved.id; })[0] || list.filter(function (x) { return x.name === saved.name; })[0])) || list.filter(function (x) { return x.type === 'Tablet'; })[0] || list.filter(function (x) { return x.type === 'Smartphone'; })[0] || list.filter(function (x) { return x.is_active; })[0] || list[0];
+    spCurDev = pick.id;
+    if (spResume && spResume === S.music.url) {
+      const rr = await spApi('PUT', '/me/player/play?device_id=' + encodeURIComponent(pick.id));
+      if (spOk(rr.status)) { spPlaying = true; spSay('Tocando em ' + pick.name + '.'); return; }
+    }
+    spResume = '';
     let body = (it.type === 'track' || it.type === 'episode') ? { uris: [it.uri] } : { context_uri: it.uri };
     const wait = function (ms) { return new Promise(function (res) { setTimeout(res, ms); }); };
     const q = '?device_id=' + encodeURIComponent(pick.id), log = [];
@@ -596,7 +613,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
         if (spOk(nx.status)) st = await check();
       }
     }
-    if (playing(st)) { spPlaying = true; spSay('Tocando em ' + (st.json.device ? st.json.device.name : pick.name) + '.'); return; }
+    if (playing(st)) { spPlaying = true; if (st.json.device && st.json.device.volume_percent != null) spVol = st.json.device.volume_percent; spSay('Tocando em ' + (st.json.device ? st.json.device.name : pick.name) + '.'); return; }
     spPlaying = false;
     spFailed = true;
     const dv = await spApi('GET', '/me/player/devices');
@@ -1155,6 +1172,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
   document.addEventListener('input', function (e) {
     const t = e.target;
     if (t.tagName === 'SELECT') return;
+    if (t.id === 'sp-vol') { spVol = Number(t.value); return; }
     if (t.getAttribute('data-bind')) {
       setPath(S, t.getAttribute('data-bind'), t.value);
       if (t.getAttribute('data-bind') === 'title') renderScenes();
@@ -1176,6 +1194,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
 
   document.addEventListener('change', function (e) {
     const t = e.target;
+    if (t.id === 'sp-vol') { spVol = Number(t.value); spSetVol(spVol); return; }
     if (t.tagName === 'SELECT' && t.getAttribute('data-bind')) {
       const p = t.getAttribute('data-bind');
       setPath(S, p, p === 'countdown.max' ? Number(t.value) : t.value);
