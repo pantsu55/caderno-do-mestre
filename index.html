@@ -309,7 +309,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
   <div class="top-in">
     <div class="brand">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c-3.4 0-5.7 2.5-5.7 5.9V12c0 1.7-.6 2.7-1.9 4.2h15.2c-1.3-1.5-1.9-2.5-1.9-4.2V8.4c0-3.4-2.3-5.9-5.7-5.9z" fill="currentColor"/><circle cx="12" cy="19.4" r="1.9" fill="currentColor"/></svg>
-      <span>Caderno do Mestre</span><span class="ver" id="ver">versão 0.02</span>
+      <span>Caderno do Mestre</span><span class="ver" id="ver">versão 0.03</span>
     </div>
     <div class="seg" role="radiogroup" aria-label="Modo">
       <button type="button" role="radio" aria-checked="false" data-action="mode" data-mode="prep">Preparar</button>
@@ -375,7 +375,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
   };
 
   /* ---------- estado ---------- */
-  const KEY = 'caderno-do-mestre-v1';
+  const KEY = 'caderno-do-mestre-v2';
   const PLAYERS = ['Ana', 'Bruno', 'Carla'];
   const SCENES = ['O Quadro de Contratos', 'Sinoeira', null, 'O Dia das Perguntas', 'Brejo adentro', 'A Capela Afogada'];
   const defaults = function () {
@@ -389,7 +389,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
         { title: 'Depois do combate', open: false, text: '**Se Bertrão for salvo:** ele desaba e confessa uma parte: "Eu só fiz os nós." Marque 1 ponto em A Confissão para a cena 6.\n\n**Se Bertrão for perdido:** os Afogados o levam, e ele volta na cena 6 como mais um Afogado.\n\n**Fim da cena:** quando o sino se cala, o grupo vê uma luz pequena se afastando pela passarela do brejo: uma vela e uma menina de camisola caminhando sem olhar para trás.' },
         { title: 'Perguntas para a mesa', open: false, text: '- O que você faz primeiro enquanto o sino toca e Bertrão se levanta como sonâmbulo?\n- O que você reconhece em Rolf, o caçador que veio antes de vocês?\n- O que você vê no rosto de Bertrão quando ele volta a si?' }
       ],
-      music: { name: 'Tensão crescente', terms: 'horror ambient · dark orchestral tension', url: 'https://open.spotify.com/search/horror%20ambient' },
+      music: { name: 'Tensão crescente', terms: 'horror ambient · dark orchestral tension', url: 'https://open.spotify.com/intl-pt/track/46FnQpc9GaNdNRsJvIofwr?si=15189fa2d9454f53' },
       cues: [
         { id: 'sino', kind: 'fx', src: 'synth' }, { id: 'passos', kind: 'fx', src: 'synth' }, { id: 'batida', kind: 'fx', src: 'synth' },
         { id: 'trovao', kind: 'fx', src: 'synth' }, { id: 'respingo', kind: 'fx', src: 'synth' }, { id: 'porta', kind: 'fx', src: 'synth' },
