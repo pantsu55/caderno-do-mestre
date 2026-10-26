@@ -554,10 +554,19 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
     const r = await spApi('PUT', '/me/player/play?device_id=' + encodeURIComponent(pick.id), body);
     if (spOk(r.status)) {
       spSay('Comando enviado para ' + pick.name + '…');
-      await new Promise(function (res) { setTimeout(res, 1800); });
-      const st = await spApi('GET', '/me/player');
-      if (st.json && st.json.is_playing) { spPlaying = true; spSay('Tocando em ' + (st.json.device ? st.json.device.name : pick.name) + '.'); }
-      else { spPlaying = false; spSay('O Spotify aceitou o comando, mas nada está tocando em ' + pick.name + '. Abra o app do Spotify nesse aparelho, toque em uma música e tente de novo, ou troque o aparelho.'); }
+      let st = null;
+      for (let k = 0; k < 4; k++) {
+        await new Promise(function (res) { setTimeout(res, 1500); });
+        st = await spApi('GET', '/me/player');
+        if (st.json && st.json.is_playing) break;
+      }
+      if (st && st.json && st.json.is_playing) { spPlaying = true; spSay('Tocando em ' + (st.json.device ? st.json.device.name : pick.name) + '.'); }
+      else {
+        spPlaying = false;
+        const j = st && st.json;
+        const seen = j ? ('Estado do Spotify: ' + (j.device ? j.device.name : '?') + ', ' + (j.item ? '"' + j.item.name + '"' : 'sem faixa') + ', pausado.') : 'O Spotify não informa nenhuma reprodução ativa (resposta ' + (st ? st.status : '?') + ').';
+        spSay('O Spotify aceitou o comando, mas não começou a tocar. ' + seen + ' Teste com o link de uma faixa ou de uma playlist sua (não uma playlist feita pelo Spotify).');
+      }
       return;
     }
     spSay('O Spotify recusou o play (resposta ' + r.status + (r.json && r.json.error && r.json.error.message ? ': ' + r.json.error.message : '') + ').');
