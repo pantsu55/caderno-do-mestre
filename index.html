@@ -309,7 +309,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
   <div class="top-in">
     <div class="brand">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c-3.4 0-5.7 2.5-5.7 5.9V12c0 1.7-.6 2.7-1.9 4.2h15.2c-1.3-1.5-1.9-2.5-1.9-4.2V8.4c0-3.4-2.3-5.9-5.7-5.9z" fill="currentColor"/><circle cx="12" cy="19.4" r="1.9" fill="currentColor"/></svg>
-      <span>Caderno do Mestre</span><span class="ver" id="ver">versão 0.03</span>
+      <span>Caderno do Mestre</span><span class="ver" id="ver">versão 0.04</span>
     </div>
     <div class="seg" role="radiogroup" aria-label="Modo">
       <button type="button" role="radio" aria-checked="false" data-action="mode" data-mode="prep">Preparar</button>
@@ -558,13 +558,18 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
       let st = null;
       for (let k = 0; k < 3; k++) {
         await wait(1500);
-        st = await spApi('GET', '/me/player');
+        st = await spApi('GET', '/me/player?additional_types=episode&market=from_token');
         if (st.json && st.json.is_playing) break;
       }
       return st;
     };
     const playing = function (st) { return !!(st && st.json && st.json.is_playing); };
     const errOf = function (x) { return x && x.json && x.json.error && x.json.error.message ? ' (' + x.json.error.message + ')' : ''; };
+    if (it.type === 'track') {
+      const tk = await spApi('GET', '/tracks/' + it.uri.split(':')[2] + '?market=from_token');
+      if (spOk(tk.status) && tk.json) log.push('faixa "' + tk.json.name + '" ' + (tk.json.is_playable === false ? 'INDISPONÍVEL' + (tk.json.restrictions ? ' (' + tk.json.restrictions.reason + ')' : '') : 'ok'));
+      else log.push('faixa ' + tk.status + errOf(tk));
+    }
     let r = await spApi('PUT', '/me/player/play' + q, body), st = null;
     log.push('play ' + r.status + errOf(r));
     if (spOk(r.status)) { spSay('Comando enviado para ' + pick.name + '…'); st = await check(); }
