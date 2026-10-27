@@ -340,6 +340,29 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
 .shot.on { box-shadow: 0 0 0 2px var(--accent), 0 0 24px -6px var(--accent); }
 .done { box-shadow: 0 0 24px -10px var(--accent); }
 
+/* paleta alternativa: ouro sombrio (preto e grafite com dourado) */
+:root[data-palette="ouro"] {
+  color-scheme: dark;
+  --bg: #0A0A0B;
+  --surface: #141415;
+  --surface-2: #1D1D1F;
+  --fg: #EFEBE1;
+  --muted: #A59F90;
+  --line: #2E2D2A;
+  --accent: #F1CF7A;
+  --accent-ink: #151003;
+  --accent-soft: #2E2511;
+  --active: #E0AC45;
+  --active-ink: #140E02;
+  --hp: #E8695E;
+  --fear: #D9708A;
+  --ok: #8CCB8F;
+  --stage: #050505;
+  --glow: rgba(224, 172, 69, 0.5);
+  --glow-1: rgba(224, 172, 69, 0.11);
+  --glow-2: rgba(255, 255, 255, 0.035);
+}
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
@@ -349,7 +372,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   <div class="top-in">
     <div class="brand">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 7.6c1.6 2.1 2.6 3.4 2.6 5 0 1.5-1.1 2.6-2.6 2.6s-2.6-1.1-2.6-2.6c0-1.6 1-2.9 2.6-5z" fill="currentColor"/></svg>
-      <span>Hollow Table</span><span class="ver" id="ver">versão 0.16</span>
+      <span>Hollow Table</span><span class="ver" id="ver">versão 0.17</span>
     </div>
     <div class="seg" role="radiogroup" aria-label="Modo">
       <button type="button" role="radio" aria-checked="false" data-action="mode" data-mode="prep">Preparar</button>
@@ -1085,6 +1108,11 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     const kindOpts = KINDS.map(function (k) { return '<option' + (S.kind === k ? ' selected' : '') + '>' + k + '</option>'; }).join('');
     return '<section class="head"><p class="eyebrow">Preparar · Cena 3 de 6</p><h1>Monte a cena</h1><p class="lede">Tudo o que você edita aqui aparece na Mesa. Textos ficam guardados neste aparelho. Imagens e sons anexados valem só para esta sessão neste protótipo.</p></section>' +
       '<div class="prep-grid">' +
+      '<section class="panel"><h2>Aparência</h2><div class="aud" role="group" aria-label="Paleta de cores">' +
+      [['', 'Arcano (violeta e ciano)'], ['ouro', 'Ouro sombrio']].map(function (pl) {
+        const cur = document.documentElement.getAttribute('data-palette') || '';
+        return '<button type="button" class="chip" data-action="palette" data-id="' + pl[0] + '" aria-pressed="' + (cur === pl[0]) + '">' + pl[1] + '</button>';
+      }).join('') + '</div><p class="hint">Só muda as cores neste aparelho.</p></section>' +
       '<section class="panel"><h2>Cena</h2><div class="form-row">' + inp('Título', 'title', S.title) + inp('Local', 'place', S.place) + inp('Momento', 'when', S.when) +
       '<div class="field"><label for="f-kind">Tipo</label><select id="f-kind" data-bind="kind">' + kindOpts + '</select></div>' + inp('Duração', 'time', S.time) + inp('Orçamento de combate', 'budget', S.budget) + '</div>' + area('Resumo', 'summary', S.summary, 3) + '</section>' +
       '<section class="panel"><h2>Notas</h2><p class="hint">Use **negrito** e linhas começando com "- " para listas.</p><div>' + notes + '</div><div class="row"><button type="button" class="btn quiet" data-action="noteAdd">Adicionar nota</button></div></section>' +
@@ -1183,6 +1211,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (a === 'spDev') { const x = spList && spList[i]; if (x) { spDev.set({ id: x.id, name: x.name }); spList = null; spSay('Vai tocar em ' + x.name + '.'); } return; }
     if (a === 'spMode') { spModeSet(id); spFailed = false; spMsg = ''; render(); return; }
     if (a === 'spOut') { spStore.clear(); spPlaying = false; render(); return; }
+    if (a === 'palette') { if (id) document.documentElement.setAttribute('data-palette', id); else document.documentElement.removeAttribute('data-palette'); try { localStorage.setItem('cdm-palette', id); } catch (e) { /* sem armazenamento */ } render(); return; }
     if (a === 'tab') { tab = id; render(); return; }
     if (a === 'hide') { revealed = null; render(); return; }
     if (a === 'aud') {
@@ -1283,6 +1312,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   }, true);
 
   /* ---------- início ---------- */
+  (function () { try { const pl = localStorage.getItem('cdm-palette'); if (pl) document.documentElement.setAttribute('data-palette', pl); } catch (e) { /* sem armazenamento */ } })();
   setSession('ambient');
   renderScenes();
   render();
