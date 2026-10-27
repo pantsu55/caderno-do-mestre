@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Caderno">
+<meta name="apple-mobile-web-app-title" content="Hollow Table">
 <link rel="apple-touch-icon" href="icon.png">
 <link rel="icon" href="icon.png">
 <style>
@@ -15,7 +15,7 @@ body { margin: 0; }
 img { max-width: 100%; }
 [hidden] { display: none !important; }
 </style>
-<title>Caderno do Mestre</title>
+<title>Hollow Table</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IM+Fell+English+SC&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -311,7 +311,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
   <div class="top-in">
     <div class="brand">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5c-3.4 0-5.7 2.5-5.7 5.9V12c0 1.7-.6 2.7-1.9 4.2h15.2c-1.3-1.5-1.9-2.5-1.9-4.2V8.4c0-3.4-2.3-5.9-5.7-5.9z" fill="currentColor"/><circle cx="12" cy="19.4" r="1.9" fill="currentColor"/></svg>
-      <span>Caderno do Mestre</span><span class="ver" id="ver">versão 0.13</span>
+      <span>Hollow Table</span><span class="ver" id="ver">versão 0.14</span>
     </div>
     <div class="seg" role="radiogroup" aria-label="Modo">
       <button type="button" role="radio" aria-checked="false" data-action="mode" data-mode="prep">Preparar</button>
@@ -524,7 +524,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
     const dq = spCurDev ? '&device_id=' + encodeURIComponent(spCurDev) : '';
     const r = await spApi('PUT', '/me/player/volume?volume_percent=' + Math.round(v) + dq);
     if (spOk(r.status)) return;
-    if (r.status === 403) spSay('Este aparelho não aceita controle de volume pelo Caderno. No iPad, use os botões de volume do aparelho.');
+    if (r.status === 403) spSay('Este aparelho não aceita controle de volume pelo Hollow Table. No iPad, use os botões de volume do aparelho.');
     else spSay('Não consegui mudar o volume (resposta ' + r.status + ').');
   }
   function spDevHtml() {
