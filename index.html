@@ -19,66 +19,76 @@ img { max-width: 100%; }
 <title>Hollow Table</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=IM+Fell+English+SC&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 /* Layout: barra fixa no topo (modo e cenas), Mesa em duas colunas (narrar à esquerda, ambientar à direita) e dock fixo embaixo com Medo e volume. */
 :root {
-  --bg: #E8EBE5;
-  --surface: #F7F8F4;
-  --surface-2: #EDF0EA;
-  --fg: #1B2724;
-  --muted: #55645E;
-  --line: #C5CEC6;
-  --accent: #8F5F0F;
-  --accent-ink: #FFF8E8;
-  --accent-soft: #F0E4C8;
-  --active: #17655E;
-  --active-ink: #F1FBF9;
-  --hp: #A3362B;
-  --fear: #8A2F52;
-  --ok: #2E7D4F;
-  --stage: #070D10;
-  --font-display: 'IM Fell English SC', Georgia, 'Times New Roman', serif;
+  color-scheme: dark;
+  --bg: #0A0912;
+  --surface: #131122;
+  --surface-2: #1B1830;
+  --fg: #E9E6F7;
+  --muted: #9D97BB;
+  --line: #2B2745;
+  --accent: #5EE1F5;
+  --accent-ink: #031219;
+  --accent-soft: #0E2B36;
+  --active: #8B7BFF;
+  --active-ink: #090719;
+  --hp: #F27A86;
+  --fear: #E474BE;
+  --ok: #6EE0A8;
+  --stage: #04030A;
+  --glow: rgba(139, 123, 255, 0.55);
+  --glow-1: rgba(139, 123, 255, 0.17);
+  --glow-2: rgba(94, 225, 245, 0.07);
+  --font-display: 'Cinzel', 'Trajan Pro', Georgia, 'Times New Roman', serif;
   --font-body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Menlo, monospace;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #111918;
-    --surface: #1A2524;
-    --surface-2: #212E2D;
-    --fg: #E6EAE4;
-    --muted: #95A59F;
-    --line: #2D3C3A;
-    --accent: #D9A94F;
-    --accent-ink: #1B1405;
-    --accent-soft: #3A3020;
-    --active: #4DB3A6;
-    --active-ink: #06201D;
-    --hp: #E2766A;
-    --fear: #D77FA1;
-    --ok: #6CC38A;
-    --stage: #05090B;
-    color-scheme: dark;
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    color-scheme: light;
+    --bg: #ECEAF5;
+    --surface: #F9F8FD;
+    --surface-2: #EFEDF8;
+    --fg: #16132B;
+    --muted: #5A5679;
+    --line: #CDC9E3;
+    --accent: #0A7288;
+    --accent-ink: #F2FCFF;
+    --accent-soft: #D3EEF4;
+    --active: #5848D6;
+    --active-ink: #FFFFFF;
+    --hp: #B3303F;
+    --fear: #A62F80;
+    --ok: #1F7F52;
+    --stage: #04030A;
+    --glow: rgba(88, 72, 214, 0.35);
+    --glow-1: rgba(88, 72, 214, 0.10);
+    --glow-2: rgba(10, 114, 136, 0.06);
   }
 }
-:root[data-theme="dark"] {
-  --bg: #111918;
-  --surface: #1A2524;
-  --surface-2: #212E2D;
-  --fg: #E6EAE4;
-  --muted: #95A59F;
-  --line: #2D3C3A;
-  --accent: #D9A94F;
-  --accent-ink: #1B1405;
-  --accent-soft: #3A3020;
-  --active: #4DB3A6;
-  --active-ink: #06201D;
-  --hp: #E2766A;
-  --fear: #D77FA1;
-  --ok: #6CC38A;
-  --stage: #05090B;
-  color-scheme: dark;
+:root[data-theme="light"] {
+  color-scheme: light;
+  --bg: #ECEAF5;
+  --surface: #F9F8FD;
+  --surface-2: #EFEDF8;
+  --fg: #16132B;
+  --muted: #5A5679;
+  --line: #CDC9E3;
+  --accent: #0A7288;
+  --accent-ink: #F2FCFF;
+  --accent-soft: #D3EEF4;
+  --active: #5848D6;
+  --active-ink: #FFFFFF;
+  --hp: #B3303F;
+  --fear: #A62F80;
+  --ok: #1F7F52;
+  --stage: #04030A;
+  --glow: rgba(88, 72, 214, 0.35);
+  --glow-1: rgba(88, 72, 214, 0.10);
+  --glow-2: rgba(10, 114, 136, 0.06);
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -303,6 +313,33 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
 .sp-msg { font-size: 14px; margin-top: 4px; }
 .linkbtn { border: 0; background: transparent; color: var(--muted); text-decoration: underline; padding: 8px 0; min-height: 40px; justify-self: start; font-size: 14px; }
 
+/* identidade v3: arcano e moderno (violeta e ciano sobre quase-preto) */
+body {
+  background: radial-gradient(1100px 520px at 12% -8%, var(--glow-1), transparent 62%), radial-gradient(900px 460px at 100% 0%, var(--glow-2), transparent 58%), var(--bg);
+  background-attachment: fixed;
+}
+h1 { font-weight: 600; letter-spacing: 0.05em; }
+h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; }
+.brand { font-size: 20px; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; }
+.brand svg { color: var(--active); filter: drop-shadow(0 0 8px var(--glow)); }
+.fear-l { font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; font-size: 18px; }
+.top { background: var(--bg); background: color-mix(in srgb, var(--bg) 80%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 14px 30px -22px var(--glow); }
+.dock { background: var(--surface); background: color-mix(in srgb, var(--surface) 88%, transparent); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); box-shadow: 0 -14px 30px -24px var(--glow); }
+.panel { border-top: 0; position: relative; padding-top: 18px; }
+.panel::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 1px; background: linear-gradient(90deg, var(--active), var(--line) 38%, transparent); }
+.console, .adv, details.note, .edit-card, .shot, .thumb, .cue-row { box-shadow: 0 16px 34px -26px rgba(0, 0, 0, 0.9); }
+.chip[aria-current="true"] { background: var(--active); color: var(--active-ink); border-color: var(--active); box-shadow: 0 0 18px -4px var(--glow); }
+.tab[aria-selected="true"] { border-bottom-color: var(--active); }
+.seg button[aria-checked="true"], .btn.primary, .amb-btn[aria-pressed="true"], .console .amb-btn[aria-pressed="true"] { box-shadow: 0 0 22px -6px var(--glow); }
+.play { box-shadow: 0 0 0 4px var(--glow-1), 0 0 26px -2px var(--glow); }
+.pip.on { box-shadow: 0 0 14px -3px var(--hp); }
+.pip-lg.on, .pip.stress.on { box-shadow: 0 0 16px -3px var(--accent); }
+.dots i.on { box-shadow: 0 0 9px var(--fear); }
+.tag-hot { box-shadow: 0 0 16px -6px var(--accent); }
+.fx:active, .fx.playing, .console .fx:active, .console .fx.playing { box-shadow: 0 0 22px -4px var(--accent); }
+.shot.on { box-shadow: 0 0 0 2px var(--accent), 0 0 24px -6px var(--accent); }
+.done { box-shadow: 0 0 24px -10px var(--accent); }
+
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
 
@@ -312,7 +349,7 @@ h1 { font-size: clamp(30px, 4.2vw, 44px); }
   <div class="top-in">
     <div class="brand">
       <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.4" fill="none" stroke="currentColor" stroke-width="2.6"/><path d="M12 7.6c1.6 2.1 2.6 3.4 2.6 5 0 1.5-1.1 2.6-2.6 2.6s-2.6-1.1-2.6-2.6c0-1.6 1-2.9 2.6-5z" fill="currentColor"/></svg>
-      <span>Hollow Table</span><span class="ver" id="ver">versão 0.15</span>
+      <span>Hollow Table</span><span class="ver" id="ver">versão 0.16</span>
     </div>
     <div class="seg" role="radiogroup" aria-label="Modo">
       <button type="button" role="radio" aria-checked="false" data-action="mode" data-mode="prep">Preparar</button>
