@@ -5,22 +5,21 @@
       <stop offset="0.55" stop-color="#120E2E"/>
       <stop offset="1" stop-color="#05040C"/>
     </radialGradient>
-    <radialGradient id="glow" cx="50%" cy="58%" r="50%">
-      <stop offset="0" stop-color="#7DE3FF" stop-opacity="0.55"/>
+    <radialGradient id="glow" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#7DE3FF" stop-opacity="0.42"/>
       <stop offset="1" stop-color="#7DE3FF" stop-opacity="0"/>
     </radialGradient>
     <linearGradient id="ring" x1="0" y1="0" x2="0" y2="1">
       <stop offset="0" stop-color="#D4CBFF"/>
       <stop offset="1" stop-color="#6853E0"/>
     </linearGradient>
-    <linearGradient id="flame" x1="0" y1="0" x2="0" y2="1">
+    <radialGradient id="iris" cx="50%" cy="42%" r="62%">
       <stop offset="0" stop-color="#F0FFFF"/>
-      <stop offset="1" stop-color="#6AD6F2"/>
-    </linearGradient>
+      <stop offset="1" stop-color="#4FC8F0"/>
+    </radialGradient>
   </defs>
   <rect width="512" height="512" fill="url(#bg)"/>
-  <circle cx="256" cy="262" r="150" fill="url(#glow)"/>
-  <!-- cadeiras ao redor da mesa -->
+  <circle cx="256" cy="256" r="165" fill="url(#glow)"/>
   <g fill="#9F8FFF" opacity="0.55">
     <rect x="236" y="26" width="40" height="22" rx="8"/>
     <rect x="236" y="464" width="40" height="22" rx="8"/>
@@ -31,12 +30,10 @@
     <rect x="236" y="26" width="40" height="22" rx="8" transform="rotate(225 256 256)"/>
     <rect x="236" y="26" width="40" height="22" rx="8" transform="rotate(315 256 256)"/>
   </g>
-  <!-- a mesa: um anel oco -->
   <circle cx="256" cy="256" r="178" fill="none" stroke="url(#ring)" stroke-width="40"/>
-  <circle cx="256" cy="256" r="156" fill="none" stroke="#2D2475" stroke-width="3" opacity="0.7"/>
-  <!-- o vazio e a chama -->
-  <g transform="translate(256 300) scale(1.28) translate(-256 -300)">
-  <path d="M256 190 C282 224 298 246 298 276 C298 304 280 322 256 322 C232 322 214 304 214 276 C214 246 232 226 256 190 Z" fill="url(#flame)"/>
-  <path d="M256 250 C268 266 276 278 276 292 C276 305 267 314 256 314 C245 314 236 305 236 292 C236 278 244 266 256 250 Z" fill="#2BA3D6" opacity="0.85"/>
-  </g>
+  <circle cx="256" cy="256" r="156" fill="none" stroke="#2D2475" stroke-width="3" opacity="0.8"/>
+  <path d="M120 256 C190 168 322 168 392 256 C322 344 190 344 120 256 Z" fill="#05040C" stroke="#7DE3FF" stroke-width="11" stroke-linejoin="round"/>
+  <circle cx="256" cy="256" r="52" fill="url(#iris)"/>
+  <ellipse cx="256" cy="256" rx="11" ry="46" fill="#05040C"/>
+  <circle cx="238" cy="238" r="7" fill="#FFFFFF" opacity="0.85"/>
 </svg>
