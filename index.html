@@ -659,7 +659,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   <div class="top-in">
     <div class="brand">
       <svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>
-      <span>Hollow Table</span><span class="ver" id="ver">versão 0.30</span>
+      <span>Hollow Table</span><span class="ver" id="ver">versão 0.31</span>
     </div>
     <div class="top-r">
       <div class="seg" role="radiogroup" aria-label="Modo">
@@ -1175,7 +1175,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       if (!libBuf[it.path]) { const buf = await (await sbDownload(it.path)).arrayBuffer(); libBuf[it.path] = await new Promise(function (res, rej) { ctx.decodeAudioData(buf, res, rej); }); }
       if (libPlaying !== id) return;
       const b = ctx.createBufferSource();
-      b.buffer = libBuf[it.path]; b.connect(fxBus);
+      b.buffer = libBuf[it.path]; const pg = ctx.createGain(); pg.gain.value = normGain(b.buffer); b.connect(pg); pg.connect(fxBus);
       b.onended = function () { if (libSrc === b) { libSrc = null; libPlaying = null; if (mode === 'lib' || libPick) render(); } };
       libSrc = b; b.start();
     } catch (e) { libPlaying = null; toast('Não consegui tocar este som.'); }
@@ -1831,7 +1831,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (c.src === 'file') {
       const b = ctx.createBufferSource();
       b.buffer = fileBuffers[c.id];
-      b.connect(fxBus);
+      const ng = ctx.createGain(); ng.gain.value = normGain(b.buffer);
+      b.connect(ng); ng.connect(fxBus);
       b.start(t);
     } else {
       LIB[c.id].play(t);
@@ -1846,7 +1847,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (c.src === 'file') {
       const s = ctx.createBufferSource();
       s.buffer = fileBuffers[c.id]; s.loop = true;
-      s.connect(out); s.start();
+      const ng = ctx.createGain(); ng.gain.value = normGain(s.buffer);
+      s.connect(ng); ng.connect(out); s.start();
       stops.push(function () { s.stop(); });
     } else {
       LIB[c.id].build(out, stops);
@@ -1873,6 +1875,22 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (active[id]) { stopAmb(id); return; }
     ensure();
     active[id] = startAmb(c, posToGain(ambLevel(c), 1.2) * ambK(c));
+  }
+  /* nivela o volume de arquivos para ficar perto dos sons sintetizados */
+  const normCache = new WeakMap();
+  function normGain(buf) {
+    if (normCache.has(buf)) return normCache.get(buf);
+    let sum = 0, n = 0, peak = 0;
+    for (let ch = 0; ch < buf.numberOfChannels; ch++) {
+      const d = buf.getChannelData(ch);
+      for (let i = 0; i < d.length; i += 3) { const v = d[i]; sum += v * v; n++; if (Math.abs(v) > peak) peak = Math.abs(v); }
+    }
+    const rms = Math.sqrt(sum / Math.max(1, n)) || 0.0001;
+    let g = 0.2 / rms;
+    g = Math.min(g, 1.6 / Math.max(peak, 0.0001));
+    g = Math.max(0.5, Math.min(g, 12));
+    normCache.set(buf, g);
+    return g;
   }
   const DUCK = 0.22;
   async function spDuck(on) {
