@@ -159,7 +159,7 @@ input[type="email"]:focus-visible, input[type="password"]:focus-visible { outlin
 .gate .skip { background: none; border: 0; color: var(--muted); font: inherit; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 8px; }
 .ver { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; margin-left: 4px; white-space: nowrap; }
 .brand svg { width: 26px; height: 26px; color: var(--accent); flex: none; }
-.seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.seg { display: grid; grid-template-columns: repeat(3, auto); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
 .seg button { border: 0; background: transparent; min-height: 44px; padding: 0 22px; font-weight: 700; transition: background 0.12s, color 0.12s; }
 .seg button + button { border-left: 1px solid var(--line); }
 .seg button[aria-checked="true"] { background: var(--active); color: var(--active-ink); }
@@ -290,6 +290,21 @@ input[type="range"] { width: 100%; height: 36px; accent-color: var(--active); ma
 .adv-row span { flex: 1 1 200px; min-width: 0; }
 .adv-row input { flex: 1 1 160px; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-height: 40px; color: var(--fg); font: inherit; }
 .adv-pick { flex: 1 1 140px; min-width: 0; text-align: left; border: 0; background: none; font: inherit; font-weight: 600; padding: 6px 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lib-up { border-style: dashed; }
+.lib-up.drag { background: var(--accent-soft); }
+.lib-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.lib-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 8px 10px; }
+.lib-play { flex: none; min-width: 40px; padding: 0; }
+.lib-n { flex: 1 1 160px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 600; }
+.lib-name { flex: 1 1 160px; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-height: 40px; color: var(--fg); font: inherit; width: 100%; }
+.lib-kind { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 6px 8px; min-height: 40px; color: var(--fg); font: inherit; }
+.lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.lib-img { margin: 0; display: grid; gap: 8px; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 8px; align-content: start; }
+.lib-img .th { aspect-ratio: 16 / 10; background: var(--stage); border-radius: 8px; overflow: hidden; display: grid; place-items: center; color: var(--muted); }
+.lib-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.lib-img figcaption { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.pick-card { width: min(560px, 100%); }
+.pick-body { max-height: 52vh; overflow-y: auto; padding-right: 2px; }
 .adv-pick small { display: block; font-weight: 400; font-size: 13px; color: var(--muted); }
 .adv-pick[aria-current="true"]::before { content: "● "; color: var(--active); }
 .dlg-card form { display: grid; gap: 12px; margin-top: 4px; }
@@ -644,11 +659,12 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   <div class="top-in">
     <div class="brand">
       <svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>
-      <span>Hollow Table</span><span class="ver" id="ver">versão 0.28</span>
+      <span>Hollow Table</span><span class="ver" id="ver">versão 0.29</span>
     </div>
     <div class="top-r">
       <div class="seg" role="radiogroup" aria-label="Modo">
       <button type="button" role="radio" aria-checked="false" data-action="mode" data-mode="prep">Preparar</button>
+        <button type="button" role="radio" aria-checked="false" data-action="mode" data-mode="lib">Biblioteca</button>
       <button type="button" role="radio" aria-checked="true" data-action="mode" data-mode="mesa">Mesa</button>
     </div>
       <button type="button" class="cloud" id="cloud" data-st="out" data-action="cloud" aria-label="Nuvem: entrar" title="Nuvem"><svg class="ring" viewBox="0 0 46 46" aria-hidden="true"><rect class="prog" x="1.5" y="1.5" width="43" height="43" rx="11" pathLength="100"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5H7z"/></svg></button>
@@ -671,6 +687,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   </div>
 </div>
 <div class="gate dlg" id="advdlg" hidden role="dialog" aria-modal="true" aria-label="Aventuras"></div>
+<div class="gate dlg" id="libdlg" hidden role="dialog" aria-modal="true" aria-label="Biblioteca"></div>
 <main class="wrap" id="main"></main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <footer class="dock" id="dock" hidden></footer>
@@ -760,17 +777,18 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     };
   };
   /* ---------- aventuras e cenas ---------- */
+  const libUrl = {}, libBuf = {};
   const IDX_KEY = 'hollow-table-index';
   const ADV_KEY = function (id) { return 'ht-adv-' + id; };
   const uid = function () { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); };
   const lsRaw = function (k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
   function blankScene(title) {
     return { title: title || 'Nova cena', place: '', when: '', kind: 'Exploração', time: '', budget: '', summary: '',
-      notes: [{ title: 'A cena', open: true, text: '' }], music: { name: '', terms: '', url: '' }, cues: defaults().cues, images: [],
+      notes: [{ title: 'A cena', open: true, text: '' }], music: { name: '', terms: '', url: '' }, cues: [], images: [],
       countdown: null, adv: null, fear: 0, vol: 0.92 };
   }
   function sceneFrom(saved) {
-    const ups = (saved.upImages || []).map(function (i) { return { id: i.id, caption: i.caption, path: i.path, src: '' }; });
+    const ups = (saved.upImages || []).map(function (i) { return { id: i.id, caption: i.caption, path: i.path, lib: i.lib, src: libUrl[i.path] || '' }; });
     const out = Object.assign(blankScene(), saved, { images: (saved.sample ? defaults().images : []).concat(ups) });
     delete out.upImages;
     if (!(out.vol >= 0 && out.vol <= 1)) out.vol = 0.92;
@@ -779,8 +797,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   function sceneSnap(sc) {
     return Object.assign({}, sc, {
       images: undefined,
-      upImages: sc.images.filter(function (i) { return i.path; }).map(function (i) { return { id: i.id, caption: i.caption, path: i.path }; }),
-      cues: sc.cues.filter(function (c) { return c.src === 'synth' || c.path; }).map(function (c) { return c.src === 'synth' ? c : { id: c.id, kind: c.kind, src: 'file', label: c.label, path: c.path }; })
+      upImages: sc.images.filter(function (i) { return i.path; }).map(function (i) { return { id: i.id, caption: i.caption, path: i.path, lib: i.lib }; }),
+      cues: sc.cues.filter(function (c) { return c.src === 'synth' || c.path; }).map(function (c) { return c.src === 'synth' ? c : { id: c.id, kind: c.kind, src: 'file', label: c.label, path: c.path, lib: c.lib }; })
     });
   }
   function advFrom(saved) {
@@ -868,6 +886,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   function anyDirty() { const m = metaGet(); return Object.keys(m).some(function (k) { return m[k] && m[k].dirty; }); }
   function docPayload(kind) {
     if (kind === 'index') return { advs: IDX.advs };
+    if (kind === 'lib') return { items: LIBR.items };
     const id = kind.slice(4);
     return id === A.id ? advSnap(A) : lsRaw(ADV_KEY(id));
   }
@@ -892,6 +911,12 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   }
   function sbDeleteDoc(kind) { sbReq('/rest/v1/docs?kind=eq.' + encodeURIComponent(kind), { method: 'DELETE' }).catch(function () { /* ok */ }); }
   function applyDoc(kind, data) {
+    if (kind === 'lib') {
+      LIBR = { items: (data && data.items) || [] };
+      try { localStorage.setItem(LIB_KEY, JSON.stringify(LIBR)); } catch (x) { /* ok */ }
+      if (mode === 'lib' || libPick) { libPick ? renderPicker() : render(); }
+      return;
+    }
     if (kind === 'index') {
       const advs = data.advs || [], keep = IDX.cur;
       IDX.advs.forEach(function (e) {
@@ -952,6 +977,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       const rl = await sbList(), conflicts = [];
       await sbMigrateLegacy(rl);
       await syncDoc('index', rl.index, force, conflicts);
+      await syncDoc('lib', rl.lib, force, conflicts);
       for (const e of IDX.advs.slice()) await syncDoc('adv:' + e.id, rl['adv:' + e.id], force, conflicts);
       ensureCurrent();
       if (conflicts.length) { sbConflict = conflicts; setSb('conflict'); }
@@ -999,22 +1025,27 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (!sbUser()) return;
     let ch = false;
     for (const im of sc.images) {
-      if (im.path && !im.src) { try { im.src = URL.createObjectURL(await sbDownload(im.path)); ch = true; } catch (e) { /* tenta depois */ } }
+      if (im.path && !im.src) {
+        try { im.src = libUrl[im.path] || (libUrl[im.path] = URL.createObjectURL(await sbDownload(im.path))); ch = true; } catch (e) { /* tenta depois */ }
+      }
     }
     if (ch && sc === S) render();
     for (const c of sc.cues) {
       if (c.src === 'file' && c.path && !fileBuffers[c.id]) {
         try {
-          const buf = await (await sbDownload(c.path)).arrayBuffer();
-          ensure();
-          fileBuffers[c.id] = await new Promise(function (res, rej) { ctx.decodeAudioData(buf, res, rej); });
+          if (!libBuf[c.path]) {
+            const buf = await (await sbDownload(c.path)).arrayBuffer();
+            ensure();
+            libBuf[c.path] = await new Promise(function (res, rej) { ctx.decodeAudioData(buf, res, rej); });
+          }
+          fileBuffers[c.id] = libBuf[c.path];
         } catch (e) { /* tenta depois */ }
       }
     }
   }
   function sbExport() {
     const advs = IDX.advs.map(function (e) { return e.id === A.id ? advSnap(A) : lsRaw(ADV_KEY(e.id)); }).filter(Boolean);
-    const blob = new Blob([JSON.stringify({ app: 'hollow-table', version: 2, saved: new Date().toISOString(), advs: advs }, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify({ app: 'hollow-table', version: 3, saved: new Date().toISOString(), advs: advs, library: LIBR.items }, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'hollow-table-backup-' + new Date().toISOString().slice(0, 10) + '.json';
@@ -1024,11 +1055,189 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   function restoreBackup(j) {
     const list = Array.isArray(j.advs) ? j.advs : (j.data && Array.isArray(j.data.notes) ? [{ id: uid(), name: 'Backup importado', cur: 0, scenes: [Object.assign({ sample: true }, j.data)] }] : null);
     if (!list || !list.length) throw new Error('formato');
+    if (Array.isArray(j.library)) { LIBR = { items: j.library }; libSave(); }
     stopAll();
     IDX.advs.forEach(function (e) { try { localStorage.removeItem(ADV_KEY(e.id)); } catch (x) { /* ok */ } sbDeleteDoc('adv:' + e.id); metaSet('adv:' + e.id, null); });
     IDX.advs = list.map(function (a) { a.id = a.id || uid(); try { localStorage.setItem(ADV_KEY(a.id), JSON.stringify(a)); } catch (x) { /* ok */ } sbDirty('adv:' + a.id); return { id: a.id, name: a.name || 'Aventura' }; });
     IDX.cur = IDX.advs[0].id; saveIdx(); sbDirty('index');
     advLoad(IDX.cur);
+  }
+  /* ---------- biblioteca (sons e imagens reutilizáveis) ---------- */
+  const LIB_KEY = 'ht-lib';
+  let LIBR = lsRaw(LIB_KEY) || { items: [] };
+  let libTab = 'snd', libQ = '', libBusy = '', libPlaying = null, libPick = null;
+  function libSave() { try { localStorage.setItem(LIB_KEY, JSON.stringify(LIBR)); } catch (e) { /* ok */ } sbDirty('lib'); }
+  const libFind = function (id) { return LIBR.items.filter(function (x) { return x.id === id; })[0]; };
+  const fmtBytes = function (n) { return n > 1048576 ? (n / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(n / 1024)) + ' KB'; };
+  async function libDecode(file) {
+    ensure();
+    const buf = await file.arrayBuffer();
+    return new Promise(function (res, rej) { ctx.decodeAudioData(buf.slice(0), res, rej); });
+  }
+  async function libAdd(file, type) {
+    const u = sbUser();
+    if (!u) throw new Error('login');
+    const id = uid();
+    if (type === 'img') {
+      const url = await downscale(await readFile(file), 1600);
+      if (!url) throw new Error('imagem');
+      const blob = await (await fetch(url)).blob();
+      const path = u.id + '/lib/' + id + '.jpg';
+      await sbUpload(path, blob, 'image/jpeg');
+      libUrl[path] = URL.createObjectURL(blob);
+      const it = { id: id, type: 'img', name: file.name.replace(/\.[^.]+$/, ''), path: path };
+      LIBR.items.push(it); libSave();
+      return it;
+    }
+    if (file.size > 40 * 1048576) throw new Error('grande');
+    const ab = await libDecode(file);
+    const ext = (file.name.match(/\.([A-Za-z0-9]+)$/) || [0, 'mp3'])[1].toLowerCase();
+    const path = u.id + '/lib/' + id + '.' + ext;
+    await sbUpload(path, file, file.type);
+    libBuf[path] = ab;
+    const it = { id: id, type: 'snd', name: file.name.replace(/\.[^.]+$/, ''), path: path, kind: ab.duration > 25 ? 'amb' : 'fx', dur: Math.round(ab.duration * 10) / 10, size: file.size };
+    LIBR.items.push(it); libSave();
+    return it;
+  }
+  async function libAddMany(files, type, thenAdd) {
+    const list = Array.prototype.slice.call(files);
+    let ok = 0, fail = 0;
+    for (let k = 0; k < list.length; k++) {
+      libBusy = 'Enviando ' + (k + 1) + ' de ' + list.length + '…';
+      if (mode === 'lib') render();
+      try { const it = await libAdd(list[k], type); ok++; if (thenAdd) (type === 'img' ? addLibImage : addLibSound)(it.id, true); } catch (e) { fail++; }
+    }
+    libBusy = '';
+    commit();
+    toast(fail ? ok + ' enviado(s), ' + fail + ' não deu certo (formato ou tamanho).' : (ok === 1 ? 'Enviado para a biblioteca.' : ok + ' arquivos enviados para a biblioteca.'));
+  }
+  function addLibSound(id, quiet) {
+    const it = libFind(id);
+    if (!it) return;
+    if (S.cues.some(function (c) { return c.id === 'L' + id; })) { if (!quiet) toast('Este som já está na cena.'); return; }
+    S.cues.push({ id: 'L' + id, kind: it.kind || 'fx', src: 'file', label: it.name, path: it.path, lib: id });
+    if (libBuf[it.path]) fileBuffers['L' + id] = libBuf[it.path];
+    if (!quiet) { commit(); toast('Som adicionado à cena.'); sbHydrate(S); }
+  }
+  function addLibImage(id, quiet) {
+    const it = libFind(id);
+    if (!it) return;
+    if (S.images.some(function (im) { return im.id === 'L' + id; })) { if (!quiet) toast('Esta imagem já está na cena.'); return; }
+    S.images.push({ id: 'L' + id, caption: it.name, path: it.path, lib: id, src: libUrl[it.path] || '' });
+    if (!quiet) { commit(); toast('Imagem adicionada à cena.'); sbHydrate(S); }
+  }
+  function libUsage(id) {
+    let n = 0;
+    A.scenes.forEach(function (sc) { if (sc.cues.some(function (c) { return c.lib === id; }) || sc.images.some(function (i) { return i.lib === id; })) n++; });
+    IDX.advs.forEach(function (e) {
+      if (e.id === A.id) return;
+      const raw = lsRaw(ADV_KEY(e.id));
+      if (raw) (raw.scenes || []).forEach(function (sc) { if ((sc.cues || []).some(function (c) { return c.lib === id; }) || (sc.upImages || []).some(function (i) { return i.lib === id; })) n++; });
+    });
+    return n;
+  }
+  function libDelete(id) {
+    const it = libFind(id);
+    if (!it) return;
+    if (libPlaying === id) libStop();
+    A.scenes.forEach(function (sc) {
+      sc.cues = sc.cues.filter(function (c) { if (c.lib === id) { stopAmb(c.id); delete fileBuffers[c.id]; return false; } return true; });
+      sc.images = sc.images.filter(function (i) { return i.lib !== id; });
+    });
+    IDX.advs.forEach(function (e) {
+      if (e.id === A.id) return;
+      const raw = lsRaw(ADV_KEY(e.id));
+      if (!raw) return;
+      let ch = false;
+      (raw.scenes || []).forEach(function (sc) {
+        const c0 = (sc.cues || []).length, i0 = (sc.upImages || []).length;
+        sc.cues = (sc.cues || []).filter(function (c) { return c.lib !== id; });
+        sc.upImages = (sc.upImages || []).filter(function (i) { return i.lib !== id; });
+        if (sc.cues.length !== c0 || sc.upImages.length !== i0) ch = true;
+      });
+      if (ch) { try { localStorage.setItem(ADV_KEY(e.id), JSON.stringify(raw)); } catch (x) { /* ok */ } sbDirty('adv:' + e.id); }
+    });
+    LIBR.items = LIBR.items.filter(function (x) { return x.id !== id; });
+    sbRemove(it.path);
+    delete libBuf[it.path]; delete libUrl[it.path];
+    libSave(); save();
+  }
+  let libSrc = null;
+  function libStop() { if (libSrc) { try { libSrc.stop(); } catch (e) { /* ok */ } libSrc = null; } libPlaying = null; }
+  async function libPreview(id) {
+    if (libPlaying === id) { libStop(); render(); return; }
+    libStop();
+    const it = libFind(id);
+    if (!it) return;
+    libPlaying = id; render();
+    try {
+      ensure();
+      if (!libBuf[it.path]) { const buf = await (await sbDownload(it.path)).arrayBuffer(); libBuf[it.path] = await new Promise(function (res, rej) { ctx.decodeAudioData(buf, res, rej); }); }
+      if (libPlaying !== id) return;
+      const b = ctx.createBufferSource();
+      b.buffer = libBuf[it.path]; b.connect(fxBus);
+      b.onended = function () { if (libSrc === b) { libSrc = null; libPlaying = null; if (mode === 'lib' || libPick) render(); } };
+      libSrc = b; b.start();
+    } catch (e) { libPlaying = null; toast('Não consegui tocar este som.'); }
+    render();
+  }
+  async function libThumbs() {
+    if (!sbUser()) return;
+    let ch = false;
+    for (const it of LIBR.items) {
+      if (it.type === 'img' && !libUrl[it.path]) { try { libUrl[it.path] = URL.createObjectURL(await sbDownload(it.path)); ch = true; } catch (e) { /* ok */ } }
+    }
+    if (ch && (mode === 'lib' || libPick)) render();
+  }
+  const libMatch = function (it) { return !libQ || it.name.toLowerCase().indexOf(libQ.toLowerCase()) >= 0; };
+  function libRows(forPick) {
+    const items = LIBR.items.filter(function (x) { return x.type === (libTab === 'img' ? 'img' : 'snd') && libMatch(x); });
+    if (!items.length) return '<p class="empty">' + (LIBR.items.some(function (x) { return x.type === (libTab === 'img' ? 'img' : 'snd'); }) ? 'Nada encontrado com essa busca.' : (libTab === 'img' ? 'Nenhuma imagem ainda.' : 'Nenhum som ainda.')) + '</p>';
+    if (libTab === 'img') {
+      return '<div class="lib-grid">' + items.map(function (it) {
+        const used = forPick && S.images.some(function (i) { return i.lib === it.id; });
+        return '<figure class="lib-img"><div class="th">' + (libUrl[it.path] ? '<img src="' + libUrl[it.path] + '" alt="' + esc(it.name) + '">' : '<span class="ph">…</span>') + '</div>' +
+          (forPick ? '<figcaption>' + esc(it.name) + '</figcaption><button type="button" class="btn sm' + (used ? ' quiet' : ' primary') + '" data-action="libUse" data-id="' + it.id + '"' + (used ? ' disabled' : '') + '>' + (used ? 'Na cena' : 'Adicionar') + '</button>'
+            : '<input type="text" class="lib-name" data-libname="' + it.id + '" value="' + esc(it.name) + '" aria-label="Nome"><button type="button" class="btn quiet sm" data-action="libDel" data-id="' + it.id + '">' + (libDelArm === it.id ? 'Confirmar' : 'Excluir') + '</button>') + '</figure>';
+      }).join('') + '</div>';
+    }
+    return '<ul class="lib-list">' + items.map(function (it) {
+      const used = forPick && S.cues.some(function (c) { return c.lib === it.id; });
+      return '<li class="lib-row"><button type="button" class="btn quiet sm lib-play" data-action="libPlay" data-id="' + it.id + '" aria-label="' + (libPlaying === it.id ? 'Parar' : 'Ouvir') + ' ' + esc(it.name) + '">' + (libPlaying === it.id ? '■' : '▶') + '</button>' +
+        (forPick ? '<span class="lib-n">' + esc(it.name) + '</span>' : '<input type="text" class="lib-name" data-libname="' + it.id + '" value="' + esc(it.name) + '" aria-label="Nome">') +
+        '<span class="tag">' + (it.kind === 'amb' ? 'Ambiente' : 'Efeito') + (it.dur ? ' · ' + fmtDur(it.dur) : '') + '</span>' +
+        (forPick ? '<button type="button" class="btn sm' + (used ? ' quiet' : ' primary') + '" data-action="libUse" data-id="' + it.id + '"' + (used ? ' disabled' : '') + '>' + (used ? 'Na cena' : 'Adicionar') + '</button>'
+          : '<select class="lib-kind" data-libkind="' + it.id + '" aria-label="Tipo"><option value="fx"' + (it.kind !== 'amb' ? ' selected' : '') + '>Efeito</option><option value="amb"' + (it.kind === 'amb' ? ' selected' : '') + '>Ambiente</option></select><button type="button" class="btn quiet sm" data-action="libDel" data-id="' + it.id + '">' + (libDelArm === it.id ? 'Confirmar' : 'Excluir') + '</button>') + '</li>';
+    }).join('') + '</ul>';
+  }
+  let libDelArm = null;
+  function libTabs(counts) {
+    return '<nav class="ptabs" aria-label="Tipo de arquivo">' + [['snd', 'Sons'], ['img', 'Imagens']].map(function (t) {
+      return '<button type="button" class="chip" data-action="libTab" data-id="' + t[0] + '"' + (libTab === t[0] ? ' aria-current="true"' : '') + '>' + t[1] + ' (' + counts[t[0]] + ')</button>';
+    }).join('') + '</nav>';
+  }
+  const libCounts = function () { return { snd: LIBR.items.filter(function (x) { return x.type === 'snd'; }).length, img: LIBR.items.filter(function (x) { return x.type === 'img'; }).length }; };
+  function renderLib() {
+    const head = '<section class="head"><p class="eyebrow">Biblioteca</p><h1>Seus sons e imagens</h1><p class="lede">Envie uma vez e use em qualquer cena ou aventura. Os arquivos ficam guardados na nuvem.</p></section>';
+    if (!sbUser()) return head + '<section class="panel"><h2>Entre para usar a biblioteca</h2><p class="hint">A biblioteca guarda os arquivos na sua conta, para abrir em qualquer aparelho.</p><div class="row"><button type="button" class="btn primary" data-action="gateOpen">Entrar</button></div></section>';
+    const isImg = libTab === 'img';
+    libThumbs();
+    return head + libTabs(libCounts()) +
+      '<section class="panel lib-up" id="lib-drop"><h2>' + (isImg ? 'Enviar imagens' : 'Enviar sons') + '</h2>' +
+      '<p class="hint">' + (isImg ? 'Escolha uma ou várias imagens. Elas são reduzidas ao tamanho de tela antes de subir.' : 'Escolha um ou vários arquivos mp3, m4a, ogg ou wav, ou arraste-os para cá. Arquivos longos (mais de 25 s) entram como Ambiente; os curtos, como Efeito. Dá para trocar depois.') + '</p>' +
+      '<div class="row"><label class="btn primary file-btn">' + (isImg ? 'Escolher imagens' : 'Escolher sons') + '<input type="file" id="lib-file" multiple accept="' + (isImg ? 'image/*' : 'audio/*') + '"></label>' + (libBusy ? '<span class="hint" role="status">' + esc(libBusy) + '</span>' : '') + '</div></section>' +
+      '<section class="panel"><div class="field"><label for="lib-q">Buscar</label><input type="text" id="lib-q" value="' + esc(libQ) + '" placeholder="Nome do arquivo" autocomplete="off"></div>' + libRows(false) + '</section>';
+  }
+  function renderPicker() {
+    const el = $('#libdlg');
+    if (!el) return;
+    if (!libPick) { el.hidden = true; el.innerHTML = ''; return; }
+    el.hidden = false;
+    libTab = libPick.type;
+    el.innerHTML = '<div class="gate-card dlg-card pick-card"><h1>' + (libPick.type === 'img' ? 'Imagens da biblioteca' : 'Sons da biblioteca') + '</h1>' +
+      (sbUser() ? '<div class="field"><label for="lib-q">Buscar</label><input type="text" id="lib-q" value="' + esc(libQ) + '" placeholder="Nome do arquivo" autocomplete="off"></div><div class="pick-body">' + libRows(true) + '</div>' : '<p class="hint" style="text-align:center">Entre na Nuvem para usar a biblioteca.</p>') +
+      '<button type="button" class="skip" data-action="libClose">Concluir</button></div>';
+    libThumbs();
   }
   function cloudPanel() {
     const u = sbUser();
@@ -1682,8 +1891,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       '<section class="panel"><div class="tabs" role="tablist" aria-label="Seções da cena">' + tabs + '</div><div class="tab-body">' + body + '</div></section></div>' +
       '<aside class="console" aria-label="Som">' +
       musicHtml() +
-      '<section class="sub"><h2>Ambientes</h2>' + ambs + '</section>' +
-      '<section class="sub"><h2>Efeitos</h2><div class="fx-grid">' + fxs + '</div></section></aside></div>';
+      '<section class="sub"><h2>Ambientes</h2>' + (ambs || '<p class="hint">Nenhum ambiente nesta cena. Adicione em Preparar.</p>') + '</section>' +
+      '<section class="sub"><h2>Efeitos</h2><div class="fx-grid">' + fxs + '</div>' + (fxs ? '' : '<p class="hint">Nenhum efeito nesta cena. Adicione em Preparar.</p>') + '</section></aside></div>';
   }
 
   const PALETTES = [
@@ -1759,10 +1968,11 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       '<section class="panel" data-sec="notas"><h2>Notas</h2><p class="hint">Use **negrito** e linhas começando com "- " para listas.</p><div>' + notes + '</div><div class="row"><button type="button" class="btn quiet" data-action="noteAdd">Adicionar nota</button></div></section>' +
       '<section class="panel" data-sec="som"><h2>Música</h2><div class="form-row">' + inp('Nome', 'music.name', S.music.name) + inp('Termos de busca', 'music.terms', S.music.terms) + inp('Link do Spotify (playlist, álbum ou faixa)', 'music.url', S.music.url) + '</div></section>' +
       '<section class="panel" data-sec="som"><h2>Sons</h2><div>' + cues + '</div>' +
-      '<div class="add-row"><div class="field"><label for="add-lib">Adicionar da biblioteca</label><select id="add-lib">' + (libOpts || '<option value="">Tudo já está na cena</option>') + '</select></div><button type="button" class="btn quiet" data-action="cueAdd"' + (libOpts ? '' : ' disabled') + '>Adicionar</button></div>' +
-      '<div class="add-row"><div class="field"><label for="new-kind">Seu arquivo de áudio será</label><select id="new-kind"><option value="fx">Efeito (toca uma vez)</option><option value="amb">Ambiente (em loop)</option></select></div><label class="btn quiet file-btn">Anexar áudio<input type="file" id="file-audio" accept="audio/*"></label></div>' +
-      '<p class="hint">Aceita mp3, m4a e wav. Baixe efeitos de fontes livres, como o Freesound.</p></section>' +
-      '<section class="panel" data-sec="imagens"><h2>Imagens</h2><div class="thumbs">' + imgs + '</div><div class="row"><label class="btn quiet file-btn">Anexar imagem<input type="file" id="file-img" accept="image/*"></label></div></section>' +
+      '<div class="row"><button type="button" class="btn primary" data-action="libOpen" data-id="snd">Adicionar da biblioteca</button></div>' +
+      '<div class="add-row"><div class="field"><label for="add-lib">Ou um som básico (sintetizado)</label><select id="add-lib">' + (libOpts || '<option value="">Tudo já está na cena</option>') + '</select></div><button type="button" class="btn quiet" data-action="cueAdd"' + (libOpts ? '' : ' disabled') + '>Adicionar</button></div>' +
+      '<div class="add-row"><div class="field"><label for="new-kind">Seu arquivo de áudio será</label><select id="new-kind"><option value="fx">Efeito (toca uma vez)</option><option value="amb">Ambiente (em loop)</option></select></div><label class="btn quiet file-btn">Enviar novo áudio<input type="file" id="file-audio" accept="audio/*" multiple></label></div>' +
+      '<p class="hint">Os sons que você envia vão para a Biblioteca e podem ser usados em outras cenas. Aceita mp3, m4a, ogg e wav.</p></section>' +
+      '<section class="panel" data-sec="imagens"><h2>Imagens</h2><div class="thumbs">' + imgs + '</div><div class="row"><button type="button" class="btn primary" data-action="libOpen" data-id="img">Adicionar da biblioteca</button><label class="btn quiet file-btn">Enviar nova imagem<input type="file" id="file-img" accept="image/*" multiple></label></div></section>' +
       cdPanel(maxOpts, cdCue) + scenePanel() +
       cloudPanel() + '</div>';
   }
@@ -1824,7 +2034,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     stopAll();
     const gone = A.scenes.splice(A.cur, 1)[0];
     A.cur = Math.min(A.cur, A.scenes.length - 1); S = A.scenes[A.cur];
-    gone.images.concat(gone.cues).forEach(function (x) { if (x.path && !pathInUse(x.path)) sbRemove(x.path); });
+    gone.images.concat(gone.cues).forEach(function (x) { if (x.path && !x.lib && !pathInUse(x.path)) sbRemove(x.path); });
     save(); afterSceneChange();
   }
   function advLoad(id) {
@@ -1857,7 +2067,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (IDX.advs.length < 2) return;
     const raw = id === A.id ? advSnap(A) : lsRaw(ADV_KEY(id));
     if (raw) raw.scenes.forEach(function (sc) {
-      (sc.upImages || []).concat((sc.cues || []).filter(function (c) { return c.path; })).forEach(function (x) { sbRemove(x.path); });
+      (sc.upImages || []).concat((sc.cues || []).filter(function (c) { return c.path; })).forEach(function (x) { if (!x.lib) sbRemove(x.path); });
     });
     IDX.advs = IDX.advs.filter(function (x) { return x.id !== id; });
     try { localStorage.removeItem(ADV_KEY(id)); } catch (x) { /* ok */ }
@@ -1891,14 +2101,16 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       }).join('') + '<button type="button" class="chip" data-action="sceneAdd">+ Nova cena</button>';
   }
   function render() {
-    document.body.classList.add('has-dock');
-    dock.hidden = false;
+    document.body.classList.toggle('has-dock', mode !== 'lib');
+    dock.hidden = mode === 'lib';
     $$('[data-mode]', document.querySelector('.seg')).forEach(function (b) { b.setAttribute('aria-checked', b.getAttribute('data-mode') === mode ? 'true' : 'false'); });
     const cs0 = $('.console'), st0 = cs0 ? cs0.scrollTop : 0;
-    main.innerHTML = mode === 'mesa' ? renderMesa() : renderPrep();
+    const keepQ = mode === 'lib' && document.activeElement && document.activeElement.id === 'lib-q';
+    main.innerHTML = mode === 'mesa' ? renderMesa() : (mode === 'lib' ? renderLib() : renderPrep());
+    if (keepQ) { const f = $('#lib-q'); if (f) { f.focus(); const n = f.value.length; f.setSelectionRange(n, n); } }
     const cs1 = $('.console');
     if (cs1) cs1.scrollTop = st0;
-    if (mode === 'mesa') renderDock(); else renderSaveBar();
+    if (mode === 'mesa') renderDock(); else if (mode === 'prep') renderSaveBar();
   }
   function commit() { save(); render(); }
 
@@ -1924,7 +2136,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     const el = e.target.closest('[data-action]');
     if (!el) return;
     const a = el.getAttribute('data-action'), id = el.getAttribute('data-id'), i = Number(el.getAttribute('data-i'));
-    if (a === 'mode') { mode = el.getAttribute('data-mode'); render(); window.scrollTo(0, 0); return; }
+    if (a === 'mode') { mode = el.getAttribute('data-mode'); libStop(); libDelArm = null; render(); window.scrollTo(0, 0); return; }
     if (a === 'fear') { S.fear = Math.max(0, Math.min(12, S.fear + Number(el.getAttribute('data-d')))); save(); renderDock(); return; }
     if (a === 'stop') { stopAll(); render(); return; }
     if (a === 'fx') { playFx(findCue(id)); return; }
@@ -1973,13 +2185,22 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (a === 'noteDel') { S.notes.splice(i, 1); commit(); return; }
     if (a === 'noteUp' && i > 0) { const n = S.notes.splice(i, 1)[0]; S.notes.splice(i - 1, 0, n); commit(); return; }
     if (a === 'noteDown' && i < S.notes.length - 1) { const n = S.notes.splice(i, 1)[0]; S.notes.splice(i + 1, 0, n); commit(); return; }
+    if (a === 'libTab') { libTab = id; libQ = ''; libDelArm = null; if (libPick) libPick.type = id; render(); return; }
+    if (a === 'libPlay') { libPreview(id); return; }
+    if (a === 'libUse') { if (libPick && libPick.type === 'img') addLibImage(id); else addLibSound(id); renderPicker(); return; }
+    if (a === 'libDel') {
+      if (libDelArm !== id) { libDelArm = id; render(); toast(libUsage(id) ? 'Usado em ' + libUsage(id) + ' cena(s). Toque de novo para excluir mesmo assim.' : 'Toque de novo para excluir.'); return; }
+      libDelArm = null; libDelete(id); render(); return;
+    }
+    if (a === 'libOpen') { libPick = { type: id }; libQ = ''; renderPicker(); return; }
+    if (a === 'libClose') { libPick = null; libStop(); renderPicker(); render(); return; }
     if (a === 'cueTest') {
       const c = findCue(id);
       if (c.kind === 'fx') playFx(c);
       else if (!active[id]) { toggleAmb(id); setTimeout(function () { stopAmb(id); }, 4000); }
       return;
     }
-    if (a === 'cueDel') { const gc = findCue(id); stopAmb(id); S.cues = S.cues.filter(function (c) { return c.id !== id; }); if (gc && gc.path && !pathInUse(gc.path)) sbRemove(gc.path); delete fileBuffers[id]; commit(); return; }
+    if (a === 'cueDel') { const gc = findCue(id); stopAmb(id); S.cues = S.cues.filter(function (c) { return c.id !== id; }); if (gc && gc.path && !gc.lib && !pathInUse(gc.path)) sbRemove(gc.path); delete fileBuffers[id]; commit(); return; }
     if (a === 'cueAdd') {
       const k = $('#add-lib').value;
       if (k && LIB[k]) { S.cues.push({ id: k, kind: LIB[k].kind, src: 'synth' }); commit(); }
@@ -2018,11 +2239,18 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (a === 'sbExport') { sbExport(); return; }
     if (a === 'sbCloud') { sbResolve(true); return; }
     if (a === 'sbLocal') { sbResolve(false); return; }
-    if (a === 'imgDel') { const gone = S.images.filter(function (im) { return im.id === id; })[0]; S.images = S.images.filter(function (im) { return im.id !== id; }); if (gone && gone.path && !pathInUse(gone.path)) sbRemove(gone.path); if (revealed === id) revealed = null; commit(); return; }
+    if (a === 'imgDel') { const gone = S.images.filter(function (im) { return im.id === id; })[0]; S.images = S.images.filter(function (im) { return im.id !== id; }); if (gone && gone.path && !gone.lib && !pathInUse(gone.path)) sbRemove(gone.path); if (revealed === id) revealed = null; commit(); return; }
   });
 
+  let libNameT = null;
   document.addEventListener('input', function (e) {
     const t = e.target;
+    if (t.id === 'lib-q') { libQ = t.value; if (libPick) { const b = $('.pick-body'); if (b) b.innerHTML = libRows(true); } else { const keep = t.selectionStart; render(); } return; }
+    if (t.getAttribute && t.getAttribute('data-libname')) {
+      const it = libFind(t.getAttribute('data-libname'));
+      if (it) { it.name = t.value; clearTimeout(libNameT); libNameT = setTimeout(libSave, 700); }
+      return;
+    }
     if (t.tagName === 'SELECT') return;
     if (t.id === 'sp-vol') { spVol = Number(t.value); return; }
     if (t.getAttribute('data-bind')) {
@@ -2046,6 +2274,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
 
   document.addEventListener('change', function (e) {
     const t = e.target;
+    if (t.getAttribute && t.getAttribute('data-libkind')) { const it = libFind(t.getAttribute('data-libkind')); if (it) { it.kind = t.value; libSave(); } return; }
+    if (t.id === 'lib-file' && t.files && t.files.length) { libAddMany(t.files, libTab === 'img' ? 'img' : 'snd', false); t.value = ''; return; }
     if (t.id === 'sp-vol') { spVol = Number(t.value); spSetVol(spVol); return; }
     if (t.tagName === 'SELECT' && t.getAttribute('data-bind')) {
       const p = t.getAttribute('data-bind');
@@ -2062,6 +2292,12 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       t.value = '';
       return;
     }
+    if (t.id === 'file-audio' && t.files && t.files.length && sbUser()) {
+      libAddMany(t.files, 'snd', true);
+      t.value = '';
+      return;
+    }
+    if (t.id === 'file-img' && t.files && t.files.length && sbUser()) { libAddMany(t.files, 'img', true); t.value = ''; return; }
     if (t.id === 'file-audio' && t.files && t.files[0]) {
       const f = t.files[0], kind = $('#new-kind').value;
       ensure();
@@ -2107,7 +2343,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   });
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Enter' && e.target && e.target.id === 'adv-rn') { e.preventDefault(); const b = $('[data-action="advRenameOk"]'); if (b) b.click(); }
-    if (e.key === 'Escape' && dlg) { dlg = null; renderDlg(); }
+    if (e.key === 'Escape' && libPick) { libPick = null; libStop(); renderPicker(); render(); }
+    else if (e.key === 'Escape' && dlg) { dlg = null; renderDlg(); }
   });
 
   document.addEventListener('toggle', function (e) {
