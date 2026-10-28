@@ -132,6 +132,9 @@ ul { padding-left: 1.2em; }
 }
 .top-in { max-width: 1180px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px 20px; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 24px; letter-spacing: 0.03em; }
+.cloud { cursor: pointer; background: transparent; font: inherit; font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+.cloud[data-st="ok"] { color: var(--accent); }
+.cloud[data-st="conflict"], .cloud[data-st="err"] { color: #ff9a6b; }
 .ver { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.04em; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; margin-left: 4px; white-space: nowrap; }
 .brand svg { width: 26px; height: 26px; color: var(--accent); flex: none; }
 .seg { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
@@ -591,8 +594,9 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   <div class="top-in">
     <div class="brand">
       <svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>
-      <span>Hollow Table</span><span class="ver" id="ver">versão 0.21</span>
+      <span>Hollow Table</span><span class="ver" id="ver">versão 0.22</span>
     </div>
+    <button type="button" class="ver cloud" id="cloud" data-st="out" data-action="cloud" aria-label="Nuvem">Entrar</button>
     <div class="seg" role="radiogroup" aria-label="Modo">
       <button type="button" role="radio" aria-checked="false" data-action="mode" data-mode="prep">Preparar</button>
       <button type="button" role="radio" aria-checked="true" data-action="mode" data-mode="mesa">Mesa</button>
@@ -689,25 +693,209 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       adv: { afogados: [0, 0, 0, 0], rolfHp: 0, rolfStress: 0 }
     };
   };
+  function fromSaved(saved) {
+    const base = defaults();
+    const ups = (saved.upImages || []).map(function (i) { return { id: i.id, caption: i.caption, path: i.path, src: '' }; });
+    const out = Object.assign(base, saved, { images: base.images.concat(ups) });
+    delete out.upImages;
+    return out;
+  }
   function load() {
     try {
       const raw = localStorage.getItem(KEY);
       if (!raw) return null;
-      const base = defaults();
-      return Object.assign(base, JSON.parse(raw), { images: base.images });
+      return fromSaved(JSON.parse(raw));
     } catch (e) { return null; }
   }
   let S = load() || defaults();
   if (!(S.vol >= 0 && S.vol <= 1)) S.vol = 0.92;
-  function save() {
-    try {
-      const copy = Object.assign({}, S, { images: undefined, cues: S.cues.filter(function (c) { return c.src === 'synth'; }) });
-      localStorage.setItem(KEY, JSON.stringify(copy));
-    } catch (e) { /* sem armazenamento */ }
+  function snapshot() {
+    return Object.assign({}, S, {
+      images: undefined,
+      upImages: S.images.filter(function (i) { return i.path; }).map(function (i) { return { id: i.id, caption: i.caption, path: i.path }; }),
+      cues: S.cues.filter(function (c) { return c.src === 'synth' || c.path; }).map(function (c) { return c.src === 'synth' ? c : { id: c.id, kind: c.kind, src: 'file', label: c.label, path: c.path }; })
+    });
   }
+  function saveLocal() { try { localStorage.setItem(KEY, JSON.stringify(snapshot())); } catch (e) { /* sem armazenamento */ } }
+  function save() { saveLocal(); sbDirty(); }
   let mode = 'mesa', tab = 'notas', revealed = null, audience = ['todos'];
   const active = {}, levels = {}, fileBuffers = {};
   const main = $('#main'), dock = $('#dock');
+
+  /* ---------- nuvem (Supabase: login, sincronização e arquivos) ---------- */
+  const SBC = { url: 'https://ksucnjrmcagzepxahync.supabase.co', key: 'sb_publishable_zg_rPvJ15I_wbaFZ2qemeg_Xnsalgsh' };
+  const lsGet = function (k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
+  const lsSet = function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sem armazenamento */ } };
+  let sbState = 'out', sbMsg = '', sbTimer = null, sbBusy = false, sbVer = 0, sbConflict = null;
+  const SB_LABEL = { out: 'Entrar', ok: 'Nuvem ✓', busy: 'Sincronizando…', off: 'Sem conexão', err: 'Erro de sync', conflict: 'Conflito' };
+  function sbUser() { const x = lsGet('cdm-sb', null); return x && x.user ? x.user : null; }
+  function setSb(st) {
+    sbState = st;
+    const b = $('#cloud');
+    if (b) { b.setAttribute('data-st', st); b.textContent = SB_LABEL[st] || ''; }
+  }
+  function sbStore(j) {
+    const x = { access_token: j.access_token, refresh_token: j.refresh_token, expires_at: j.expires_at || Math.floor(Date.now() / 1000) + j.expires_in, user: { id: j.user.id, email: j.user.email } };
+    lsSet('cdm-sb', x);
+    return x;
+  }
+  async function sbToken() {
+    let x = lsGet('cdm-sb', null);
+    if (!x) throw new Error('sem sessão');
+    if (x.expires_at - 60 < Date.now() / 1000) {
+      const r = await fetch(SBC.url + '/auth/v1/token?grant_type=refresh_token', { method: 'POST', headers: { apikey: SBC.key, 'Content-Type': 'application/json' }, body: JSON.stringify({ refresh_token: x.refresh_token }) });
+      if (!r.ok) { if (r.status === 400 || r.status === 401) { try { localStorage.removeItem('cdm-sb'); } catch (e) { /* ok */ } setSb('out'); } throw new Error('sessão expirada'); }
+      x = sbStore(await r.json());
+    }
+    return x.access_token;
+  }
+  async function sbReq(path, opt) {
+    const tok = await sbToken();
+    opt = opt || {};
+    opt.headers = Object.assign({ apikey: SBC.key, Authorization: 'Bearer ' + tok }, opt.headers || {});
+    return fetch(SBC.url + path, opt);
+  }
+  async function sbLogin(email, pass) {
+    const r = await fetch(SBC.url + '/auth/v1/token?grant_type=password', { method: 'POST', headers: { apikey: SBC.key, 'Content-Type': 'application/json' }, body: JSON.stringify({ email: email, password: pass }) });
+    const j = await r.json().catch(function () { return {}; });
+    if (!r.ok) throw new Error(r.status === 400 ? 'E-mail ou senha incorretos.' : 'Não consegui entrar agora. Tente de novo.');
+    sbStore(j);
+  }
+  async function sbPull() {
+    const r = await sbReq('/rest/v1/docs?kind=eq.state&select=data,updated_at');
+    if (!r.ok) throw new Error('pull');
+    const a = await r.json();
+    return a[0] || null;
+  }
+  async function sbPush() {
+    const r = await sbReq('/rest/v1/docs?on_conflict=owner,kind', { method: 'POST', headers: { 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=representation' }, body: JSON.stringify({ kind: 'state', data: snapshot() }) });
+    if (!r.ok) throw new Error('push');
+    const a = await r.json();
+    return a[0].updated_at;
+  }
+  function applyState(data) {
+    S = fromSaved(data);
+    if (!(S.vol >= 0 && S.vol <= 1)) S.vol = 0.92;
+    revealed = null;
+    saveLocal();
+    renderScenes();
+    sbHydrate();
+    render();
+  }
+  function sbDirty() {
+    sbVer++;
+    const m = lsGet('cdm-sbmeta', {});
+    m.dirty = true;
+    lsSet('cdm-sbmeta', m);
+    if (sbUser() && sbState !== 'conflict') { clearTimeout(sbTimer); sbTimer = setTimeout(sbSync, 1500); }
+  }
+  async function sbSync() {
+    if (!sbUser() || sbBusy) return;
+    sbBusy = true; setSb('busy');
+    const ver = sbVer;
+    try {
+      const m = lsGet('cdm-sbmeta', {}), rem = await sbPull();
+      if (!rem) {
+        const at = await sbPush();
+        lsSet('cdm-sbmeta', { at: at, dirty: sbVer !== ver });
+      } else if (!m.at) {
+        try { localStorage.setItem('cdm-prelogin', localStorage.getItem(KEY) || ''); } catch (e) { /* ok */ }
+        applyState(rem.data);
+        lsSet('cdm-sbmeta', { at: rem.updated_at, dirty: false });
+        toast('Carreguei sua aventura da nuvem.');
+      } else if (rem.updated_at !== m.at) {
+        if (m.dirty) { sbConflict = rem; setSb('conflict'); sbBusy = false; if (mode === 'prep') render(); return; }
+        applyState(rem.data);
+        lsSet('cdm-sbmeta', { at: rem.updated_at, dirty: false });
+        toast('Atualizado com a versão da nuvem.');
+      } else if (m.dirty) {
+        const at = await sbPush();
+        lsSet('cdm-sbmeta', { at: at, dirty: sbVer !== ver });
+      }
+      setSb('ok');
+    } catch (e) { setSb(navigator.onLine ? 'err' : 'off'); }
+    sbBusy = false;
+    if (mode === 'prep') render();
+  }
+  async function sbResolve(useCloud) {
+    const rem = sbConflict; sbConflict = null;
+    if (!rem) return;
+    try {
+      if (useCloud) { applyState(rem.data); lsSet('cdm-sbmeta', { at: rem.updated_at, dirty: false }); }
+      else { const at = await sbPush(); lsSet('cdm-sbmeta', { at: at, dirty: false }); }
+      setSb('ok');
+    } catch (e) { setSb('err'); }
+    render();
+  }
+  async function sbUpload(path, blob, type) {
+    const r = await sbReq('/storage/v1/object/media/' + path, { method: 'POST', headers: { 'Content-Type': type || 'application/octet-stream', 'x-upsert': 'true' }, body: blob });
+    if (!r.ok) throw new Error('upload');
+  }
+  async function sbDownload(path) {
+    const r = await sbReq('/storage/v1/object/authenticated/media/' + path);
+    if (!r.ok) throw new Error('download');
+    return r.blob();
+  }
+  function sbRemove(path) { if (path && sbUser()) sbReq('/storage/v1/object/media/' + path, { method: 'DELETE' }).catch(function () { /* ok */ }); }
+  async function sbAttach(item, blob, ext, type) {
+    const u = sbUser();
+    if (!u) return false;
+    try {
+      const path = u.id + '/' + item.id + '.' + ext;
+      await sbUpload(path, blob, type);
+      item.path = path;
+      save();
+      return true;
+    } catch (e) { return false; }
+  }
+  async function sbHydrate() {
+    if (!sbUser()) return;
+    let ch = false;
+    for (const im of S.images) {
+      if (im.path && !im.src) { try { im.src = URL.createObjectURL(await sbDownload(im.path)); ch = true; } catch (e) { /* tenta depois */ } }
+    }
+    if (ch) render();
+    for (const c of S.cues) {
+      if (c.src === 'file' && c.path && !fileBuffers[c.id]) {
+        try {
+          const buf = await (await sbDownload(c.path)).arrayBuffer();
+          ensure();
+          fileBuffers[c.id] = await new Promise(function (res, rej) { ctx.decodeAudioData(buf, res, rej); });
+        } catch (e) { /* tenta depois */ }
+      }
+    }
+  }
+  function sbExport() {
+    const blob = new Blob([JSON.stringify({ app: 'hollow-table', saved: new Date().toISOString(), data: snapshot() }, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'hollow-table-backup-' + new Date().toISOString().slice(0, 10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+  }
+  function cloudPanel() {
+    const u = sbUser();
+    if (!u) {
+      return '<section class="panel" id="nuvem"><h2>Nuvem</h2><p class="hint">Entre para guardar a aventura, as imagens e os áudios, e abrir tudo no PC e no iPad.</p>' +
+        '<div class="form-row"><div class="field"><label for="sb-email">E-mail</label><input type="email" id="sb-email" autocomplete="username"></div>' +
+        '<div class="field"><label for="sb-pass">Senha</label><input type="password" id="sb-pass" autocomplete="current-password"></div></div>' +
+        '<div class="row"><button type="button" class="btn primary" data-action="sbLogin">Entrar</button></div>' +
+        (sbMsg ? '<p class="hint" role="alert">' + esc(sbMsg) + '</p>' : '') + '</section>';
+    }
+    const st = { ok: 'Tudo salvo na nuvem.', busy: 'Sincronizando…', off: 'Sem conexão. Suas alterações ficam neste aparelho e sobem quando a internet voltar.', err: 'Não consegui sincronizar agora. Vou tentar de novo na próxima alteração.', conflict: 'A nuvem tem uma versão mais nova, e este aparelho tem alterações que ainda não subiram.', out: '' }[sbState] || '';
+    return '<section class="panel" id="nuvem"><h2>Nuvem</h2><p class="hint">Conectado como ' + esc(u.email) + '. ' + st + '</p>' +
+      (sbState === 'conflict' ? '<div class="row"><button type="button" class="btn primary" data-action="sbCloud">Usar a versão da nuvem</button><button type="button" class="btn quiet" data-action="sbLocal">Manter a deste aparelho</button></div>' : '') +
+      '<div class="row"><button type="button" class="btn quiet" data-action="sbSync">Sincronizar agora</button><button type="button" class="btn quiet" data-action="sbExport">Baixar backup</button>' +
+      '<label class="btn quiet file-btn">Restaurar backup<input type="file" id="file-restore" accept="application/json,.json"></label>' +
+      '<button type="button" class="btn quiet" data-action="sbOut">Sair</button></div>' +
+      '<p class="hint">O backup guarda o texto e as configurações. Imagens e áudios ficam na nuvem.</p></section>';
+  }
+  function sbInit() {
+    setSb(sbUser() ? 'busy' : 'out');
+    if (sbUser()) { sbHydrate(); sbSync(); }
+    document.addEventListener('visibilitychange', function () { if (!document.hidden) sbSync(); });
+    window.addEventListener('online', function () { sbSync(); });
+  }
 
 
   /* ---------- Spotify (login PKCE + Web API, sem servidor) ---------- */
@@ -1157,6 +1345,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   function playFx(c) {
     ensure();
     const t = ctx.currentTime + 0.03;
+    if (c.src === 'file' && !fileBuffers[c.id]) { toast('Este som ainda está baixando da nuvem.'); return; }
     if (c.src === 'file') {
       const b = ctx.createBufferSource();
       b.buffer = fileBuffers[c.id];
@@ -1359,6 +1548,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       '<div class="field"><label for="f-countdown.max">Passos</label><select id="f-countdown.max" data-bind="countdown.max">' + maxOpts + '</select></div>' +
       '<div class="field"><label for="f-countdown.cue">Som ao avançar</label><select id="f-countdown.cue" data-bind="countdown.cue">' + cdCue + '</select></div></div>' +
       area('Quando chegar ao fim', 'countdown.done', S.countdown.done, 2) + '</section>' +
+      cloudPanel() +
       '<div class="row"><button type="button" class="btn primary" data-action="mode" data-mode="mesa">Ir para a Mesa</button></div></div>';
   }
 
@@ -1467,13 +1657,25 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       else if (!active[id]) { toggleAmb(id); setTimeout(function () { stopAmb(id); }, 4000); }
       return;
     }
-    if (a === 'cueDel') { stopAmb(id); S.cues = S.cues.filter(function (c) { return c.id !== id; }); delete fileBuffers[id]; commit(); return; }
+    if (a === 'cueDel') { const gc = findCue(id); if (gc && gc.path) sbRemove(gc.path); stopAmb(id); S.cues = S.cues.filter(function (c) { return c.id !== id; }); delete fileBuffers[id]; commit(); return; }
     if (a === 'cueAdd') {
       const k = $('#add-lib').value;
       if (k && LIB[k]) { S.cues.push({ id: k, kind: LIB[k].kind, src: 'synth' }); commit(); }
       return;
     }
-    if (a === 'imgDel') { S.images = S.images.filter(function (im) { return im.id !== id; }); if (revealed === id) revealed = null; commit(); return; }
+    if (a === 'cloud') { if (sbUser() && sbState !== 'conflict') { sbSync(); } mode = 'prep'; render(); setTimeout(function () { const n = $('#nuvem'); if (n) n.scrollIntoView({ block: 'center' }); }, 30); return; }
+    if (a === 'sbLogin') {
+      const em = $('#sb-email'), pw = $('#sb-pass');
+      sbMsg = 'Entrando…'; render();
+      sbLogin(em ? em.value.trim() : '', pw ? pw.value : '').then(function () { sbMsg = ''; sbSync(); sbHydrate(); render(); }).catch(function (er) { sbMsg = er.message; render(); });
+      return;
+    }
+    if (a === 'sbOut') { try { localStorage.removeItem('cdm-sb'); localStorage.removeItem('cdm-sbmeta'); } catch (e) { /* ok */ } sbConflict = null; setSb('out'); render(); return; }
+    if (a === 'sbSync') { sbSync(); return; }
+    if (a === 'sbExport') { sbExport(); return; }
+    if (a === 'sbCloud') { sbResolve(true); return; }
+    if (a === 'sbLocal') { sbResolve(false); return; }
+    if (a === 'imgDel') { const gone = S.images.filter(function (im) { return im.id === id; })[0]; if (gone && gone.path) sbRemove(gone.path); S.images = S.images.filter(function (im) { return im.id !== id; }); if (revealed === id) revealed = null; commit(); return; }
   });
 
   document.addEventListener('input', function (e) {
@@ -1509,6 +1711,15 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       commit();
       return;
     }
+    if (t.id === 'file-restore' && t.files && t.files[0]) {
+      t.files[0].text().then(function (tx) {
+        const j = JSON.parse(tx), d = j && j.data;
+        if (!d || !Array.isArray(d.notes)) throw new Error('formato');
+        applyState(d); sbDirty(); toast('Backup restaurado.');
+      }).catch(function () { toast('Este arquivo não parece um backup do Hollow Table.'); });
+      t.value = '';
+      return;
+    }
     if (t.id === 'file-audio' && t.files && t.files[0]) {
       const f = t.files[0], kind = $('#new-kind').value;
       ensure();
@@ -1517,9 +1728,12 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       }).then(function (ab) {
         const id = 'f' + Date.now();
         fileBuffers[id] = ab;
-        S.cues.push({ id: id, kind: kind, src: 'file', label: f.name.replace(/\.[^.]+$/, '') });
+        const cue = { id: id, kind: kind, src: 'file', label: f.name.replace(/\.[^.]+$/, '') };
+        S.cues.push(cue);
         commit();
-        toast('Som adicionado à cena.');
+        toast(sbUser() ? 'Som adicionado. Enviando para a nuvem…' : 'Som adicionado (só neste aparelho; entre na Nuvem para guardá-lo).');
+        const ext = (f.name.match(/\.([A-Za-z0-9]+)$/) || [0, 'mp3'])[1].toLowerCase();
+        sbAttach(cue, f, ext, f.type).then(function (ok) { if (sbUser()) toast(ok ? 'Som guardado na nuvem.' : 'Não consegui enviar o som para a nuvem.'); });
       }).catch(function () { toast('Não consegui ler este áudio. Tente mp3, m4a ou wav.'); });
       t.value = '';
       return;
@@ -1528,12 +1742,18 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       const f = t.files[0];
       readFile(f).then(function (u) { return downscale(u, 1280); }).then(function (u) {
         if (!u) { toast('Não consegui abrir esta imagem.'); return; }
-        S.images.push({ id: 'u' + Date.now(), caption: f.name.replace(/\.[^.]+$/, ''), src: u });
+        const im = { id: 'u' + Date.now(), caption: f.name.replace(/\.[^.]+$/, ''), src: u };
+        S.images.push(im);
         commit();
-        toast('Imagem adicionada à cena.');
+        toast(sbUser() ? 'Imagem adicionada. Enviando para a nuvem…' : 'Imagem adicionada (só neste aparelho; entre na Nuvem para guardá-la).');
+        fetch(u).then(function (r) { return r.blob(); }).then(function (bl) { return sbAttach(im, bl, 'jpg', 'image/jpeg'); }).then(function (ok) { if (sbUser()) toast(ok ? 'Imagem guardada na nuvem.' : 'Não consegui enviar a imagem para a nuvem.'); });
       }).catch(function () { toast('Não consegui abrir esta imagem.'); });
       t.value = '';
     }
+  });
+
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target && e.target.id === 'sb-pass') { const b = $('[data-action="sbLogin"]'); if (b) b.click(); }
   });
 
   document.addEventListener('toggle', function (e) {
@@ -1549,6 +1769,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   setSession('ambient');
   renderScenes();
   render();
+  sbInit();
   if (SP.enabled) spHandleCallback().then(render);
 })();
 </script>
