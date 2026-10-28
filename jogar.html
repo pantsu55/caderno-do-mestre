@@ -87,6 +87,57 @@ input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px s
 .dlg .card { width: min(380px, 100%); }
 @media (max-width: 640px) { .notes { grid-template-columns: 1fr; } .nlist { grid-auto-flow: column; grid-auto-columns: minmax(120px, max-content); overflow-x: auto; } }
 @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---- v2: navegação inferior, resultado no topo, ajustes compactos ---- */
+main { padding-bottom: 92px; }
+.col { display: grid; gap: 14px; min-width: 0; align-content: start; }
+.top { padding: 16px 0 6px; align-items: flex-start; }
+.top h1 { font-size: 22px; line-height: 1.2; }
+.top .sub { display: flex; align-items: center; gap: 10px; margin-top: 4px; flex-wrap: wrap; }
+.ghost { background: none; border: 0; color: var(--muted); font: inherit; font-size: 15px; min-height: 40px; padding: 0 10px; border-radius: 10px; cursor: pointer; }
+.ghost:hover { color: var(--fg); background: var(--surface); }
+.roster { color: var(--muted); font-size: 14px; display: flex; flex-wrap: wrap; gap: 4px 12px; padding: 0 0 10px; }
+.roster b { color: var(--accent); font-weight: 700; }
+.nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 4; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 4px; background: var(--surface); border-top: 1px solid var(--line); padding: 6px max(8px, env(safe-area-inset-right, 0px)) calc(6px + env(safe-area-inset-bottom, 0px)) max(8px, env(safe-area-inset-left, 0px)); }
+.nav button { background: none; border: 0; color: var(--muted); font: inherit; font-size: 12px; display: grid; justify-items: center; gap: 2px; padding: 6px 4px; min-height: 54px; border-radius: 12px; cursor: pointer; }
+.nav button svg { width: 24px; height: 24px; }
+.nav button[aria-selected="true"] { color: var(--accent); background: var(--accent-soft); }
+.pane { padding: 6px 0 24px; gap: 14px; }
+.result { order: 0; min-height: 150px; border-radius: 18px; background: linear-gradient(180deg, var(--surface-2), var(--surface)); padding: 18px 12px; }
+.result .n { font-size: 64px; }
+.result .n.pop { animation: pop 0.35s ease; }
+@keyframes pop { 0% { transform: scale(0.6); opacity: 0.2; } 60% { transform: scale(1.08); } 100% { transform: scale(1); opacity: 1; } }
+.result .empty { color: var(--muted); font-size: 16px; }
+.dgrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.dgrid .die { min-height: 64px; font-size: 18px; border-radius: 14px; }
+.dgrid .die.big { grid-column: span 2; background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-size: 24px; }
+.act { display: grid; gap: 4px; justify-items: center; min-height: 64px; padding: 10px 18px; font-size: 18px; }
+.act small { font-weight: 400; font-size: 13px; opacity: 0.85; }
+.adj { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px 12px; padding: 14px; }
+.adj .full { grid-column: 1 / -1; }
+.adj .seg { display: flex; width: 100%; }
+.adj .seg button { flex: 1; padding: 0 6px; }
+.hint-s { color: var(--muted); font-size: 13px; }
+details.more { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 0 14px; }
+details.more summary { cursor: pointer; min-height: 48px; display: flex; align-items: center; color: var(--muted); list-style: none; }
+details.more summary::-webkit-details-marker { display: none; }
+details.more summary::after { content: '▾'; margin-left: auto; }
+details.more[open] summary::after { content: '▴'; }
+details.more .in { display: grid; gap: 14px; padding: 4px 0 16px; }
+.chk { display: flex; align-items: center; gap: 10px; min-height: 44px; color: var(--fg); font-size: 16px; }
+.chk input { width: 22px; min-height: 22px; height: 22px; }
+.log li { grid-template-columns: 1fr auto; gap: 2px 12px; }
+.log .l { min-width: 0; display: grid; gap: 1px; }
+.log .e { white-space: normal; }
+.log .r { grid-row: 1 / span 2; grid-column: 2; align-self: center; font-size: 22px; }
+@media (min-width: 760px) {
+  main { padding-bottom: 24px; }
+  .nav { position: static; border: 0; background: none; justify-content: start; grid-auto-columns: max-content; gap: 6px; padding: 0 0 10px; border-bottom: 1px solid var(--line); }
+  .nav button { grid-auto-flow: column; align-items: center; font-size: 15px; padding: 8px 16px; min-height: 44px; gap: 8px; }
+  .nav button svg { width: 20px; height: 20px; }
+  .pane { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; }
+  .pane > .col { display: grid; gap: 14px; min-width: 0; }
+}
 </style>
 </head>
 <body>
@@ -149,9 +200,9 @@ input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px s
     } catch (e) { drawLogin('Sem conexão. Tente de novo.'); }
   }
   function topBar(title, sub) {
-    return '<div class="top"><div><h1>' + esc(title) + '</h1>' + (sub || '') + '</div><div class="who">' +
-      (camps && camps.length > 1 && cur ? '<button type="button" class="btn q sm" data-a="lobby">Trocar de mesa</button>' : '') +
-      '<button type="button" class="btn q sm" data-a="profile">Perfil</button><button type="button" class="btn q sm" data-a="out">Sair</button></div></div>';
+    return '<div class="top"><div><h1>' + esc(title) + '</h1>' + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div><div class="who">' +
+      (camps && camps.length > 1 && cur ? '<button type="button" class="ghost" data-a="lobby">Mesas</button>' : '') +
+      '<button type="button" class="ghost" data-a="profile">Perfil</button><button type="button" class="ghost" data-a="out">Sair</button></div></div>';
   }
   function drawCamps() {
     stopLog();
@@ -165,12 +216,16 @@ input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px s
     const u = me(), m = cur && (cur.members || []).filter(function (x) { return x.user_id === u.id; })[0];
     return m ? m.name : (cur && cur.owner === u.id ? 'Mestre' : u.email);
   }
+  const ICO = {
+    dados: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M12 2.5l8.5 4.9v9.2L12 21.5l-8.5-4.9V7.4z"/><path d="M12 2.5v19M3.5 7.4l8.5 4.9 8.5-4.9"/></svg>',
+    notas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7"/></svg>'
+  };
   function drawLobby() {
     const u = me();
-    const pills = '<span class="pill' + (cur.owner === u.id ? ' me' : '') + '">Mestre</span>' + (cur.members || []).map(function (m) { return '<span class="pill' + (m.user_id === u.id ? ' me' : '') + '">' + esc(m.name) + '</span>'; }).join('');
+    const who = [cur.owner === u.id ? '<b>Mestre (você)</b>' : 'Mestre'].concat((cur.members || []).map(function (m) { return m.user_id === u.id ? '<b>' + esc(m.name) + ' (você)</b>' : esc(m.name); }));
     app.innerHTML = topBar(cur.name, '<span class="sys">' + esc(SYS[cur.system] || cur.system) + '</span>') +
-      '<div class="table" aria-label="Quem está na mesa">' + pills + '</div>' +
-      '<div class="tabs" role="tablist">' + [['dados', 'Dados'], ['notas', 'Anotações']].map(function (t) { return '<button type="button" role="tab" class="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</div>' +
+      '<div class="roster" aria-label="Quem está na mesa">' + who.map(function (w) { return '<span>' + w + '</span>'; }).join('') + '</div>' +
+      '<nav class="nav" role="tablist" aria-label="Ferramentas">' + [['dados', 'Dados'], ['notas', 'Anotações']].map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + ICO[t[0]] + '<span>' + t[1] + '</span></button>'; }).join('') + '</nav>' +
       '<div class="pane" id="pane"></div>';
     drawPane();
   }
@@ -258,30 +313,35 @@ input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px s
   function paintResult() {
     const el = $('#result');
     if (!el) return;
-    if (!last) { el.innerHTML = '<p class="muted">Role um dado para ver o resultado.</p>'; return; }
+    if (!last) { el.innerHTML = '<p class="empty">Toque num dado para rolar.</p>'; return; }
     if (last.error) { el.innerHTML = '<p class="bad">' + esc(last.error) + '</p>'; return; }
-    el.innerHTML = '<div class="n ' + (last.tone || '') + '">' + last.total + '</div>' + (last.tag ? '<div class="g ' + (last.tone || '') + '">' + esc(last.tag) + '</div>' : '') + '<div class="t">' + esc(last.text) + '</div>' + (last.warn ? '<div class="bad">' + esc(last.warn) + '</div>' : '') + (dice.priv ? '<div class="muted">Só você viu esta rolagem.</div>' : '');
+    try { if (navigator.vibrate) navigator.vibrate(12); } catch (e) { /* ok */ }
+    el.innerHTML = '<div class="n pop ' + (last.tone || '') + '">' + last.total + '</div>' + (last.tag ? '<div class="g ' + (last.tone || '') + '">' + esc(last.tag) + '</div>' : '') + '<div class="t">' + esc(last.text) + '</div>' + (last.warn ? '<div class="bad">' + esc(last.warn) + '</div>' : '') + (dice.priv ? '<div class="muted">Só você viu esta rolagem.</div>' : '');
   }
   function diceHtml() {
     const sys = cur.system;
-    const advLbl = sys === 'daggerheart' ? ['Desvantagem', 'Normal', 'Vantagem'] : ['Desvantagem', 'Normal', 'Vantagem'];
-    return '<div class="card"><h2>Rolar dados</h2><div class="dice">' + [4, 6, 8, 10, 12, 20, 100].map(function (n) { return '<button type="button" class="die" data-die="' + n + '" aria-label="Rolar d' + n + '">d' + n + '</button>'; }).join('') + '</div>' +
-      '<div class="row"><div class="field"><label>Quantidade</label><div class="step"><button type="button" data-st="qty" data-d="-1" aria-label="Menos um dado">−</button><output id="o-qty">' + dice.qty + '</output><button type="button" data-st="qty" data-d="1" aria-label="Mais um dado">+</button></div></div>' +
+    const special = sys === 'daggerheart'
+      ? '<button type="button" class="btn act" data-a="duality">Rolar Dualidade<small>2d12 · Esperança e Medo' + (dice.mod ? ' · ' + modStr(dice.mod) : '') + '</small></button>'
+      : (sys === 'gurps'
+        ? '<div class="card"><h2>Teste de perícia</h2><div class="row"><div class="field"><label for="nh">NH (nível da perícia)</label><input id="nh" type="number" inputmode="numeric" min="1" max="40" value="' + dice.nh + '" style="width:110px"></div><button type="button" class="btn act" data-a="gurps" style="flex:1;min-width:150px">Teste 3d6<small>Rolar contra o NH</small></button></div></div>'
+        : '');
+    const advLbl = sys === 'daggerheart' ? 'Vantagem (+d6)' : 'Vantagem no d20';
+    const left = '<div class="result" id="result" aria-live="polite"></div>' + special +
+      '<div class="dgrid" role="group" aria-label="Dados">' + [4, 6, 8, 10, 12, 20, 100].map(function (n) { return '<button type="button" class="die' + (n === 20 ? ' big' : '') + '" data-die="' + n + '" aria-label="Rolar d' + n + '">d' + n + '</button>'; }).join('') + '</div>' +
+      '<div class="card adj"><div class="field"><label>Quantidade</label><div class="step"><button type="button" data-st="qty" data-d="-1" aria-label="Menos um dado">−</button><output id="o-qty">' + dice.qty + '</output><button type="button" data-st="qty" data-d="1" aria-label="Mais um dado">+</button></div></div>' +
       '<div class="field"><label>Modificador</label><div class="step"><button type="button" data-st="mod" data-d="-1" aria-label="Diminuir modificador">−</button><output id="o-mod">' + (dice.mod > 0 ? '+' : '') + dice.mod + '</output><button type="button" data-st="mod" data-d="1" aria-label="Aumentar modificador">+</button></div></div>' +
-      '<div class="field"><label>' + (sys === 'daggerheart' ? 'Dado de vantagem (d6)' : 'Vantagem (d20)') + '</label><div class="seg" role="group">' + advLbl.map(function (t, k) { return '<button type="button" data-adv="' + (k - 1) + '" aria-pressed="' + (dice.adv === k - 1) + '">' + t + '</button>'; }).join('') + '</div></div></div>' +
-      '<div class="row"><div class="field" style="flex:1 1 200px"><label for="lbl">Motivo (opcional)</label><input id="lbl" maxlength="60" value="' + esc(dice.label) + '" placeholder="Ex.: Percepção, ataque com a espada" autocomplete="off"></div>' +
-      '<label class="seg" style="align-items:center;padding:0 12px;gap:8px;min-height:46px"><input type="checkbox" id="priv" style="width:auto;min-height:0"' + (dice.priv ? ' checked' : '') + '> <span style="color:var(--fg)">Só eu vejo</span></label></div>' +
-      (sys === 'daggerheart' ? '<div class="sysbox"><button type="button" class="btn" data-a="duality">Rolar Dualidade (2d12: Esperança e Medo)</button></div>' : '') +
-      (sys === 'gurps' ? '<div class="row"><div class="field"><label for="nh">Nível da perícia ou atributo (NH)</label><input id="nh" type="number" inputmode="numeric" min="1" max="40" value="' + dice.nh + '" style="width:120px"></div><button type="button" class="btn" data-a="gurps">Teste 3d6</button></div>' : '') +
-      '<div class="row"><div class="field" style="flex:1 1 200px"><label for="expr">Ou digite uma rolagem</label><input id="expr" value="' + esc(dice.expr) + '" placeholder="2d6+3, d20+5, 4d6kh3" autocomplete="off" autocapitalize="off" spellcheck="false"></div><button type="button" class="btn q" data-a="expr">Rolar</button></div></div>' +
-      '<div class="result" id="result" aria-live="polite"></div>' +
-      '<div class="card"><h2>Rolagens da mesa</h2><ul class="log" id="log"></ul></div>';
+      (sys === 'gurps' ? '' : '<div class="field full"><label>' + advLbl + '</label><div class="seg" role="group">' + ['Desvantagem', 'Normal', 'Vantagem'].map(function (t, k) { return '<button type="button" data-adv="' + (k - 1) + '" aria-pressed="' + (dice.adv === k - 1) + '">' + t + '</button>'; }).join('') + '</div></div>') +
+      '<p class="hint-s full">Os ajustes valem para a próxima rolagem.</p></div>' +
+      '<details class="more"><summary>Mais opções</summary><div class="in"><div class="field"><label for="lbl">Motivo (aparece para a mesa)</label><input id="lbl" maxlength="60" value="' + esc(dice.label) + '" placeholder="Ex.: Percepção, ataque com a espada" autocomplete="off"></div>' +
+      '<label class="chk"><input type="checkbox" id="priv"' + (dice.priv ? ' checked' : '') + '> Rolagem secreta (só eu vejo)</label>' +
+      '<div class="row"><div class="field" style="flex:1 1 180px"><label for="expr">Digitar uma rolagem</label><input id="expr" value="' + esc(dice.expr) + '" placeholder="2d6+3, d20+5, 4d6kh3" autocomplete="off" autocapitalize="off" spellcheck="false"></div><button type="button" class="btn q" data-a="expr">Rolar</button></div></div></details>';
+    return '<div class="col">' + left + '</div><div class="col"><div class="card"><h2>Rolagens da mesa</h2><ul class="log" id="log"></ul></div></div>';
   }
   function logHtml() {
     if (!rolls.length) return '<li><span class="muted" style="grid-column:1/-1">Nenhuma rolagem ainda.</span></li>';
-    return rolls.map(function (r) {
+    return rolls.slice(0, 10).map(function (r) {
       const res = r.result || {}, d = new Date(r.at);
-      return '<li><span class="w">' + esc(r.who) + '</span><span class="e">' + esc((r.label ? r.label + ' · ' : '') + r.expr + (res.text ? ' · ' + res.text : '')) + (res.tag ? ' · ' + esc(res.tag) : '') + '</span><span class="r ' + esc(res.tone || '') + '">' + esc(res.total) + '</span><span class="tm" style="grid-column:1/-1">' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '</span></li>';
+      return '<li><span class="l"><span class="w">' + esc(r.who) + ' <span class="tm">' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '</span></span><span class="e">' + esc((r.label ? r.label + ' · ' : '') + r.expr + (res.text ? ' · ' + res.text : '')) + (res.tag ? ' · ' + esc(res.tag) : '') + '</span></span><span class="r ' + esc(res.tone || '') + '">' + esc(res.total) + '</span></li>';
     }).join('');
   }
   async function pollLog() {
@@ -398,7 +458,7 @@ input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px s
       return;
     }
     if (el.dataset.adv != null) { dice.adv = parseInt(el.dataset.adv, 10); document.querySelectorAll('[data-adv]').forEach(function (b) { b.setAttribute('aria-pressed', String(parseInt(b.dataset.adv, 10) === dice.adv)); }); return; }
-    if (el.dataset.tab) { tab = el.dataset.tab; document.querySelectorAll('.tab').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tab === tab)); }); drawPane(); return; }
+    if (el.dataset.tab) { tab = el.dataset.tab; document.querySelectorAll('.nav button').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tab === tab)); }); drawPane(); return; }
     if (el.dataset.camp) { cur = camps.filter(function (c) { return c.id === el.dataset.camp; })[0]; tab = 'dados'; last = null; drawLobby(); return; }
     if (el.dataset.note) { noteId = el.dataset.note; noteDelArm = false; paintNotes(); return; }
     const a = el.dataset.a;
