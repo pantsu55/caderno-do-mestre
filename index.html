@@ -440,30 +440,33 @@ input[type="range"] { width: 100%; height: 34px; margin: 0; accent-color: var(--
 .save[data-k="ok"] svg { color: var(--ok); }
 .save[data-k="busy"] { color: var(--muted); }
 .save[data-k="warn"] { border-color: #ff9a6b; color: #ffc3a5; }
-.cloud { position: relative; isolation: isolate; overflow: hidden; display: inline-grid; place-items: center; width: 46px; height: 46px; padding: 0; border: 0; border-radius: 12px; background: var(--line); color: var(--muted); transition: background 0.3s, box-shadow 0.6s, color 0.3s; }
+.cloud { position: relative; isolation: isolate; display: inline-grid; place-items: center; width: 46px; height: 46px; padding: 0; border: 0; border-radius: 12px; background: var(--line); color: var(--muted); transition: background 0.3s, box-shadow 0.6s, color 0.3s; }
 .cloud:hover { background: color-mix(in srgb, var(--muted) 55%, var(--line)); }
 .cloud .face { position: absolute; z-index: 1; inset: 1.5px; border-radius: 10.5px; background: var(--surface); }
-.cloud > svg { position: relative; z-index: 2; width: 22px; height: 22px; }
-.cloud .dot { position: absolute; z-index: 3; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); box-shadow: 0 0 0 2px var(--surface); transition: background 0.4s, box-shadow 0.4s; }
-/* rastro: duas luzes girando sem parar (lenta parada, rápida ao sincronizar); só a opacidade muda, então nunca há tranco */
-.cloud .trail { position: absolute; z-index: 0; inset: -45%; pointer-events: none; opacity: 0; transition: opacity 0.8s ease; will-change: transform; }
-.cloud .trail.slow { background: conic-gradient(from 0deg, transparent 0deg, transparent 220deg, color-mix(in srgb, var(--active) 30%, transparent) 300deg, var(--active) 354deg, transparent 360deg); animation: cloud-trail 14s linear var(--ps, 0s) infinite; }
-.cloud .trail.fast { background: conic-gradient(from 0deg, transparent 0deg, transparent 170deg, color-mix(in srgb, var(--active) 25%, transparent) 250deg, var(--active) 325deg, var(--accent) 356deg, transparent 360deg); animation: cloud-trail 1.25s linear var(--pf, 0s) infinite; }
+.cloud > svg { position: relative; z-index: 3; width: 22px; height: 22px; }
+.cloud .dot { position: absolute; z-index: 4; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); box-shadow: 0 0 0 2px var(--surface); transition: background 0.4s, box-shadow 0.4s; }
+/* rastro: um traço que corre pela própria borda, sempre com o mesmo tamanho e a mesma velocidade;
+   lento quando está tudo salvo, rápido ao sincronizar. Só a opacidade troca, então nunca há tranco */
+.cloud > svg.trail { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; fill: none; stroke-width: 1.6; pointer-events: none; overflow: hidden; }
+.cloud .trail g { opacity: 0; transition: opacity 0.8s ease; }
+.cloud .trail path { stroke: var(--active); animation: cloud-run 14s linear var(--ps, 0s) infinite; }
+.cloud .trail .fast path { animation: cloud-run 1.25s linear var(--pf, 0s) infinite; }
+.cloud .trail .fast path.h { stroke: var(--accent); }
 .cloud[data-st="out"] .dot { display: none; }
 .cloud[data-st="ok"] { color: var(--fg); }
 .cloud[data-st="ok"] .dot { background: var(--ok); }
-.cloud[data-st="ok"] .trail.slow { opacity: 0.9; }
+.cloud[data-st="ok"] .trail .slow { opacity: 0.9; }
 .cloud[data-st="busy"] { color: var(--fg); box-shadow: 0 0 16px -5px var(--active); }
-.cloud[data-st="busy"] .trail.fast { opacity: 1; }
+.cloud[data-st="busy"] .trail .fast { opacity: 1; }
 .cloud[data-st="busy"] .dot { background: var(--active); box-shadow: 0 0 0 2px var(--surface), 0 0 8px var(--active); }
 .cloud[data-st="off"], .cloud[data-st="err"], .cloud[data-st="conflict"] { color: #ffb48f; }
 .cloud[data-st="off"] .dot, .cloud[data-st="err"] .dot, .cloud[data-st="conflict"] .dot { background: #ff9a6b; }
 .cloud[data-st="conflict"] .dot { animation: cloud-dot 1.4s ease-in-out infinite; }
 .cloud.flash { box-shadow: 0 0 0 1px var(--ok), 0 0 18px -4px var(--ok); }
 .cloud.flash .dot { box-shadow: 0 0 0 2px var(--surface), 0 0 10px var(--ok); }
-@keyframes cloud-trail { to { transform: rotate(360deg); } }
+@keyframes cloud-run { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -158.372; } }
 @keyframes cloud-dot { 50% { opacity: 0.35; } }
-@media (prefers-reduced-motion: reduce) { .cloud .trail { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .cloud .trail path { animation: none; } }
 @keyframes pulse { 50% { opacity: 0.25; } }
 
 /* menus suspensos */
@@ -1023,7 +1026,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     }).join('');
   }
   /* ---------- ícones (traço simples, herdam a cor do texto) ---------- */
-  const APP_VER = '0.43';
+  const APP_VER = '0.44';
   const RAVEN = '<svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>';
   const SV = function (p, extra) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '>' + p + '</svg>'; };
   const ICO = {
@@ -1193,6 +1196,20 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   let sbState = 'out', sbMsg = '', sbTimer = null, sbBusy = false, sbVer = 0, sbConflict = null;
   const SB_LABEL = { out: 'entrar', ok: 'tudo salvo', busy: 'sincronizando…', off: 'sem conexão', err: 'erro ao sincronizar', conflict: 'conflito de versões' };
   function sbUser() { const x = lsGet('cdm-sb', null); return x && x.user ? x.user : null; }
+  /* o rastro da nuvem: camadas do mesmo traço, cada uma mais longa e mais fraca, com a ponta alinhada;
+     andam juntas pela borda (perímetro 158,372), então a cauda some aos poucos e a velocidade é sempre a mesma */
+  const CLOUD_TRAIL = (function () {
+    const d = 'M23 .8H34A11.2 11.2 0 0 1 45.2 12V34A11.2 11.2 0 0 1 34 45.2H12A11.2 11.2 0 0 1 .8 34V12A11.2 11.2 0 0 1 12 .8Z', P = 158.372, E = 100;
+    /* T: tamanho da cauda; N camadas; a soma das camadas segue (1 - x/T)^1.5, então o brilho cai sem degraus visíveis */
+    const lay = function (T, N, head) {
+      const L = [], I = [], O = [];
+      for (let k = 0; k < N; k++) L.push(k ? head + (T - head) * Math.pow(k / (N - 1), 1.1) : head);
+      L.forEach(function (l, k) { I.push(k ? Math.pow(1 - (L[k - 1] + l) / 2 / T, 1.5) : 1); });
+      for (let k = 0; k < N; k++) O.push(1 - (1 - I[k]) / (k + 1 < N ? 1 - I[k + 1] : 1));
+      return L.map(function (l, k) { return '<path' + (k ? '' : ' class="h"') + ' d="' + d + '" stroke-dasharray="0 ' + (E - l).toFixed(2) + ' ' + l.toFixed(2) + ' ' + (P - E).toFixed(3) + '" stroke-opacity="' + O[k].toFixed(3) + '"/>'; }).join('');
+    };
+    return '<svg class="trail" viewBox="0 0 46 46" aria-hidden="true" focusable="false"><g class="slow">' + lay(60, 14, 3) + '</g><g class="fast">' + lay(90, 16, 5) + '</g></svg>';
+  })();
   let cloudVis = 'out', cloudBusyAt = 0, cloudT = null;
   function cloudShown() { return cloudVis; }
   /* o rastro gira pelo relógio: se a barra for redesenhada, ele continua do mesmo ponto, sem pulo */
@@ -3254,7 +3271,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       '<div class="bar-c">' + (scenesMode ? sceneSwitcherHtml() : '') + '</div>' +
       '<div class="bar-r"><div class="seg" role="radiogroup" aria-label="Modo"><button type="button" role="radio" aria-checked="' + (mode === 'prep') + '" data-action="mode" data-mode="prep">Preparar</button><button type="button" role="radio" aria-checked="' + (mode === 'mesa') + '" data-action="mode" data-mode="mesa">Mesa</button></div>' +
       (mode === 'prep' ? saveBtnHtml() : '') +
-      '<button type="button" class="cloud" id="cloud" data-st="' + cloudShown() + '" style="' + cloudPhase() + '" data-action="cloud" aria-label="Nuvem: ' + esc(SB_LABEL[sbState] || '') + '" title="Nuvem: ' + esc(SB_LABEL[sbState] || '') + '"><span class="trail slow"></span><span class="trail fast"></span><span class="face"></span><span class="dot"></span>' + ICO.cloud + '</button></div></div>';
+      '<button type="button" class="cloud" id="cloud" data-st="' + cloudShown() + '" style="' + cloudPhase() + '" data-action="cloud" aria-label="Nuvem: ' + esc(SB_LABEL[sbState] || '') + '" title="Nuvem: ' + esc(SB_LABEL[sbState] || '') + '"><span class="face"></span>' + CLOUD_TRAIL + ICO.cloud + '<span class="dot"></span></button></div></div>';
   }
   let pop = null;
   function renderPop() {
