@@ -290,6 +290,12 @@ input[type="range"] { width: 100%; height: 36px; accent-color: var(--active); ma
 .adv-row span { flex: 1 1 200px; min-width: 0; }
 .adv-row input { flex: 1 1 160px; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-height: 40px; color: var(--fg); font: inherit; }
 .adv-pick { flex: 1 1 140px; min-width: 0; text-align: left; border: 0; background: none; font: inherit; font-weight: 600; padding: 6px 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.trk-nav { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 10px; }
+.trk-ed, .combo-ed { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; display: grid; gap: 10px; }
+.combo-cues { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px 12px; }
+.chk { display: flex; align-items: center; gap: 8px; min-height: 36px; font-size: 14px; }
+.chk small { color: var(--muted); }
+.combo-grid { display: flex; flex-wrap: wrap; gap: 8px; }
 .lib-up { border-style: dashed; }
 .lib-up.drag { background: var(--accent-soft); }
 .lib-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
@@ -659,7 +665,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   <div class="top-in">
     <div class="brand">
       <svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>
-      <span>Hollow Table</span><span class="ver" id="ver">versão 0.31</span>
+      <span>Hollow Table</span><span class="ver" id="ver">versão 0.32</span>
     </div>
     <div class="top-r">
       <div class="seg" role="radiogroup" aria-label="Modo">
@@ -784,13 +790,21 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   const lsRaw = function (k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
   function blankScene(title) {
     return { title: title || 'Nova cena', place: '', when: '', kind: 'Exploração', time: '', budget: '', summary: '',
-      notes: [{ title: 'A cena', open: true, text: '' }], music: { name: '', terms: '', url: '' }, cues: [], images: [],
+      notes: [{ title: 'A cena', open: true, text: '' }], tracks: [], mi: 0, combos: [], cues: [], images: [],
       countdown: null, adv: null, fear: 0, vol: 0.92 };
+  }
+  function normTracks(sc) {
+    if (!Array.isArray(sc.tracks)) sc.tracks = (sc.music && (sc.music.url || sc.music.name)) ? [sc.music] : [];
+    delete sc.music;
+    if (!Array.isArray(sc.combos)) sc.combos = [];
+    sc.mi = Math.max(0, Math.min(Math.max(0, sc.tracks.length - 1), sc.mi | 0));
+    return sc;
   }
   function sceneFrom(saved) {
     const ups = (saved.upImages || []).map(function (i) { return { id: i.id, caption: i.caption, path: i.path, lib: i.lib, src: libUrl[i.path] || '' }; });
     const out = Object.assign(blankScene(), saved, { images: (saved.sample ? defaults().images : []).concat(ups) });
     delete out.upImages;
+    normTracks(out);
     if (!(out.vol >= 0 && out.vol <= 1)) out.vol = 0.92;
     return out;
   }
@@ -814,7 +828,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       if (saved) { A = advFrom(saved); IDX.cur = A.id; return; }
     }
     const legacy = lsRaw(KEY);
-    A = { id: uid(), name: 'Os Sinos de Sinoeira', cur: 0, scenes: [legacy ? sceneFrom(Object.assign({ sample: true }, legacy)) : defaults()] };
+    A = { id: uid(), name: 'Os Sinos de Sinoeira', cur: 0, scenes: [legacy ? sceneFrom(Object.assign({ sample: true }, legacy)) : normTracks(defaults())] };
     IDX = { advs: [{ id: A.id, name: A.name }], cur: A.id };
     try { localStorage.setItem(ADV_KEY(A.id), JSON.stringify(advSnap(A))); localStorage.setItem(IDX_KEY, JSON.stringify(IDX)); } catch (e) { /* sem armazenamento */ }
   })();
@@ -1445,6 +1459,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       return { status: r.status, json: j };
     } catch (e) { return { status: 0 }; }
   }
+  const EMPTY_TRK = { name: '', terms: '', url: '' };
+  function mus() { return (S.tracks && S.tracks[S.mi]) || EMPTY_TRK; }
   function spParse(u) {
     const t = String(u || '').trim();
     const m = t.match(/open\.spotify\.com\/(?:intl-[a-z-]+\/)?(track|playlist|album|artist|episode|show)\/([A-Za-z0-9]+)/) || t.match(/^spotify:(track|playlist|album|artist|episode|show):([A-Za-z0-9]+)$/);
@@ -1493,11 +1509,11 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (spPlaying) {
       const r = await spApi('PUT', '/me/player/pause');
       spPlaying = false;
-      if (spOk(r.status)) spResume = S.music.url;
+      if (spOk(r.status)) spResume = mus().url;
       spSay(spOk(r.status) ? 'Pausado.' : 'Pausa enviada (resposta ' + r.status + ').');
       return;
     }
-    const it = spParse(S.music.url);
+    const it = spParse(mus().url);
     if (!it) { spSay('O link não é de playlist, álbum ou faixa do Spotify. Corrija em Preparar.'); return; }
     spSay('Procurando o Spotify do iPad…');
     const d = await spApi('GET', '/me/player/devices');
@@ -1509,7 +1525,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     const saved = spDev.get();
     const pick = (saved && (list.filter(function (x) { return x.id === saved.id; })[0] || list.filter(function (x) { return x.name === saved.name; })[0])) || list.filter(function (x) { return x.type === 'Tablet'; })[0] || list.filter(function (x) { return x.type === 'Smartphone'; })[0] || list.filter(function (x) { return x.is_active; })[0] || list[0];
     spCurDev = pick.id;
-    if (spResume && spResume === S.music.url) {
+    if (spResume && spResume === mus().url) {
       const rr = await spApi('PUT', '/me/player/play?device_id=' + encodeURIComponent(pick.id));
       if (spOk(rr.status)) { spPlaying = true; spSay('Tocando em ' + pick.name + '.'); return; }
     }
@@ -1565,23 +1581,31 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     const j = st && st.json;
     spSay('Não começou a tocar em ' + pick.name + '. Tentativas: ' + log.join(' → ') + '. ' + (j ? 'Estado: ' + (j.item ? '"' + j.item.name + '"' : 'sem faixa') + ', pausado.' + (j.device ? ' Aparelho do estado: ' + j.device.name + ' (' + j.device.type + '), restrito=' + !!j.device.is_restricted + ', sessão privada=' + !!j.device.is_private_session + '.' : '') + (j.actions && j.actions.disallows ? ' Bloqueado: ' + (Object.keys(j.actions.disallows).join(', ') || 'nada') + '.' : '') : 'O Spotify não informa reprodução ativa.'));
   }
-  function musicHtml() {
-    if (!S.music.url) return '<div class="music"><div class="m-txt"><p class="lbl-s">Música · Spotify</p><p class="m-name">Sem música nesta cena</p><p class="m-terms">Cole um link do Spotify em Preparar, na aba Música e sons.</p></div></div>';
+  function trackNav() {
+    const n = S.tracks.length;
+    if (n < 2) return '';
+    return '<div class="trk-nav" role="group" aria-label="Músicas da cena"><button type="button" class="btn quiet sm" data-action="trackGo" data-d="-1" aria-label="Música anterior">‹</button>' +
+      S.tracks.map(function (t, k) { return '<button type="button" class="chip" data-action="trackGo" data-i="' + k + '"' + (k === S.mi ? ' aria-current="true"' : '') + '>' + (k + 1) + '. ' + esc(t.name || 'Sem nome') + '</button>'; }).join('') +
+      '<button type="button" class="btn quiet sm" data-action="trackGo" data-d="1" aria-label="Próxima música">›</button></div>';
+  }
+  function musicHtml() { return musicCore() + trackNav(); }
+  function musicCore() {
+    if (!mus().url) return '<div class="music"><div class="m-txt"><p class="lbl-s">Música · Spotify</p><p class="m-name">Sem música nesta cena</p><p class="m-terms">Cole um link do Spotify em Preparar, na aba Música e sons.</p></div></div>';
     const pause = '<path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/>', playI = '<path d="M8 5.5v13l11-6.5z" fill="currentColor"/>';
-    const txt = '<div class="m-txt"><p class="lbl-s">Música · Spotify</p><p class="m-name">' + esc(S.music.name) + '</p><p class="m-terms">' + esc(S.music.terms) + '</p>' + (spMsg ? '<p class="sp-msg" role="status">' + esc(spMsg) + '</p>' : '') + spDevHtml();
+    const txt = '<div class="m-txt"><p class="lbl-s">Música · Spotify</p><p class="m-name">' + esc(mus().name) + '</p><p class="m-terms">' + esc(mus().terms) + '</p>' + (spMsg ? '<p class="sp-msg" role="status">' + esc(spMsg) + '</p>' : '') + spDevHtml();
     if (SP.enabled && spModeGet() === 'app') {
-      const it0 = spParse(S.music.url);
-      const href = it0 ? it0.uri + ':play' : safeUrl(S.music.url);
-      return '<div class="music"><a class="play" href="' + esc(href) + '" aria-label="Tocar ' + esc(S.music.name) + ' no app do Spotify"><svg viewBox="0 0 24 24" aria-hidden="true">' + playI + '</svg></a>' +
-        '<div class="m-txt"><p class="lbl-s">Música · Spotify</p><p class="m-name">' + esc(S.music.name) + '</p><p class="m-terms">' + esc(S.music.terms) + '</p>' +
+      const it0 = spParse(mus().url);
+      const href = it0 ? it0.uri + ':play' : safeUrl(mus().url);
+      return '<div class="music"><a class="play" href="' + esc(href) + '" aria-label="Tocar ' + esc(mus().name) + ' no app do Spotify"><svg viewBox="0 0 24 24" aria-hidden="true">' + playI + '</svg></a>' +
+        '<div class="m-txt"><p class="lbl-s">Música · Spotify</p><p class="m-name">' + esc(mus().name) + '</p><p class="m-terms">' + esc(mus().terms) + '</p>' +
         '<p class="sp-dev">Modo app: o play abre o Spotify e toca a faixa.</p>' +
         '<button type="button" class="linkbtn" data-action="spMode" data-id="api">Voltar ao controle direto (experimental)</button></div></div>';
     }
     if (!SP.enabled) {
-      return '<div class="music"><a class="play" href="' + esc(safeUrl(S.music.url)) + '" target="_blank" rel="noopener noreferrer" aria-label="Abrir ' + esc(S.music.name) + ' no Spotify"><svg viewBox="0 0 24 24" aria-hidden="true">' + playI + '</svg></a>' + txt + '</div></div>';
+      return '<div class="music"><a class="play" href="' + esc(safeUrl(mus().url)) + '" target="_blank" rel="noopener noreferrer" aria-label="Abrir ' + esc(mus().name) + ' no Spotify"><svg viewBox="0 0 24 24" aria-hidden="true">' + playI + '</svg></a>' + txt + '</div></div>';
     }
     const on = !!spStore.get();
-    return '<div class="music"><button type="button" class="play" data-action="spToggle" aria-label="' + (on ? (spPlaying ? 'Pausar' : 'Tocar') + ' ' + esc(S.music.name) : 'Conectar ao Spotify') + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + (spPlaying ? pause : playI) + '</svg></button>' +
+    return '<div class="music"><button type="button" class="play" data-action="spToggle" aria-label="' + (on ? (spPlaying ? 'Pausar' : 'Tocar') + ' ' + esc(mus().name) : 'Conectar ao Spotify') + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + (spPlaying ? pause : playI) + '</svg></button>' +
       txt + (spFailed ? '<button type="button" class="btn primary sm" data-action="spMode" data-id="app">Usar o modo app</button>' : '') + (on ? '<button type="button" class="linkbtn" data-action="spOut">Desconectar Spotify</button>' : '<button type="button" class="btn primary sm" data-action="spToggle">Conectar Spotify</button>') + '</div></div>';
   }
 
@@ -1950,6 +1974,14 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   }
   function audText() { return audience.indexOf('todos') >= 0 ? 'todos' : audience.join(', '); }
   const TABS_ALL = [['notas', 'Notas'], ['adv', 'Adversários'], ['img', 'Imagens']];
+  function comboCues(cb) { return (cb.ids || []).map(findCue).filter(Boolean); }
+  function combosHtml() {
+    if (!S.combos.length) return '';
+    return '<section class="sub"><h2>Combos</h2><div class="combo-grid">' + S.combos.map(function (cb, ci) {
+      const on = comboCues(cb).some(function (c) { return c.kind === 'amb' && active[c.id]; });
+      return '<button type="button" class="btn' + (on ? ' primary' : ' quiet') + '" data-action="combo" data-i="' + ci + '" aria-pressed="' + on + '">' + esc(cb.name || 'Combo') + '</button>';
+    }).join('') + '</div></section>';
+  }
   function renderMesa() {
     if (tab === 'adv' && !S.adv) tab = 'notas';
     const fx = S.cues.filter(function (c) { return c.kind === 'fx'; });
@@ -1996,6 +2028,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       '<section class="panel"><div class="tabs" role="tablist" aria-label="Seções da cena">' + tabs + '</div><div class="tab-body">' + body + '</div></section></div>' +
       '<aside class="console" aria-label="Som">' +
       musicHtml() +
+      combosHtml() +
       '<section class="sub"><h2>Ambientes</h2>' + (ambs || '<p class="hint">Nenhum ambiente nesta cena. Adicione em Preparar.</p>') + '</section>' +
       '<section class="sub"><h2>Efeitos</h2><div class="fx-grid">' + fxs + '</div>' + (fxs ? '' : '<p class="hint">Nenhum efeito nesta cena. Adicione em Preparar.</p>') + '</section></aside></div>';
   }
@@ -2071,7 +2104,16 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       '<section class="panel" data-sec="cena"><h2>Cena</h2><div class="form-row">' + inp('Título', 'title', S.title) + inp('Local', 'place', S.place) + inp('Momento', 'when', S.when) +
       '<div class="field"><label for="f-kind">Tipo</label><select id="f-kind" data-bind="kind">' + kindOpts + '</select></div>' + inp('Duração', 'time', S.time) + inp('Orçamento de combate', 'budget', S.budget) + '</div>' + area('Resumo', 'summary', S.summary, 3) + '</section>' +
       '<section class="panel" data-sec="notas"><h2>Notas</h2><p class="hint">Use **negrito** e linhas começando com "- " para listas.</p><div>' + notes + '</div><div class="row"><button type="button" class="btn quiet" data-action="noteAdd">Adicionar nota</button></div></section>' +
-      '<section class="panel" data-sec="som"><h2>Música</h2><div class="form-row">' + inp('Nome', 'music.name', S.music.name) + inp('Termos de busca', 'music.terms', S.music.terms) + inp('Link do Spotify (playlist, álbum ou faixa)', 'music.url', S.music.url) + '</div></section>' +
+      '<section class="panel" data-sec="som"><h2>Música</h2>' + (S.tracks.length ? '' : '<p class="hint">Nenhuma música nesta cena. Adicione uma abaixo.</p>') + S.tracks.map(function (t, k) {
+        return '<div class="trk-ed"><p class="lbl-s">Música ' + (k + 1) + '</p><div class="form-row">' + inp('Nome', 'tracks.' + k + '.name', t.name) + inp('Termos de busca', 'tracks.' + k + '.terms', t.terms) + inp('Link do Spotify (playlist, álbum ou faixa)', 'tracks.' + k + '.url', t.url) + '</div>' +
+          '<div class="row"><button type="button" class="btn quiet sm" data-action="trackDel" data-i="' + k + '">Remover esta música</button></div></div>';
+      }).join('') + '<div class="row"><button type="button" class="btn primary" data-action="trackAdd">Adicionar música</button></div></section>' +
+      '<section class="panel" data-sec="som"><h2>Combos</h2><p class="hint">Um combo liga vários sons com um toque na Mesa. Os ambientes entram juntos e os efeitos tocam uma vez. Toque de novo para desligar os ambientes.</p>' +
+      S.combos.map(function (cb, ci) {
+        return '<div class="combo-ed"><div class="field"><label for="f-combos.' + ci + '.name">Nome do combo</label><input type="text" id="f-combos.' + ci + '.name" data-bind="combos.' + ci + '.name" value="' + esc(cb.name) + '"></div><div class="combo-cues">' +
+          (S.cues.length ? S.cues.map(function (c) { return '<label class="chk"><input type="checkbox" data-cbx="' + ci + '|' + c.id + '"' + (cb.ids.indexOf(c.id) >= 0 ? ' checked' : '') + '> ' + esc(label(c)) + ' <small>' + (c.kind === 'amb' ? 'ambiente' : 'efeito') + '</small></label>'; }).join('') : '<p class="hint">Adicione sons à cena primeiro.</p>') +
+          '</div><div class="row"><button type="button" class="btn quiet sm" data-action="comboDel" data-i="' + ci + '">Excluir combo</button></div></div>';
+      }).join('') + '<div class="row"><button type="button" class="btn primary" data-action="comboAdd">Novo combo</button></div></section>' +
       '<section class="panel" data-sec="som"><h2>Sons</h2><div>' + cues + '</div>' +
       '<div class="row"><button type="button" class="btn primary" data-action="libOpen" data-id="snd">Adicionar da biblioteca</button></div>' +
       '<div class="add-row"><div class="field"><label for="fade-sel">Transição dos ambientes (entrar e sair)</label><select id="fade-sel">' + FADES.map(function (f) { return '<option value="' + f[0] + '"' + (parseFloat(f[0]) === fadeSec() ? ' selected' : '') + '>' + f[1] + ' (' + f[0].replace('.', ',') + ' s)</option>'; }).join('') + '</select></div></div>' +
@@ -2245,6 +2287,27 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     const a = el.getAttribute('data-action'), id = el.getAttribute('data-id'), i = Number(el.getAttribute('data-i'));
     if (a === 'mode') { mode = el.getAttribute('data-mode'); libStop(); libDelArm = null; render(); window.scrollTo(0, 0); return; }
     if (a === 'fear') { S.fear = Math.max(0, Math.min(12, S.fear + Number(el.getAttribute('data-d')))); save(); renderDock(); return; }
+    if (a === 'trackAdd') { S.tracks.push({ name: '', terms: '', url: '' }); S.mi = S.tracks.length - 1; commit(); return; }
+    if (a === 'trackDel') { S.tracks.splice(i, 1); S.mi = Math.max(0, Math.min(S.mi, S.tracks.length - 1)); spResume = ''; commit(); return; }
+    if (a === 'trackGo') {
+      const n = S.tracks.length, d = el.getAttribute('data-d');
+      if (!n) return;
+      S.mi = d != null ? (S.mi + Number(d) + n) % n : Math.max(0, Math.min(n - 1, i));
+      spResume = ''; spPlaying = false; save(); render();
+      if (SP.enabled && spModeGet() !== 'app' && spStore.get()) spToggle();
+      return;
+    }
+    if (a === 'comboAdd') { S.combos.push({ id: uid(), name: 'Combo ' + (S.combos.length + 1), ids: [] }); commit(); return; }
+    if (a === 'comboDel') { S.combos.splice(i, 1); commit(); return; }
+    if (a === 'combo') {
+      const cb = S.combos[i];
+      if (!cb) return;
+      const cs = comboCues(cb), ambs = cs.filter(function (c) { return c.kind === 'amb'; }), fxs = cs.filter(function (c) { return c.kind !== 'amb'; });
+      if (ambs.length && ambs.some(function (c) { return active[c.id]; })) { ambs.forEach(function (c) { if (active[c.id]) stopAmb(c.id); }); }
+      else { ensure(); ambs.forEach(function (c) { if (!active[c.id]) toggleAmb(c.id); }); fxs.forEach(function (c, k) { setTimeout(function () { playFx(c); }, k * 450); }); }
+      render();
+      return;
+    }
     if (a === 'talk') { setTalking(!talking); return; }
     if (a === 'stop') { stopAll(); render(); return; }
     if (a === 'fx') { playFx(findCue(id)); return; }
@@ -2391,6 +2454,11 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
 
   document.addEventListener('change', function (e) {
     const t = e.target;
+    if (t.getAttribute && t.getAttribute('data-cbx')) {
+      const parts = t.getAttribute('data-cbx').split('|'), cb = S.combos[Number(parts[0])];
+      if (cb) { cb.ids = cb.ids.filter(function (x) { return x !== parts[1]; }); if (t.checked) cb.ids.push(parts[1]); save(); }
+      return;
+    }
     if (t.id === 'fs-len') { fsLen = t.value; return; }
     if (t.id === 'fade-sel') { lsSet('ht-fade', t.value); return; }
     if (t.getAttribute && t.getAttribute('data-libkind')) { const it = libFind(t.getAttribute('data-libkind')); if (it) { it.kind = t.value; libSave(); } return; }
