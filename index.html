@@ -438,16 +438,28 @@ input[type="range"] { width: 100%; height: 34px; margin: 0; accent-color: var(--
 .save[data-k="busy"] { color: var(--muted); }
 .save[data-k="warn"] { border-color: #ff9a6b; color: #ffc3a5; }
 .cloud { position: relative; display: inline-grid; place-items: center; width: 46px; height: 46px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--muted); }
-.cloud svg { width: 22px; height: 22px; }
-.cloud svg.ring { position: absolute; inset: -1px; width: calc(100% + 2px); height: calc(100% + 2px); pointer-events: none; }
-.cloud .prog { fill: none; stroke: var(--active); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 0.25s linear; }
-.cloud[data-st="out"] .prog { display: none; }
-.cloud::after { content: ""; position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); box-shadow: 0 0 0 2px var(--surface); }
+.cloud:hover { border-color: var(--muted); }
+.cloud > svg:last-child { position: relative; width: 19px; height: 19px; transition: color 0.3s; }
+.cloud svg.ring { position: absolute; inset: 0; width: 100%; height: 100%; transform: rotate(-90deg); pointer-events: none; overflow: visible; }
+.cloud .trk { fill: none; stroke: var(--line); stroke-width: 2; transition: stroke 0.3s; }
+.cloud .prog { fill: none; stroke: url(#cloud-g); stroke-width: 2.6; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 0.25s linear, opacity 0.3s; filter: drop-shadow(0 0 3px var(--glow)); transform-box: fill-box; transform-origin: center; }
+.cloud[data-st="out"] .ring { display: none; }
 .cloud[data-st="ok"] { color: var(--fg); }
-.cloud[data-st="ok"]::after { background: var(--ok); }
-.cloud[data-st="busy"]::after { background: var(--active); animation: pulse 1s ease-in-out infinite; }
-.cloud[data-st="off"]::after, .cloud[data-st="err"]::after, .cloud[data-st="conflict"]::after { background: #ff9a6b; }
-.cloud[data-st="out"]::after { display: none; }
+.cloud[data-st="busy"] { color: var(--fg); }
+.cloud[data-st="busy"] > svg:last-child { animation: cloud-breathe 1.4s ease-in-out infinite; }
+.cloud[data-st="busy"] .prog { stroke-dasharray: 34 66 !important; stroke-dashoffset: 0 !important; transition: none; animation: cloud-spin 0.95s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite; }
+.cloud[data-st="off"] .trk, .cloud[data-st="err"] .trk { stroke: #ff9a6b; stroke-dasharray: 3 5; }
+.cloud[data-st="off"] .prog, .cloud[data-st="err"] .prog { opacity: 0; }
+.cloud[data-st="conflict"] .trk { stroke: #ff9a6b; }
+.cloud[data-st="conflict"] .prog { opacity: 0; }
+.cloud[data-st="off"], .cloud[data-st="err"], .cloud[data-st="conflict"] { color: #ffb48f; }
+.cloud[data-st="conflict"] > svg:last-child { animation: cloud-breathe 1.2s ease-in-out infinite; }
+.cloud.flash > svg:last-child { animation: cloud-ok 0.9s ease-out; }
+.cloud.flash .trk { animation: cloud-ring-ok 0.9s ease-out; }
+@keyframes cloud-spin { to { transform: rotate(360deg); } }
+@keyframes cloud-breathe { 50% { opacity: 0.45; transform: translateY(-1px); } }
+@keyframes cloud-ok { 30% { color: var(--ok); filter: drop-shadow(0 0 6px var(--ok)); transform: scale(1.14); } }
+@keyframes cloud-ring-ok { 30% { stroke: var(--ok); } }
 @keyframes pulse { 50% { opacity: 0.25; } }
 
 /* menus suspensos */
@@ -895,7 +907,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     }).join('');
   }
   /* ---------- ícones (traço simples, herdam a cor do texto) ---------- */
-  const APP_VER = '0.38';
+  const APP_VER = '0.39';
   const RAVEN = '<svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>';
   const SV = function (p, extra) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '>' + p + '</svg>'; };
   const ICO = {
@@ -1063,10 +1075,14 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   const SB_LABEL = { out: 'entrar', ok: 'tudo salvo', busy: 'sincronizando…', off: 'sem conexão', err: 'erro ao sincronizar', conflict: 'conflito de versões' };
   function sbUser() { const x = lsGet('cdm-sb', null); return x && x.user ? x.user : null; }
   function setSb(st) {
+    const prev = sbState;
     sbState = st;
     const b = $('#cloud');
     updateSaveBar();
-    if (b) { b.setAttribute('data-st', st); b.setAttribute('aria-label', 'Nuvem: ' + (SB_LABEL[st] || '')); b.title = 'Nuvem: ' + (SB_LABEL[st] || ''); }
+    if (b) {
+      b.setAttribute('data-st', st); b.setAttribute('aria-label', 'Nuvem: ' + (SB_LABEL[st] || '')); b.title = 'Nuvem: ' + (SB_LABEL[st] || '');
+      if (prev === 'busy' && st === 'ok') { b.classList.remove('flash'); void b.offsetWidth; b.classList.add('flash'); setTimeout(function () { b.classList.remove('flash'); }, 950); }
+    }
   }
   function sbStore(j) {
     const x = { access_token: j.access_token, refresh_token: j.refresh_token, expires_at: j.expires_at || Math.floor(Date.now() / 1000) + j.expires_in, user: { id: j.user.id, email: j.user.email } };
@@ -2732,7 +2748,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       '<div class="bar-c">' + (scenesMode ? sceneSwitcherHtml() : '') + '</div>' +
       '<div class="bar-r"><div class="seg" role="radiogroup" aria-label="Modo"><button type="button" role="radio" aria-checked="' + (mode === 'prep') + '" data-action="mode" data-mode="prep">Preparar</button><button type="button" role="radio" aria-checked="' + (mode === 'mesa') + '" data-action="mode" data-mode="mesa">Mesa</button></div>' +
       (mode === 'prep' ? saveBtnHtml() : '') +
-      '<button type="button" class="cloud" id="cloud" data-st="' + sbState + '" data-action="cloud" aria-label="Nuvem: ' + esc(SB_LABEL[sbState] || '') + '" title="Nuvem: ' + esc(SB_LABEL[sbState] || '') + '"><svg class="ring" viewBox="0 0 46 46" aria-hidden="true"><rect class="prog" x="1.5" y="1.5" width="43" height="43" rx="11" pathLength="100"/></svg>' + ICO.cloud + '</button></div></div>';
+      '<button type="button" class="cloud" id="cloud" data-st="' + sbState + '" data-action="cloud" aria-label="Nuvem: ' + esc(SB_LABEL[sbState] || '') + '" title="Nuvem: ' + esc(SB_LABEL[sbState] || '') + '"><svg class="ring" viewBox="0 0 46 46" aria-hidden="true"><defs><linearGradient id="cloud-g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--active)"/><stop offset="1" style="stop-color:var(--accent)"/></linearGradient></defs><circle class="trk" cx="23" cy="23" r="17"/><circle class="prog" cx="23" cy="23" r="17" pathLength="100"/></svg>' + ICO.cloud + '</button></div></div>';
   }
   let pop = null;
   function renderPop() {
