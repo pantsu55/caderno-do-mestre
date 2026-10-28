@@ -138,6 +138,58 @@ details.more .in { display: grid; gap: 14px; padding: 4px 0 16px; }
   .pane { grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; }
   .pane > .col { display: grid; gap: 14px; min-width: 0; }
 }
+
+/* ---- ficha ---- */
+.pane.one { grid-template-columns: 1fr !important; }
+.sheet-wrap { display: grid; gap: 12px; }
+.sheet { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: start; }
+.sheet .card { min-width: 0; }
+.sheet .idc, .sheet .card:last-child { grid-column: 1 / -1; }
+.idc { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 16px; align-items: start; }
+.idf { display: grid; gap: 10px; min-width: 0; }
+.idf .nm { font-family: var(--serif); font-size: 22px; font-weight: 700; }
+.avatar { width: 128px; aspect-ratio: 4 / 5; max-width: 100%; border-radius: 14px; border: 1px dashed var(--line); background: var(--surface-2); display: grid; place-items: center; overflow: hidden; cursor: pointer; color: var(--muted); font-size: 13px; text-align: center; position: relative; padding: 0; }
+.avatar span { padding: 10px; }
+.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.avatar input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.stat { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 8px; display: grid; gap: 6px; justify-items: center; text-align: center; min-width: 0; }
+.stat .k { font: 700 12px var(--mono); letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; }
+.stat input { text-align: center; font: 700 22px var(--mono); padding: 4px; min-height: 44px; }
+.stat .m { font: 700 16px var(--mono); color: var(--accent); }
+.mono { font-family: var(--mono); }
+.big { font-size: 20px; }
+.rb { background: var(--accent-soft); color: var(--accent); border: 1px solid transparent; border-radius: 10px; font: inherit; font-size: 14px; font-weight: 700; min-height: 36px; padding: 0 10px; cursor: pointer; white-space: nowrap; }
+.rb:hover { border-color: var(--accent); }
+.track { display: grid; gap: 6px; min-width: 0; flex: 1 1 200px; }
+.track .hd { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.track .tl b { font-family: var(--mono); color: var(--fg); }
+.pips { display: flex; flex-wrap: wrap; gap: 6px; }
+.pip { width: 30px; height: 30px; border-radius: 8px; border: 1.5px solid var(--line); background: var(--bg); cursor: pointer; padding: 0; }
+.pip.on { background: var(--accent); border-color: var(--accent); }
+.track.hp .pip.on { background: var(--bad); border-color: var(--bad); }
+.track.st .pip.on { background: var(--hot); border-color: var(--hot); }
+.track.hope .pip { border-radius: 50%; }
+.track.hope .pip.on { background: var(--ok); border-color: var(--ok); }
+.mxl { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+.mx { width: 64px; min-height: 34px; padding: 4px 6px; text-align: center; }
+.lrow { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.lrow .field { min-width: 0; }
+.sm-x { min-height: 44px; }
+.skl { display: grid; grid-template-columns: auto minmax(0, 1fr) auto auto; gap: 10px; align-items: center; min-height: 42px; border-bottom: 1px solid var(--line); }
+.skl:last-child { border-bottom: 0; }
+.prof { width: 30px; height: 30px; border-radius: 50%; border: 1.5px solid var(--line); background: none; color: var(--accent); font-weight: 700; cursor: pointer; padding: 0; }
+.prof[data-v="1"] { background: var(--accent-soft); border-color: var(--accent); }
+.prof[data-v="2"] { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); }
+.slotmax { display: flex; flex-wrap: wrap; gap: 8px 12px; }
+.slotmax .mx { width: 52px; }
+.slots { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+select { appearance: auto; }
+input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg); background: var(--surface); }
+.rtoast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 6; background: var(--surface-2); border: 1px solid var(--accent); border-radius: 16px; padding: 10px 18px; display: flex; gap: 14px; align-items: center; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); width: max-content; max-width: calc(100% - 32px); }
+.rtoast .n { font: 700 34px/1 var(--mono); }
+@media (min-width: 760px) { .rtoast { bottom: 24px; } }
+@media (max-width: 520px) { .idc { grid-template-columns: 1fr; justify-items: center; } .idc .idf { width: 100%; } .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 </style>
 </head>
 <body>
@@ -218,6 +270,7 @@ details.more .in { display: grid; gap: 14px; padding: 4px 0 16px; }
   }
   const ICO = {
     dados: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M12 2.5l8.5 4.9v9.2L12 21.5l-8.5-4.9V7.4z"/><path d="M12 2.5v19M3.5 7.4l8.5 4.9 8.5-4.9"/></svg>',
+    ficha: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9.5" r="2.6"/><path d="M7.5 17c.8-2.3 2.5-3.4 4.5-3.4s3.7 1.1 4.5 3.4"/></svg>',
     notas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7"/></svg>'
   };
   function drawLobby() {
@@ -225,7 +278,7 @@ details.more .in { display: grid; gap: 14px; padding: 4px 0 16px; }
     const who = [cur.owner === u.id ? '<b>Mestre (você)</b>' : 'Mestre'].concat((cur.members || []).map(function (m) { return m.user_id === u.id ? '<b>' + esc(m.name) + ' (você)</b>' : esc(m.name); }));
     app.innerHTML = topBar(cur.name, '<span class="sys">' + esc(SYS[cur.system] || cur.system) + '</span>') +
       '<div class="roster" aria-label="Quem está na mesa">' + who.map(function (w) { return '<span>' + w + '</span>'; }).join('') + '</div>' +
-      '<nav class="nav" role="tablist" aria-label="Ferramentas">' + [['dados', 'Dados'], ['notas', 'Anotações']].map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + ICO[t[0]] + '<span>' + t[1] + '</span></button>'; }).join('') + '</nav>' +
+      '<nav class="nav" role="tablist" aria-label="Ferramentas">' + [['dados', 'Dados'], cur.owner === u.id ? ['fichas', 'Fichas'] : ['ficha', 'Ficha'], ['notas', 'Anotações']].map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + ICO[t[0] === 'fichas' ? 'ficha' : t[0]] + '<span>' + t[1] + '</span></button>'; }).join('') + '</nav>' +
       '<div class="pane" id="pane"></div>';
     drawPane();
   }
@@ -233,7 +286,11 @@ details.more .in { display: grid; gap: 14px; padding: 4px 0 16px; }
     stopLog();
     const p = $('#pane');
     if (!p) return;
-    if (tab === 'dados') { p.innerHTML = diceHtml(); startLog(); } else { p.innerHTML = notesHtml(); loadNotes(); }
+    p.classList.toggle('one', tab !== 'dados');
+    if (tab === 'dados') { p.innerHTML = diceHtml(); startLog(); }
+    else if (tab === 'ficha') { p.innerHTML = sheetPaneHtml(); loadSheet(me().id, false); }
+    else if (tab === 'fichas') { p.innerHTML = fichasHtml(); loadSheet(shView, true); }
+    else { p.innerHTML = notesHtml(); loadNotes(); }
   }
 
   /* ---------- dados ---------- */
@@ -300,12 +357,14 @@ details.more .in { display: grid; gap: 14px; padding: 4px 0 16px; }
     else { tag = 'Falha (por ' + (t - nh) + ')'; tone = 'bad'; }
     return { total: t, text: '[' + a + ', ' + b + ', ' + c + '] contra ' + nh, expr: '3d6 ≤ ' + nh, tag: tag, tone: tone };
   }
-  async function doRoll(r) {
+  async function doRoll(r, lbl) {
+    const lb = lbl != null ? lbl : dice.label;
+    if (!$('#result')) rollToast(r ? Object.assign({ lbl: lb }, r) : null);
     if (!r) { last = { error: 'Expressão inválida. Exemplos: d20+5, 2d6+3, 4d6kh3.' }; paintResult(); return; }
     last = r; paintResult();
     if (dice.priv) return;
     try {
-      const res = await api('/rest/v1/rolls', { method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, JSONH), body: JSON.stringify({ campaign_id: cur.id, who: myName(), label: dice.label.slice(0, 60), expr: r.expr, result: { total: r.total, text: r.text, tag: r.tag || '', tone: r.tone || '' } }) });
+      const res = await api('/rest/v1/rolls', { method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, JSONH), body: JSON.stringify({ campaign_id: cur.id, who: myName(), label: String(lb || '').slice(0, 60), expr: r.expr, result: { total: r.total, text: r.text, tag: r.tag || '', tone: r.tone || '' } }) });
       if (!res.ok) throw new Error('x');
       pollLog();
     } catch (e) { last.warn = 'Não consegui compartilhar esta rolagem.'; paintResult(); }
@@ -394,6 +453,293 @@ details.more .in { display: grid; gap: 14px; padding: 4px 0 16px; }
     const sv = $('#sv'); if (sv) sv.textContent = noteSv;
   }
 
+  /* ---------- ficha de personagem ---------- */
+  const TR_DH = [['agi', 'Agilidade'], ['for', 'Força'], ['acu', 'Acuidade'], ['ins', 'Instinto'], ['pre', 'Presença'], ['con', 'Conhecimento']];
+  const AT5 = [['for', 'FOR', 'Força'], ['des', 'DES', 'Destreza'], ['con', 'CON', 'Constituição'], ['int', 'INT', 'Inteligência'], ['sab', 'SAB', 'Sabedoria'], ['car', 'CAR', 'Carisma']];
+  const SK5 = [['acrobacia', 'Acrobacia', 'des'], ['adestrar', 'Adestrar Animais', 'sab'], ['arcanismo', 'Arcanismo', 'int'], ['atletismo', 'Atletismo', 'for'], ['atuacao', 'Atuação', 'car'], ['enganacao', 'Enganação', 'car'], ['furtividade', 'Furtividade', 'des'], ['historia', 'História', 'int'], ['intimidacao', 'Intimidação', 'car'], ['intuicao', 'Intuição', 'sab'], ['investigacao', 'Investigação', 'int'], ['medicina', 'Medicina', 'sab'], ['natureza', 'Natureza', 'int'], ['percepcao', 'Percepção', 'sab'], ['persuasao', 'Persuasão', 'car'], ['prestidigitacao', 'Prestidigitação', 'des'], ['religiao', 'Religião', 'int'], ['sobrevivencia', 'Sobrevivência', 'sab']];
+  const AT_G = [['st', 'ST', 'Força', 10], ['dx', 'DX', 'Destreza', 20], ['iq', 'IQ', 'Inteligência', 20], ['ht', 'HT', 'Vitalidade', 10]];
+  const DIFF_G = [['F', 'Fácil', 0], ['M', 'Média', -1], ['D', 'Difícil', -2], ['MD', 'Muito difícil', -3]];
+  function sheetDefault(sys) {
+    if (sys === 'daggerheart') return { ancestry: '', community: '', cls: '', sub: '', level: 1, tr: { agi: 0, for: 0, acu: 0, ins: 0, pre: 0, con: 0 }, evasion: 10, armor: { max: 3, v: 0 }, armorName: '', thr: { major: 7, severe: 14 }, hp: { max: 6, v: 0 }, stress: { max: 6, v: 0 }, hope: { max: 6, v: 2 }, exps: [{ n: '', b: 2 }], weapons: [{ n: '', tr: '', rng: '', dmg: '' }], gold: { h: 0, b: 0, c: 0 }, cards: [], bio: '' };
+    if (sys === 'dnd5e') {
+      const sk = {}; SK5.forEach(function (x) { sk[x[0]] = 0; });
+      return { race: '', cls: '', sub: '', level: 1, bg: '', align: '', at: { for: 10, des: 10, con: 10, int: 10, sab: 10, car: 10 }, sv: { for: false, des: false, con: false, int: false, sab: false, car: false }, sk: sk, ac: 10, speed: '9 m', hp: { max: 10, cur: 10, tmp: 0 }, hd: '1d8', death: { ok: 0, fail: 0 }, insp: false, atks: [{ n: '', b: 0, dmg: '1d6' }], spAt: 'int', slots: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function () { return { max: 0, v: 0 }; }), spells: '', coins: { pc: 0, pp: 0, pe: 0, po: 0, pl: 0 }, feats: '', bio: '' };
+    }
+    return { pts: 150, at: { st: 10, dx: 10, iq: 10, ht: 10 }, sec: { hp: 0, will: 0, per: 0, fp: 0, spd: 0, move: 0 }, hpCur: 10, fpCur: 10, adv: [{ n: '', p: 0 }], skills: [{ n: '', at: 'dx', df: 'M', p: 1, m: 0 }], parry: '', block: '', dr: 0, bio: '' };
+  }
+  function deepFill(dst, def) {
+    Object.keys(def).forEach(function (k) {
+      if (dst[k] === undefined || dst[k] === null) dst[k] = JSON.parse(JSON.stringify(def[k]));
+      else if (def[k] && typeof def[k] === 'object' && !Array.isArray(def[k]) && typeof dst[k] === 'object') deepFill(dst[k], def[k]);
+    });
+    return dst;
+  }
+  let SH = null, shFor = null, shSv = '', shT = null, shView = null, shRO = false, shOwner = null, shErr = '';
+  const photoUrls = {};
+  const CALC = {};
+  function sysData() { const s = cur.system; SH[s] = deepFill(SH[s] || {}, sheetDefault(s)); return SH[s]; }
+  function getP(o, p) { return p.split('.').reduce(function (a, k) { return a == null ? a : a[k]; }, o); }
+  function setP(o, p, v) { const k = p.split('.'); let x = o; for (let i = 0; i < k.length - 1; i++) x = x[k[i]]; x[k[k.length - 1]] = v; }
+  const num = function (v) { const n = Number(v); return isFinite(n) ? n : 0; };
+  const sgn = function (n) { return n > 0 ? '+' + n : String(n); };
+  const dis = function () { return shRO ? ' disabled' : ''; };
+  function fT(label, path, opt) {
+    opt = opt || {};
+    const d = sysData(), v = path.indexOf('@') === 0 ? getP(SH, path.slice(1)) : getP(d, path);
+    return '<div class="field"' + (opt.grow ? ' style="flex:' + opt.grow + ' 1 ' + (opt.basis || 140) + 'px"' : '') + '><label>' + label + '</label><input data-k="' + path + '" value="' + esc(v == null ? '' : v) + '"' + (opt.ph ? ' placeholder="' + esc(opt.ph) + '"' : '') + dis() + '></div>';
+  }
+  function fN(label, path, opt) {
+    opt = opt || {};
+    const v = getP(sysData(), path);
+    return '<div class="field' + (opt.cls ? ' ' + opt.cls : '') + '"' + (opt.grow ? ' style="flex:' + opt.grow + ' 1 ' + (opt.basis || 90) + 'px"' : '') + '><label>' + label + '</label><input type="number" inputmode="numeric" data-k="' + path + '" data-num="1"' + (opt.rr ? ' data-rr="1"' : '') + ' value="' + esc(v) + '"' + (opt.min != null ? ' min="' + opt.min + '"' : '') + (opt.max != null ? ' max="' + opt.max + '"' : '') + (opt.step ? ' step="' + opt.step + '"' : '') + dis() + '></div>';
+  }
+  function fA(label, path, rows) {
+    const v = getP(sysData(), path);
+    return '<div class="field"><label>' + label + '</label><textarea data-k="' + path + '" rows="' + (rows || 4) + '" style="min-height:0"' + dis() + '>' + esc(v || '') + '</textarea></div>';
+  }
+  function calc(key, fn) { CALC[key] = fn; return '<span data-calc="' + key + '">' + fn() + '</span>'; }
+  function track(label, path, cls, maxEdit) {
+    const t = getP(sysData(), path), max = Math.max(0, Math.min(30, num(t.max)));
+    let pips = '';
+    for (let i = 0; i < max; i++) pips += '<button type="button" class="pip' + (i < t.v ? ' on' : '') + '" data-pip="' + path + '" data-i="' + i + '" aria-label="' + label + ' ' + (i + 1) + '"' + dis() + '></button>';
+    return '<div class="track ' + (cls || '') + '"><div class="hd"><span class="tl">' + label + ' <b>' + Math.min(t.v, max) + '/' + max + '</b></span>' + (maxEdit === false ? '' : '<label class="mxl">máx <input class="mx" type="number" inputmode="numeric" min="0" max="30" data-k="' + path + '.max" data-num="1" data-rr="1" value="' + max + '"' + dis() + '></label>') + '</div><div class="pips">' + pips + '</div></div>';
+  }
+  function rollBtn(kind, key, lbl, txt) { return '<button type="button" class="rb" data-roll="' + kind + '" data-ck="' + key + '" data-lbl="' + esc(lbl) + '" aria-label="Rolar ' + esc(lbl) + '">' + (txt || 'Rolar') + '</button>'; }
+  function listRows(path, rowFn, addLbl) {
+    const arr = getP(sysData(), path) || [];
+    return arr.map(function (x, i) { return '<div class="lrow">' + rowFn(x, i) + (shRO ? '' : '<button type="button" class="ghost sm-x" data-del="' + path + '" data-i="' + i + '" aria-label="Remover">✕</button>') + '</div>'; }).join('') +
+      (shRO ? '' : '<button type="button" class="btn q sm" data-add="' + path + '">' + addLbl + '</button>');
+  }
+  function photoBox() {
+    const p = SH.photo, url = p ? photoUrls[p] : '';
+    if (p && !url) loadPhoto(p);
+    return '<label class="avatar">' + (url ? '<img src="' + url + '" alt="Retrato do personagem">' : '<span>' + (p ? 'Carregando…' : (shRO ? 'Sem retrato' : 'Toque para adicionar um retrato')) + '</span>') + (shRO ? '' : '<input type="file" id="photo" accept="image/*" aria-label="Escolher retrato">') + '</label>';
+  }
+  async function loadPhoto(p) {
+    if (loadPhoto.busy === p) return;
+    loadPhoto.busy = p;
+    try { const r = await api('/storage/v1/object/authenticated/players/' + p); if (r.ok) { photoUrls[p] = URL.createObjectURL(await r.blob()); if (SH && SH.photo === p) paintSheet(); } } catch (e) { /* ok */ }
+    loadPhoto.busy = null;
+  }
+  async function uploadPhoto(file) {
+    const img = await new Promise(function (res, rej) { const i = new Image(); i.onload = function () { res(i); }; i.onerror = rej; i.src = URL.createObjectURL(file); });
+    const k = Math.min(1, 640 / Math.max(img.width, img.height)), c = document.createElement('canvas');
+    c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+    c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+    const blob = await new Promise(function (res) { c.toBlob(res, 'image/jpeg', 0.85); });
+    const path = cur.id + '/' + me().id + '/retrato-' + Date.now().toString(36) + '.jpg';
+    shSv = 'Enviando retrato…'; paintSv();
+    const r = await api('/storage/v1/object/players/' + path, { method: 'POST', headers: { 'Content-Type': 'image/jpeg', 'x-upsert': 'true' }, body: blob });
+    if (!r.ok) { shSv = 'Não consegui enviar o retrato.'; paintSv(); return; }
+    const old = SH.photo;
+    photoUrls[path] = URL.createObjectURL(blob);
+    SH.photo = path; paintSheet(); saveSheetSoon();
+    if (old) api('/storage/v1/object/players/' + old, { method: 'DELETE' }).catch(function () { /* ok */ });
+  }
+
+  /* Daggerheart */
+  function sheetDH() {
+    const d = sysData();
+    return '<div class="card"><h2>Traços</h2><div class="stats">' + TR_DH.map(function (t) {
+      return '<div class="stat"><span class="k">' + t[1] + '</span><input type="number" inputmode="numeric" data-k="tr.' + t[0] + '" data-num="1" value="' + d.tr[t[0]] + '" min="-5" max="9" aria-label="' + t[1] + '"' + dis() + '>' + rollBtn('dual', 'dh:' + t[0], t[1], 'Dualidade') + '</div>';
+    }).join('') + '</div></div>' +
+      '<div class="card"><h2>Defesa</h2><div class="row">' + fN('Evasão', 'evasion', { grow: 1 }) + fN('Limiar Maior', 'thr.major', { grow: 1 }) + fN('Limiar Grave', 'thr.severe', { grow: 1 }) + '</div>' + fT('Armadura', 'armorName', { ph: 'Ex.: Gibão de couro' }) + track('Espaços de armadura', 'armor', 'arm') + '</div>' +
+      '<div class="card"><h2>Condição</h2>' + track('Pontos de Vida', 'hp', 'hp') + track('Estresse', 'stress', 'st') + track('Esperança', 'hope', 'hope') + '</div>' +
+      '<div class="card"><h2>Experiências</h2>' + listRows('exps', function (x, i) { return fT('Experiência', 'exps.' + i + '.n', { grow: 3 }) + fN('Bônus', 'exps.' + i + '.b', { grow: 1, basis: 70 }); }, '+ Experiência') + '</div>' +
+      '<div class="card"><h2>Armas</h2>' + listRows('weapons', function (x, i) { return fT('Arma', 'weapons.' + i + '.n', { grow: 3 }) + fT('Traço', 'weapons.' + i + '.tr', { grow: 1, basis: 90 }) + fT('Alcance', 'weapons.' + i + '.rng', { grow: 1, basis: 90 }) + fT('Dano', 'weapons.' + i + '.dmg', { grow: 1, basis: 90, ph: 'd8+2' }) + rollBtn('dmg', 'weapons.' + i + '.dmg', (x.n || 'Arma') + ' (dano)', 'Dano'); }, '+ Arma') + '</div>' +
+      '<div class="card"><h2>Cartas de domínio</h2>' + listRows('cards', function (x, i) { return fT('Carta', 'cards.' + i + '.n', { grow: 2 }) + fN('Nível', 'cards.' + i + '.lvl', { grow: 1, basis: 70 }) + '<div class="field" style="flex:1 1 100%"><label>Efeito</label><textarea data-k="cards.' + i + '.txt" rows="2" style="min-height:0"' + dis() + '>' + esc(x.txt || '') + '</textarea></div>'; }, '+ Carta') + '</div>' +
+      '<div class="card"><h2>Ouro</h2><div class="row">' + fN('Punhados', 'gold.h', { grow: 1, min: 0 }) + fN('Bolsas', 'gold.b', { grow: 1, min: 0 }) + fN('Baús', 'gold.c', { grow: 1, min: 0 }) + '</div></div>';
+  }
+  /* D&D 5e */
+  const md5 = function (s) { return Math.floor((num(s) - 10) / 2); };
+  const prof5 = function () { return 2 + Math.floor((Math.max(1, num(sysData().level)) - 1) / 4); };
+  function sk5(id) { const s = SK5.filter(function (x) { return x[0] === id; })[0], d = sysData(); return md5(d.at[s[2]]) + prof5() * num(d.sk[id]); }
+  function sheetDND() {
+    const d = sysData();
+    const ats = AT5.map(function (a) {
+      return '<div class="stat"><span class="k">' + a[1] + '</span><input type="number" inputmode="numeric" data-k="at.' + a[0] + '" data-num="1" value="' + d.at[a[0]] + '" min="1" max="30" aria-label="' + a[2] + '"' + dis() + '><span class="m">' + calc('mod:' + a[0], function () { return sgn(md5(sysData().at[a[0]])); }) + '</span>' + rollBtn('d20', 'mod:' + a[0], a[2]) + '</div>';
+    }).join('');
+    const svs = AT5.map(function (a) {
+      return '<div class="skl"><button type="button" class="prof" data-tog="sv.' + a[0] + '" data-v="' + (d.sv[a[0]] ? 1 : 0) + '" aria-label="Proficiente em ' + a[2] + '" aria-pressed="' + !!d.sv[a[0]] + '"' + dis() + '>' + (d.sv[a[0]] ? '●' : '') + '</button><span>' + a[2] + '</span><b class="mono">' + calc('sv:' + a[0], function () { const x = sysData(); return sgn(md5(x.at[a[0]]) + (x.sv[a[0]] ? prof5() : 0)); }) + '</b>' + rollBtn('d20', 'sv:' + a[0], 'Salvaguarda de ' + a[2]) + '</div>';
+    }).join('');
+    const sks = SK5.map(function (s) {
+      const v = num(d.sk[s[0]]);
+      return '<div class="skl"><button type="button" class="prof" data-cyc="sk.' + s[0] + '" data-v="' + v + '" aria-label="' + s[1] + ': ' + ['sem proficiência', 'proficiente', 'especialista'][v] + '"' + dis() + '>' + ['', '●', '★'][v] + '</button><span>' + s[1] + ' <small class="muted">' + s[2].toUpperCase() + '</small></span><b class="mono">' + calc('sk:' + s[0], function () { return sgn(sk5(s[0])); }) + '</b>' + rollBtn('d20', 'sk:' + s[0], s[1]) + '</div>';
+    }).join('');
+    let slots = '';
+    d.slots.forEach(function (sl, i) { if (num(sl.max) > 0) slots += track((i + 1) + 'º círculo', 'slots.' + i, 'slot', false); });
+    const slotMax = shRO ? '' : '<div class="slotmax">' + d.slots.map(function (sl, i) { return '<label class="mxl">' + (i + 1) + 'º <input class="mx" type="number" inputmode="numeric" min="0" max="9" data-k="slots.' + i + '.max" data-num="1" data-rr="1" value="' + num(sl.max) + '" aria-label="Espaços de ' + (i + 1) + 'º círculo"></label>'; }).join('') + '</div>';
+    return '<div class="card"><h2>Atributos</h2><div class="stats">' + ats + '</div><p class="hint-s">Bônus de proficiência: ' + calc('prof', function () { return sgn(prof5()); }) + ' · Percepção passiva: ' + calc('pp', function () { return 10 + sk5('percepcao'); }) + '</p></div>' +
+      '<div class="card"><h2>Combate</h2><div class="row">' + fN('Classe de Armadura', 'ac', { grow: 1 }) + '<div class="field" style="flex:1 1 90px"><label>Iniciativa</label><div class="row" style="gap:6px;align-items:center"><b class="mono big">' + calc('ini', function () { return sgn(md5(sysData().at.des)); }) + '</b>' + rollBtn('d20', 'ini', 'Iniciativa') + '</div></div>' + fT('Deslocamento', 'speed', { grow: 1, basis: 90 }) + '</div>' +
+      '<div class="row">' + fN('PV máximos', 'hp.max', { grow: 1 }) + fN('PV atuais', 'hp.cur', { grow: 1 }) + fN('PV temporários', 'hp.tmp', { grow: 1 }) + fT('Dados de vida', 'hd', { grow: 1, basis: 90 }) + '</div>' +
+      '<div class="row">' + track('Testes contra a morte: sucessos', 'death.okT', 'hope', false) + track('Falhas', 'death.failT', 'hp', false) + '</div>' +
+      '<label class="chk"><input type="checkbox" data-chk="insp"' + (d.insp ? ' checked' : '') + dis() + '> Inspiração</label></div>' +
+      '<div class="card"><h2>Salvaguardas</h2>' + svs + '</div>' +
+      '<div class="card"><h2>Perícias</h2><p class="hint-s">Toque no círculo: vazio, proficiente (●), especialista (★).</p>' + sks + '</div>' +
+      '<div class="card"><h2>Ataques</h2>' + listRows('atks', function (x, i) { return fT('Ataque', 'atks.' + i + '.n', { grow: 3 }) + fN('Bônus', 'atks.' + i + '.b', { grow: 1, basis: 70 }) + fT('Dano', 'atks.' + i + '.dmg', { grow: 1, basis: 90, ph: '1d8+3' }) + '<div class="row" style="gap:6px">' + rollBtn('d20', 'atk:' + i, (x.n || 'Ataque'), 'Acerto') + rollBtn('dmg', 'atks.' + i + '.dmg', (x.n || 'Ataque') + ' (dano)', 'Dano') + '</div>'; }, '+ Ataque') + '</div>' +
+      '<div class="card"><h2>Magia</h2><div class="row"><div class="field" style="flex:1 1 140px"><label>Atributo de conjuração</label><select data-k="spAt"' + dis() + '>' + AT5.map(function (a) { return '<option value="' + a[0] + '"' + (d.spAt === a[0] ? ' selected' : '') + '>' + a[2] + '</option>'; }).join('') + '</select></div><div class="field" style="flex:1 1 90px"><label>CD</label><b class="mono big">' + calc('cd', function () { const x = sysData(); return 8 + prof5() + md5(x.at[x.spAt]); }) + '</b></div><div class="field" style="flex:1 1 90px"><label>Ataque mágico</label><div class="row" style="gap:6px;align-items:center"><b class="mono big">' + calc('spa', function () { const x = sysData(); return sgn(prof5() + md5(x.at[x.spAt])); }) + '</b>' + rollBtn('d20', 'spa', 'Ataque mágico') + '</div></div></div>' +
+      '<h2 style="margin-top:4px">Espaços de magia</h2>' + (shRO ? '' : '<p class="hint-s">Quantos espaços por círculo:</p>') + slotMax + (slots ? '<p class="hint-s">Toque para marcar os espaços gastos.</p><div class="slots">' + slots + '</div>' : '') + fA('Magias conhecidas e preparadas', 'spells', 5) + '</div>' +
+      '<div class="card"><h2>Moedas</h2><div class="row">' + [['pc', 'PC'], ['pp', 'PP'], ['pe', 'PE'], ['po', 'PO'], ['pl', 'PL']].map(function (c) { return fN(c[1], 'coins.' + c[0], { grow: 1, basis: 60, min: 0 }); }).join('') + '</div></div>' +
+      '<div class="card"><h2>Características e talentos</h2>' + fA('', 'feats', 6) + '</div>';
+  }
+  /* GURPS */
+  function gAt(k) {
+    const d = sysData(), a = d.at, s = d.sec;
+    if (k === 'per') return num(a.iq) + num(s.per);
+    if (k === 'will') return num(a.iq) + num(s.will);
+    return num(a[k]);
+  }
+  function gSpd() { const d = sysData(); return (num(d.at.dx) + num(d.at.ht)) / 4 + num(d.sec.spd) * 0.25; }
+  function gNH(i) {
+    const s = sysData().skills[i]; if (!s) return 0;
+    const p = num(s.p), off = (DIFF_G.filter(function (x) { return x[0] === s.df; })[0] || DIFF_G[1])[2];
+    const bonus = p < 1 ? -99 : (p < 2 ? 0 : (p < 4 ? 1 : 2 + Math.floor((p - 4) / 4)));
+    return bonus === -99 ? 0 : gAt(s.at) + off + bonus + num(s.m);
+  }
+  function gSpent() {
+    const d = sysData(), a = d.at, s = d.sec;
+    let t = (num(a.st) - 10) * 10 + (num(a.dx) - 10) * 20 + (num(a.iq) - 10) * 20 + (num(a.ht) - 10) * 10;
+    t += num(s.hp) * 2 + num(s.will) * 5 + num(s.per) * 5 + num(s.fp) * 3 + num(s.spd) * 5 + num(s.move) * 5;
+    d.adv.forEach(function (x) { t += num(x.p); });
+    d.skills.forEach(function (x) { t += num(x.p); });
+    return t;
+  }
+  function sheetGURPS() {
+    const d = sysData();
+    const ats = AT_G.map(function (a) {
+      return '<div class="stat"><span class="k">' + a[1] + '</span><input type="number" inputmode="numeric" data-k="at.' + a[0] + '" data-num="1" value="' + d.at[a[0]] + '" min="1" max="30" aria-label="' + a[2] + '"' + dis() + '>' + rollBtn('3d6', 'g:' + a[0], a[2], 'Teste') + '</div>';
+    }).join('');
+    const sec = [['hp', 'PV', function () { return gAt('st') + num(sysData().sec.hp); }], ['will', 'Vontade', function () { return gAt('will'); }], ['per', 'Percepção', function () { return gAt('per'); }], ['fp', 'PF', function () { return num(sysData().at.ht) + num(sysData().sec.fp); }]].map(function (x) {
+      return '<div class="stat"><span class="k">' + x[1] + '</span><b class="mono big">' + calc('gs:' + x[0], x[2]) + '</b><label class="mxl">ajuste <input class="mx" type="number" inputmode="numeric" data-k="sec.' + x[0] + '" data-num="1" value="' + d.sec[x[0]] + '"' + dis() + '></label>' + (x[0] === 'will' || x[0] === 'per' ? rollBtn('3d6', 'g:' + x[0], x[1], 'Teste') : '') + '</div>';
+    }).join('');
+    return '<div class="card"><div class="row" style="justify-content:space-between;align-items:center"><h2>Pontos</h2><span class="mono">Gastos ' + calc('gpts', function () { return gSpent(); }) + ' · Livres ' + calc('gfree', function () { return num(sysData().pts) - gSpent(); }) + '</span></div><div class="row">' + fN('Total de pontos do personagem', 'pts', { grow: 1 }) + '</div></div>' +
+      '<div class="card"><h2>Atributos</h2><div class="stats">' + ats + '</div><h2 style="margin-top:6px">Secundários</h2><div class="stats">' + sec + '</div>' +
+      '<p class="hint-s">Velocidade Básica ' + calc('gspd', function () { return gSpd().toFixed(2).replace('.', ','); }) + ' · Deslocamento ' + calc('gmov', function () { return Math.floor(gSpd()) + num(sysData().sec.move); }) + ' · Esquiva ' + calc('gdod', function () { return Math.floor(gSpd()) + 3; }) + '</p>' +
+      '<div class="row">' + fN('Ajuste de Velocidade (×0,25)', 'sec.spd', { grow: 1 }) + fN('Ajuste de Deslocamento', 'sec.move', { grow: 1 }) + '</div></div>' +
+      '<div class="card"><h2>Condição</h2><div class="row">' + fN('PV atuais', 'hpCur', { grow: 1 }) + fN('PF atuais', 'fpCur', { grow: 1 }) + fN('RD', 'dr', { grow: 1 }) + fT('Aparar', 'parry', { grow: 1, basis: 80 }) + fT('Bloqueio', 'block', { grow: 1, basis: 80 }) + '</div></div>' +
+      '<div class="card"><h2>Vantagens e desvantagens</h2>' + listRows('adv', function (x, i) { return fT('Nome', 'adv.' + i + '.n', { grow: 4 }) + fN('Pontos', 'adv.' + i + '.p', { grow: 1, basis: 70 }); }, '+ Vantagem ou desvantagem') + '</div>' +
+      '<div class="card"><h2>Perícias</h2><p class="hint-s">O NH é calculado pelo atributo, dificuldade e pontos gastos. Use o bônus para modificadores fixos.</p>' + listRows('skills', function (x, i) {
+        return fT('Perícia', 'skills.' + i + '.n', { grow: 3 }) +
+          '<div class="field" style="flex:1 1 80px"><label>Atributo</label><select data-k="skills.' + i + '.at"' + dis() + '>' + [['st', 'ST'], ['dx', 'DX'], ['iq', 'IQ'], ['ht', 'HT'], ['per', 'Per'], ['will', 'Vont']].map(function (o) { return '<option value="' + o[0] + '"' + (x.at === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></div>' +
+          '<div class="field" style="flex:1 1 110px"><label>Dificuldade</label><select data-k="skills.' + i + '.df"' + dis() + '>' + DIFF_G.map(function (o) { return '<option value="' + o[0] + '"' + (x.df === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') + '</select></div>' +
+          fN('Pontos', 'skills.' + i + '.p', { grow: 1, basis: 64, min: 0 }) + fN('Bônus', 'skills.' + i + '.m', { grow: 1, basis: 64 }) +
+          '<div class="field" style="flex:0 0 auto"><label>NH</label><div class="row" style="gap:6px;align-items:center"><b class="mono big">' + calc('nh:' + i, function () { return gNH(i); }) + '</b>' + rollBtn('3d6', 'nh:' + i, x.n || 'Perícia', 'Teste') + '</div></div>';
+      }, '+ Perícia') + '</div>';
+  }
+  function identityCard() {
+    const s = cur.system;
+    const idf = s === 'daggerheart' ? fT('Ancestralidade', 'ancestry', { grow: 1 }) + fT('Comunidade', 'community', { grow: 1 }) + fT('Classe', 'cls', { grow: 1 }) + fT('Subclasse', 'sub', { grow: 1 }) + fN('Nível', 'level', { grow: 1, basis: 70, min: 1, max: 10 })
+      : (s === 'dnd5e' ? fT('Espécie', 'race', { grow: 1 }) + fT('Classe', 'cls', { grow: 1 }) + fT('Subclasse', 'sub', { grow: 1 }) + fN('Nível', 'level', { grow: 1, basis: 70, min: 1, max: 20 }) + fT('Antecedente', 'bg', { grow: 1 }) + fT('Tendência', 'align', { grow: 1 })
+        : '');
+    return '<div class="card idc">' + photoBox() + '<div class="idf"><div class="field"><label>Nome do personagem</label><input class="nm" data-k="@name" value="' + esc(SH.name || '') + '" placeholder="Sem nome"' + dis() + '></div><div class="row">' + idf + '</div></div></div>';
+  }
+  function sheetHtml() {
+    for (const k in CALC) delete CALC[k];
+    if (cur.system === 'dnd5e') { const d = sysData(); d.death.okT = { max: 3, v: num(d.death.ok) }; d.death.failT = { max: 3, v: num(d.death.fail) }; }
+    const body = cur.system === 'daggerheart' ? sheetDH() : (cur.system === 'dnd5e' ? sheetDND() : sheetGURPS());
+    return identityCard() + body + '<div class="card"><h2>História e aparência</h2>' + fA('', 'bio', 6) + '</div>';
+  }
+  function paintSv() { const el = $('#shsv'); if (el) el.textContent = shSv; }
+  function paintSheet() {
+    const box = $('#sheet');
+    if (!box || !SH) return;
+    const y = window.scrollY;
+    box.innerHTML = sheetHtml();
+    window.scrollTo(0, y);
+  }
+  function calcAll() { document.querySelectorAll('[data-calc]').forEach(function (el) { const f = CALC[el.dataset.calc]; if (f) el.textContent = f(); }); }
+  function sheetPaneHtml(head) {
+    return '<div class="sheet-wrap"><div class="row" style="justify-content:space-between;align-items:center">' + (head || '<h2>Ficha · ' + esc(SYS[cur.system]) + '</h2>') + '<span class="sv" id="shsv" role="status">' + esc(shSv) + '</span></div>' + (shErr ? '<p class="bad">' + esc(shErr) + '</p>' : '') + '<div class="sheet" id="sheet"><p class="muted">Carregando a ficha…</p></div></div>';
+  }
+  const skey = function (uidv) { return 'ht-sheet-' + cur.id + '-' + uidv; };
+  async function loadSheet(uidv, ro) {
+    shRO = !!ro; shOwner = uidv; shFor = cur.id + ':' + uidv; shErr = '';
+    SH = ro ? null : lsGet(skey(uidv), null);
+    if (SH) paintSheet();
+    const want = shFor;
+    try {
+      const r = await api('/rest/v1/pdocs?campaign_id=eq.' + cur.id + '&kind=eq.sheet&user_id=eq.' + uidv + '&select=data');
+      if (!r.ok) throw new Error('x');
+      const j = await r.json();
+      if (want !== shFor || shT) return;
+      if (j[0] && j[0].data) { SH = j[0].data; if (!ro) lsSet(skey(uidv), SH); shSv = ro ? '' : 'Salvo na nuvem'; }
+      else if (!SH) SH = { name: '' };
+    } catch (e) { if (!SH) SH = { name: '' }; shSv = 'Sem conexão. Mostrando o que está neste aparelho.'; }
+    if (want === shFor) { paintSheet(); paintSv(); }
+  }
+  function saveSheetSoon() { if (shRO) return; shSv = 'Salvando…'; paintSv(); clearTimeout(shT); shT = setTimeout(saveSheet, 900); }
+  async function saveSheet() {
+    shT = null; lsSet(skey(me().id), SH);
+    try {
+      const r = await api('/rest/v1/pdocs?on_conflict=campaign_id,user_id,kind', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, JSONH), body: JSON.stringify({ campaign_id: cur.id, kind: 'sheet', data: SH }) });
+      if (!r.ok) throw new Error('x');
+      shSv = 'Salvo na nuvem';
+    } catch (e) { shSv = 'Sem conexão. Salvo neste aparelho.'; }
+    paintSv();
+  }
+  function sheetRoll(kind, key, lbl) {
+    const d = sysData();
+    if (kind === 'dmg') { const ex = String(getP(d, key) || '').trim(); doRoll(ex ? rollExpr(ex) : null, lbl); return; }
+    let mod = 0;
+    if (kind === 'dual') { mod = num(d.tr[key.split(':')[1]]); const o = dice.mod; dice.mod = mod; const r = rollDuality(); dice.mod = o; doRoll(r, lbl); return; }
+    if (kind === '3d6') {
+      const k = key.split(':'), nh = k[0] === 'nh' ? gNH(Number(k[1])) : gAt(k[1]);
+      const o = dice.nh; dice.nh = nh; const r = rollGurps(); dice.nh = o; doRoll(r, lbl); return;
+    }
+    if (key.indexOf('atk:') === 0) mod = num(d.atks[Number(key.split(':')[1])].b);
+    else mod = Number(String(CALC[key] ? CALC[key]() : 0).replace('+', '')) || 0;
+    const o = dice.mod, q = dice.qty; dice.mod = mod; dice.qty = 1; const r = rollSimple(20); dice.mod = o; dice.qty = q;
+    doRoll(r, lbl);
+  }
+  function shInput(t) {
+    let p = t.dataset.k, v = t.value;
+    if (t.dataset.num) v = t.value === '' ? 0 : num(t.value);
+    if (p.indexOf('@') === 0) SH[p.slice(1)] = v; else setP(sysData(), p, v);
+    calcAll(); saveSheetSoon();
+  }
+  function shClick(el) {
+    const d = sysData();
+    if (el.dataset.pip) {
+      const p = el.dataset.pip, i = Number(el.dataset.i), t = getP(d, p);
+      t.v = t.v === i + 1 ? i : i + 1;
+      if (p === 'death.okT') d.death.ok = t.v; if (p === 'death.failT') d.death.fail = t.v;
+      paintSheet(); saveSheetSoon(); return true;
+    }
+    if (el.dataset.tog) { setP(d, el.dataset.tog, !getP(d, el.dataset.tog)); paintSheet(); saveSheetSoon(); return true; }
+    if (el.dataset.cyc) { setP(d, el.dataset.cyc, (num(getP(d, el.dataset.cyc)) + 1) % 3); paintSheet(); saveSheetSoon(); return true; }
+    if (el.dataset.add) {
+      const arr = getP(d, el.dataset.add), proto = { exps: { n: '', b: 2 }, weapons: { n: '', tr: '', rng: '', dmg: '' }, cards: { n: '', lvl: 1, txt: '' }, atks: { n: '', b: 0, dmg: '' }, adv: { n: '', p: 0 }, skills: { n: '', at: 'dx', df: 'M', p: 1, m: 0 } }[el.dataset.add];
+      arr.push(JSON.parse(JSON.stringify(proto))); paintSheet(); saveSheetSoon();
+      const ins = document.querySelectorAll('[data-k^="' + el.dataset.add + '.' + (arr.length - 1) + '."]'); if (ins[0]) ins[0].focus();
+      return true;
+    }
+    if (el.dataset.del) { getP(d, el.dataset.del).splice(Number(el.dataset.i), 1); paintSheet(); saveSheetSoon(); return true; }
+    if (el.dataset.roll) {
+      const ck = el.dataset.ck, m = ck.match(/^(nh|atk):(\d+)$/) || ck.match(/^(atks|weapons)\.(\d+)\.dmg$/);
+      let lbl = el.dataset.lbl;
+      if (m) { const row = (m[1] === 'nh' ? d.skills : (m[1] === 'atk' || m[1] === 'atks' ? d.atks : d.weapons))[Number(m[2])]; if (row && row.n) lbl = row.n + (ck.indexOf('.dmg') > 0 ? ' (dano)' : ''); }
+      sheetRoll(el.dataset.roll, ck, lbl); return true;
+    }
+    return false;
+  }
+  /* visão do Mestre: fichas dos jogadores */
+  function fichasHtml() {
+    const ms = cur.members || [];
+    if (!ms.length) return '<div class="card"><p class="muted">Nenhum jogador na mesa ainda.</p></div>';
+    if (!shView || !ms.some(function (m) { return m.user_id === shView; })) shView = ms[0].user_id;
+    return '<div class="table" role="group" aria-label="Escolher jogador">' + ms.map(function (m) { return '<button type="button" class="btn q sm" data-pv="' + m.user_id + '" aria-pressed="' + (m.user_id === shView) + '"' + (m.user_id === shView ? ' style="border-color:var(--accent);color:var(--accent)"' : '') + '>' + esc(m.name) + '</button>'; }).join('') + '</div>' +
+      sheetPaneHtml('<h2>Ficha de ' + esc((ms.filter(function (m) { return m.user_id === shView; })[0] || {}).name || '') + '</h2>');
+  }
+  /* aviso flutuante de rolagem (fora da aba Dados) */
+  let rtT = null;
+  function rollToast(r) {
+    let el = $('#rt');
+    if (!el) { el = document.createElement('div'); el.id = 'rt'; el.className = 'rtoast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+    el.hidden = false;
+    el.innerHTML = r && !r.error ? '<span class="n pop ' + (r.tone || '') + '">' + r.total + '</span><span><b>' + esc(r.lbl || '') + '</b><br><span class="muted mono" style="font-size:13px">' + esc(r.text) + (r.tag ? ' · ' + esc(r.tag) : '') + '</span></span>' : '<span class="bad">Rolagem inválida. Confira o campo de dano (ex.: 1d8+3).</span>';
+    clearTimeout(rtT); rtT = setTimeout(function () { el.hidden = true; }, 6000);
+  }
+
   /* ---------- perfil ---------- */
   function profile(msg, ok) {
     const el = $('#dlg'), u = me();
@@ -440,16 +786,25 @@ details.more .in { display: grid; gap: 14px; padding: 4px 0 16px; }
   });
   document.addEventListener('input', function (e) {
     const t = e.target;
+    if (t.dataset && t.dataset.k && SH) { shInput(t); return; }
     if (t.id === 'lbl') dice.label = t.value;
     else if (t.id === 'expr') dice.expr = t.value;
     else if (t.id === 'nh') dice.nh = Math.max(1, Math.min(40, parseInt(t.value, 10) || 10));
     else if (t.id === 'nt' || t.id === 'nx') { const n = curNote(); if (n) { if (t.id === 'nt') n.title = t.value; else n.text = t.value; n.at = Date.now(); saveSoon(); if (t.id === 'nt') { const b = document.querySelector('.nitem[aria-current="true"]'); if (b) b.textContent = t.value || 'Sem título'; } } }
   });
-  document.addEventListener('change', function (e) { if (e.target.id === 'priv') dice.priv = e.target.checked; });
+  document.addEventListener('change', function (e) {
+    const t = e.target;
+    if (t.id === 'priv') dice.priv = t.checked;
+    else if (t.dataset && t.dataset.chk && SH) { sysData()[t.dataset.chk] = t.checked; saveSheetSoon(); }
+    else if (t.dataset && t.dataset.rr && SH) paintSheet();
+    else if (t.id === 'photo' && t.files && t.files[0]) { uploadPhoto(t.files[0]).catch(function () { shSv = 'Não consegui usar esta imagem.'; paintSv(); }); t.value = ''; }
+  });
   document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'expr') { e.preventDefault(); doRoll(rollExpr(dice.expr)); } if (e.key === 'Escape' && !$('#dlg').hidden) $('#dlg').hidden = true; });
   document.addEventListener('click', function (e) {
-    const el = e.target.closest('[data-a],[data-die],[data-st],[data-adv],[data-tab],[data-camp],[data-note]');
+    const el = e.target.closest('[data-a],[data-die],[data-st],[data-adv],[data-tab],[data-camp],[data-note],[data-pip],[data-tog],[data-cyc],[data-add],[data-del],[data-roll],[data-pv]');
     if (!el) return;
+    if (el.dataset.pv) { shView = el.dataset.pv; drawPane(); return; }
+    if (SH && !el.disabled && shClick(el)) return;
     if (el.dataset.die) { doRoll(rollSimple(parseInt(el.dataset.die, 10))); return; }
     if (el.dataset.st) {
       const k = el.dataset.st, d = parseInt(el.dataset.d, 10);
