@@ -134,7 +134,8 @@ ul { padding-left: 1.2em; }
 .brand { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 24px; letter-spacing: 0.03em; }
 input[type="email"], input[type="password"] { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 46px; color: var(--fg); font: inherit; }
 input[type="email"]:focus-visible, input[type="password"]:focus-visible { outline: 2px solid var(--active); outline-offset: 1px; }
-.cloud { display: inline-flex; align-items: center; justify-content: center; position: relative; width: 40px; height: 40px; padding: 0; margin-left: 2px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--muted); cursor: pointer; }
+.top-r { display: flex; align-items: center; gap: 10px; margin-left: auto; }
+.cloud { display: inline-flex; align-items: center; justify-content: center; position: relative; flex: none; width: 46px; height: 46px; padding: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--muted); cursor: pointer; }
 .cloud svg { width: 22px; height: 22px; }
 .cloud::after { content: ""; position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); box-shadow: 0 0 0 2px var(--surface); }
 .cloud[data-st="ok"] { color: var(--fg); }
@@ -275,6 +276,20 @@ input[type="range"] { width: 100%; height: 36px; accent-color: var(--active); ma
 
 /* preparar */
 .prep-grid { display: grid; gap: 28px; }
+.ptabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
+.prep-grid[data-ptab="cena"] > [data-sec]:not([data-sec="cena"]) { display: none; }
+.prep-grid[data-ptab="notas"] > [data-sec]:not([data-sec="notas"]) { display: none; }
+.prep-grid[data-ptab="som"] > [data-sec]:not([data-sec="som"]) { display: none; }
+.prep-grid[data-ptab="imagens"] > [data-sec]:not([data-sec="imagens"]) { display: none; }
+.prep-grid[data-ptab="visual"] > [data-sec]:not([data-sec="visual"]) { display: none; }
+.prep-grid[data-ptab="nuvem"] > [data-sec]:not([data-sec="nuvem"]) { display: none; }
+.save-st { display: inline-flex; align-items: center; gap: 10px; min-width: 0; color: var(--muted); font-size: 15px; }
+.save-st i { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--muted); }
+.save-st[data-k="ok"] i { background: var(--ok); }
+.save-st[data-k="busy"] i { background: var(--active); animation: pulse 1s ease-in-out infinite; }
+.save-st[data-k="dirty"] i, .save-st[data-k="warn"] i { background: #ff9a6b; }
+.dock-r { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
 .field { display: grid; gap: 6px; min-width: 0; }
 .field label, .lbl-s { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 input[type="text"], textarea, select { width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 46px; }
@@ -612,12 +627,14 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   <div class="top-in">
     <div class="brand">
       <svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>
-      <span>Hollow Table</span><span class="ver" id="ver">versão 0.23</span>
+      <span>Hollow Table</span><span class="ver" id="ver">versão 0.24</span>
     </div>
-    <button type="button" class="cloud" id="cloud" data-st="out" data-action="cloud" aria-label="Nuvem: entrar" title="Nuvem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5H7z"/></svg></button>
-    <div class="seg" role="radiogroup" aria-label="Modo">
+    <div class="top-r">
+      <div class="seg" role="radiogroup" aria-label="Modo">
       <button type="button" role="radio" aria-checked="false" data-action="mode" data-mode="prep">Preparar</button>
       <button type="button" role="radio" aria-checked="true" data-action="mode" data-mode="mesa">Mesa</button>
+    </div>
+      <button type="button" class="cloud" id="cloud" data-st="out" data-action="cloud" aria-label="Nuvem: entrar" title="Nuvem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5H7z"/></svg></button>
     </div>
   </div>
   <nav class="scenes" id="scenes" aria-label="Cenas"></nav>
@@ -750,6 +767,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   }
   function saveLocal() { try { localStorage.setItem(KEY, JSON.stringify(snapshot())); } catch (e) { /* sem armazenamento */ } }
   function save() { saveLocal(); sbDirty(); }
+  const PTABS = [['cena', 'Cena'], ['notas', 'Notas'], ['som', 'Música e sons'], ['imagens', 'Imagens'], ['visual', 'Aparência'], ['nuvem', 'Nuvem']];
+  let ptab = 'cena';
   let mode = 'mesa', tab = 'notas', revealed = null, audience = ['todos'];
   const active = {}, levels = {}, fileBuffers = {};
   const main = $('#main'), dock = $('#dock');
@@ -764,6 +783,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   function setSb(st) {
     sbState = st;
     const b = $('#cloud');
+    updateSaveBar();
     if (b) { b.setAttribute('data-st', st); b.setAttribute('aria-label', 'Nuvem: ' + (SB_LABEL[st] || '')); b.title = 'Nuvem: ' + (SB_LABEL[st] || ''); }
   }
   function sbStore(j) {
@@ -819,9 +839,10 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     const m = lsGet('cdm-sbmeta', {});
     m.dirty = true;
     lsSet('cdm-sbmeta', m);
+    updateSaveBar();
     if (sbUser() && sbState !== 'conflict') { clearTimeout(sbTimer); sbTimer = setTimeout(sbSync, 1500); }
   }
-  async function sbSync() {
+  async function sbSync(force) {
     if (!sbUser() || sbBusy) return;
     sbBusy = true; setSb('busy');
     const ver = sbVer;
@@ -840,10 +861,11 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
         applyState(rem.data);
         lsSet('cdm-sbmeta', { at: rem.updated_at, dirty: false });
         toast('Atualizado com a versão da nuvem.');
-      } else if (m.dirty) {
+      } else if (m.dirty || force === true) {
         const at = await sbPush();
         lsSet('cdm-sbmeta', { at: at, dirty: sbVer !== ver });
       }
+      sbLast = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
       setSb('ok');
     } catch (e) { setSb(navigator.onLine ? 'err' : 'off'); }
     sbBusy = false;
@@ -908,10 +930,10 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   function cloudPanel() {
     const u = sbUser();
     if (!u) {
-      return '<section class="panel" id="nuvem"><h2>Nuvem</h2><p class="hint">Entre para guardar a aventura, as imagens e os áudios, e abrir tudo no PC e no iPad.</p><div class="row"><button type="button" class="btn primary" data-action="gateOpen">Entrar</button></div></section>';
+      return '<section class="panel" id="nuvem" data-sec="nuvem"><h2>Nuvem</h2><p class="hint">Entre para guardar a aventura, as imagens e os áudios, e abrir tudo no PC e no iPad.</p><div class="row"><button type="button" class="btn primary" data-action="gateOpen">Entrar</button></div></section>';
     }
     const st = { ok: 'Tudo salvo na nuvem.', busy: 'Sincronizando…', off: 'Sem conexão. Suas alterações ficam neste aparelho e sobem quando a internet voltar.', err: 'Não consegui sincronizar agora. Vou tentar de novo na próxima alteração.', conflict: 'A nuvem tem uma versão mais nova, e este aparelho tem alterações que ainda não subiram.', out: '' }[sbState] || '';
-    return '<section class="panel" id="nuvem"><h2>Nuvem</h2><p class="hint">Conectado como ' + esc(u.email) + '. ' + st + '</p>' +
+    return '<section class="panel" id="nuvem" data-sec="nuvem"><h2>Nuvem</h2><p class="hint">Conectado como ' + esc(u.email) + '. ' + st + '</p>' +
       (sbState === 'conflict' ? '<div class="row"><button type="button" class="btn primary" data-action="sbCloud">Usar a versão da nuvem</button><button type="button" class="btn quiet" data-action="sbLocal">Manter a deste aparelho</button></div>' : '') +
       '<div class="row"><button type="button" class="btn quiet" data-action="sbSync">Sincronizar agora</button><button type="button" class="btn quiet" data-action="sbExport">Baixar backup</button>' +
       '<label class="btn quiet file-btn">Restaurar backup<input type="file" id="file-restore" accept="application/json,.json"></label>' +
@@ -1578,28 +1600,29 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     })).join('');
     const maxOpts = [2, 3, 4, 5, 6].map(function (n) { return '<option value="' + n + '"' + (S.countdown.max === n ? ' selected' : '') + '>' + n + '</option>'; }).join('');
     const kindOpts = KINDS.map(function (k) { return '<option' + (S.kind === k ? ' selected' : '') + '>' + k + '</option>'; }).join('');
-    return '<section class="head"><p class="eyebrow">Preparar · Cena 3 de 6</p><h1>Monte a cena</h1><p class="lede">Tudo o que você edita aqui aparece na Mesa. Textos ficam guardados neste aparelho. Imagens e sons anexados valem só para esta sessão neste protótipo.</p></section>' +
-      '<div class="prep-grid">' +
-      '<section class="panel"><h2>Aparência</h2><div class="pal-grid" role="group" aria-label="Paleta de cores">' +
+    const tabsHtml = PTABS.map(function (t) { return '<button type="button" class="chip" data-action="ptab" data-id="' + t[0] + '"' + (ptab === t[0] ? ' aria-current="true"' : '') + '>' + t[1] + '</button>'; }).join('');
+    return '<section class="head"><p class="eyebrow">Preparar · Cena 3 de 6</p><h1>Monte a cena</h1><p class="lede">Tudo o que você edita aqui aparece na Mesa. Use Salvar para guardar na nuvem na hora; o app também salva sozinho.</p></section>' +
+      '<nav class="ptabs" aria-label="Seções do Preparar">' + tabsHtml + '</nav>' +
+      '<div class="prep-grid" data-ptab="' + ptab + '">' +
+      '<section class="panel" data-sec="visual"><h2>Aparência</h2><div class="pal-grid" role="group" aria-label="Paleta de cores">' +
       PALETTES.map(function (pl) {
         const cur = document.documentElement.getAttribute('data-palette') || '';
         return '<button type="button" class="pal" data-action="palette" data-id="' + pl[0] + '" aria-pressed="' + (cur === pl[0]) + '"><span class="sw">' + pl[2].map(function (c) { return '<i style="background:' + c + '"></i>'; }).join('') + '</span><span class="n">' + esc(pl[1]) + '</span></button>';
       }).join('') + '</div><p class="hint">Só muda as cores neste aparelho.</p></section>' +
-      '<section class="panel"><h2>Cena</h2><div class="form-row">' + inp('Título', 'title', S.title) + inp('Local', 'place', S.place) + inp('Momento', 'when', S.when) +
+      '<section class="panel" data-sec="cena"><h2>Cena</h2><div class="form-row">' + inp('Título', 'title', S.title) + inp('Local', 'place', S.place) + inp('Momento', 'when', S.when) +
       '<div class="field"><label for="f-kind">Tipo</label><select id="f-kind" data-bind="kind">' + kindOpts + '</select></div>' + inp('Duração', 'time', S.time) + inp('Orçamento de combate', 'budget', S.budget) + '</div>' + area('Resumo', 'summary', S.summary, 3) + '</section>' +
-      '<section class="panel"><h2>Notas</h2><p class="hint">Use **negrito** e linhas começando com "- " para listas.</p><div>' + notes + '</div><div class="row"><button type="button" class="btn quiet" data-action="noteAdd">Adicionar nota</button></div></section>' +
-      '<section class="panel"><h2>Música</h2><div class="form-row">' + inp('Nome', 'music.name', S.music.name) + inp('Termos de busca', 'music.terms', S.music.terms) + inp('Link do Spotify (playlist, álbum ou faixa)', 'music.url', S.music.url) + '</div></section>' +
-      '<section class="panel"><h2>Sons</h2><div>' + cues + '</div>' +
+      '<section class="panel" data-sec="notas"><h2>Notas</h2><p class="hint">Use **negrito** e linhas começando com "- " para listas.</p><div>' + notes + '</div><div class="row"><button type="button" class="btn quiet" data-action="noteAdd">Adicionar nota</button></div></section>' +
+      '<section class="panel" data-sec="som"><h2>Música</h2><div class="form-row">' + inp('Nome', 'music.name', S.music.name) + inp('Termos de busca', 'music.terms', S.music.terms) + inp('Link do Spotify (playlist, álbum ou faixa)', 'music.url', S.music.url) + '</div></section>' +
+      '<section class="panel" data-sec="som"><h2>Sons</h2><div>' + cues + '</div>' +
       '<div class="add-row"><div class="field"><label for="add-lib">Adicionar da biblioteca</label><select id="add-lib">' + (libOpts || '<option value="">Tudo já está na cena</option>') + '</select></div><button type="button" class="btn quiet" data-action="cueAdd"' + (libOpts ? '' : ' disabled') + '>Adicionar</button></div>' +
       '<div class="add-row"><div class="field"><label for="new-kind">Seu arquivo de áudio será</label><select id="new-kind"><option value="fx">Efeito (toca uma vez)</option><option value="amb">Ambiente (em loop)</option></select></div><label class="btn quiet file-btn">Anexar áudio<input type="file" id="file-audio" accept="audio/*"></label></div>' +
       '<p class="hint">Aceita mp3, m4a e wav. Baixe efeitos de fontes livres, como o Freesound.</p></section>' +
-      '<section class="panel"><h2>Imagens</h2><div class="thumbs">' + imgs + '</div><div class="row"><label class="btn quiet file-btn">Anexar imagem<input type="file" id="file-img" accept="image/*"></label></div></section>' +
-      '<section class="panel"><h2>Contagem</h2><div class="form-row">' + inp('Nome', 'countdown.name', S.countdown.name) +
+      '<section class="panel" data-sec="imagens"><h2>Imagens</h2><div class="thumbs">' + imgs + '</div><div class="row"><label class="btn quiet file-btn">Anexar imagem<input type="file" id="file-img" accept="image/*"></label></div></section>' +
+      '<section class="panel" data-sec="cena"><h2>Contagem</h2><div class="form-row">' + inp('Nome', 'countdown.name', S.countdown.name) +
       '<div class="field"><label for="f-countdown.max">Passos</label><select id="f-countdown.max" data-bind="countdown.max">' + maxOpts + '</select></div>' +
       '<div class="field"><label for="f-countdown.cue">Som ao avançar</label><select id="f-countdown.cue" data-bind="countdown.cue">' + cdCue + '</select></div></div>' +
       area('Quando chegar ao fim', 'countdown.done', S.countdown.done, 2) + '</section>' +
-      cloudPanel() +
-      '<div class="row"><button type="button" class="btn primary" data-action="mode" data-mode="mesa">Ir para a Mesa</button></div></div>';
+      cloudPanel() + '</div>';
   }
 
   function renderDock() {
@@ -1611,6 +1634,23 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       '<label class="dock-vol"><span>Volume dos sons</span><input type="range" id="vol-master" min="0" max="1" step="0.005" value="' + S.vol + '"></label>' +
       '<button type="button" class="btn" data-action="stop">Parar tudo</button></div>';
   }
+  let sbLast = '';
+  function saveStatus() {
+    const m = lsGet('cdm-sbmeta', {});
+    if (!sbUser()) return { k: 'local', t: 'Salvo neste aparelho' };
+    if (sbState === 'busy') return { k: 'busy', t: 'Salvando…' };
+    if (sbState === 'conflict') return { k: 'warn', t: 'Conflito de versões. Veja a aba Nuvem' };
+    if (sbState === 'off') return { k: 'warn', t: 'Sem conexão. Salvo neste aparelho' };
+    if (sbState === 'err') return { k: 'warn', t: 'Não consegui salvar na nuvem' };
+    if (m.dirty) return { k: 'dirty', t: 'Alterações ainda não enviadas' };
+    return { k: 'ok', t: 'Tudo salvo na nuvem' + (sbLast ? ' às ' + sbLast : '') };
+  }
+  function renderSaveBar() {
+    const st = saveStatus();
+    dock.innerHTML = '<div class="dock-in"><div class="save-st" data-k="' + st.k + '" role="status"><i></i><span>' + esc(st.t) + '</span></div>' +
+      '<div class="dock-r"><button type="button" class="btn quiet" data-action="mode" data-mode="mesa">Ir para a Mesa</button><button type="button" class="btn primary" data-action="saveNow">Salvar</button></div></div>';
+  }
+  function updateSaveBar() { if (mode === 'prep') renderSaveBar(); }
   function renderScenes() {
     $('#scenes').innerHTML = SCENES.map(function (n, i) {
       return i === 2
@@ -1619,14 +1659,14 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     }).join('') + '<button type="button" class="chip" disabled title="Em breve">+ Nova cena</button>';
   }
   function render() {
-    document.body.classList.toggle('has-dock', mode === 'mesa');
-    dock.hidden = mode !== 'mesa';
+    document.body.classList.add('has-dock');
+    dock.hidden = false;
     $$('[data-mode]', document.querySelector('.seg')).forEach(function (b) { b.setAttribute('aria-checked', b.getAttribute('data-mode') === mode ? 'true' : 'false'); });
     const cs0 = $('.console'), st0 = cs0 ? cs0.scrollTop : 0;
     main.innerHTML = mode === 'mesa' ? renderMesa() : renderPrep();
     const cs1 = $('.console');
     if (cs1) cs1.scrollTop = st0;
-    if (mode === 'mesa') renderDock();
+    if (mode === 'mesa') renderDock(); else renderSaveBar();
   }
   function commit() { save(); render(); }
 
@@ -1713,7 +1753,15 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       if (k && LIB[k]) { S.cues.push({ id: k, kind: LIB[k].kind, src: 'synth' }); commit(); }
       return;
     }
-    if (a === 'cloud') { if (!sbUser()) { showGate(); return; } if (sbState !== 'conflict') sbSync(); mode = 'prep'; render(); setTimeout(function () { const n = $('#nuvem'); if (n) n.scrollIntoView({ block: 'center' }); }, 30); return; }
+    if (a === 'ptab') { ptab = id; render(); return; }
+    if (a === 'saveNow') {
+      saveLocal();
+      if (!sbUser()) { toast('Salvo neste aparelho. Entre na Nuvem para abrir no iPad.'); return; }
+      clearTimeout(sbTimer);
+      sbSync(true).then(function () { toast(sbState === 'ok' ? 'Salvo na nuvem.' : 'Não consegui salvar na nuvem.'); });
+      return;
+    }
+    if (a === 'cloud') { if (!sbUser()) { showGate(); return; } if (sbState !== 'conflict') sbSync(); mode = 'prep'; ptab = 'nuvem'; render(); window.scrollTo(0, 0); return; }
     if (a === 'gateOpen') { showGate(); return; }
     if (a === 'gateSkip') { try { sessionStorage.setItem('cdm-skip', '1'); } catch (e) { /* ok */ } hideGate(); return; }
     if (a === 'sbOut') { try { localStorage.removeItem('cdm-sb'); localStorage.removeItem('cdm-sbmeta'); } catch (e) { /* ok */ } sbConflict = null; setSb('out'); render(); return; }
@@ -1798,11 +1846,15 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     }
   });
 
+  document.addEventListener('keydown', function (e) {
+    if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S') && mode === 'prep') { e.preventDefault(); const b = $('[data-action="saveNow"]'); if (b) b.click(); }
+  });
+
   document.addEventListener('toggle', function (e) {
     const d = e.target;
     if (d && d.matches && d.matches('details.note')) {
       const n = S.notes[Number(d.getAttribute('data-note'))];
-      if (n) { n.open = d.open; save(); }
+      if (n && n.open !== d.open) { n.open = d.open; save(); }
     }
   }, true);
 
