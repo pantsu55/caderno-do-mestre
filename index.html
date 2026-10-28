@@ -659,7 +659,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   <div class="top-in">
     <div class="brand">
       <svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>
-      <span>Hollow Table</span><span class="ver" id="ver">versão 0.29</span>
+      <span>Hollow Table</span><span class="ver" id="ver">versão 0.30</span>
     </div>
     <div class="top-r">
       <div class="seg" role="radiogroup" aria-label="Modo">
@@ -1217,6 +1217,73 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     }).join('') + '</nav>';
   }
   const libCounts = function () { return { snd: LIBR.items.filter(function (x) { return x.type === 'snd'; }).length, img: LIBR.items.filter(function (x) { return x.type === 'img'; }).length }; };
+  /* ---------- busca no Freesound (só licença CC0) ---------- */
+  const FS_KEY = 'ht-fskey';
+  let fsKey = lsGet(FS_KEY) || '', fsQ = '', fsLen = 'fx', fsRes = null, fsBusy = false, fsMsg = '', fsAudio = null, fsPlay = null, fsSaving = {};
+  function fsStop() { if (fsAudio) { try { fsAudio.pause(); } catch (e) { /* ok */ } fsAudio = null; } fsPlay = null; }
+  async function fsSearch() {
+    if (!fsKey || !fsQ.trim()) return;
+    fsStop(); fsBusy = true; fsMsg = ''; render();
+    const range = fsLen === 'fx' ? '[0 TO 20]' : '[25 TO 900]';
+    const u = 'https://freesound.org/apiv2/search/text/?query=' + encodeURIComponent(fsQ.trim()) +
+      '&filter=' + encodeURIComponent('license:"Creative Commons 0" duration:' + range) +
+      '&fields=id,name,duration,previews,username&page_size=15&token=' + encodeURIComponent(fsKey);
+    try {
+      const r = await fetch(u);
+      if (r.status === 401 || r.status === 403) { fsMsg = 'A chave do Freesound não foi aceita. Confira se copiou inteira.'; fsRes = null; }
+      else if (!r.ok) { fsMsg = 'O Freesound não respondeu (' + r.status + '). Tente de novo.'; fsRes = null; }
+      else { const j = await r.json(); fsRes = j.results || []; if (!fsRes.length) fsMsg = 'Nada encontrado. Tente outra palavra, de preferência em inglês (rain, tavern, door).'; }
+    } catch (e) { fsMsg = 'Não consegui falar com o Freesound. Verifique a conexão.'; fsRes = null; }
+    fsBusy = false; render();
+  }
+  function fsPreview(id) {
+    if (fsPlay === id) { fsStop(); render(); return; }
+    fsStop();
+    const it = (fsRes || []).filter(function (x) { return x.id === Number(id); })[0];
+    if (!it) return;
+    fsAudio = new Audio(it.previews['preview-lq-mp3']);
+    fsPlay = Number(id);
+    fsAudio.onended = function () { fsPlay = null; fsAudio = null; if (mode === 'lib') render(); };
+    fsAudio.play().catch(function () { fsPlay = null; toast('Não consegui tocar esta prévia.'); render(); });
+    render();
+  }
+  async function fsSave(id) {
+    const it = (fsRes || []).filter(function (x) { return x.id === Number(id); })[0];
+    if (!it || fsSaving[id]) return;
+    if (!sbUser()) { toast('Entre na Nuvem para guardar na biblioteca.'); return; }
+    fsSaving[id] = true; render();
+    try {
+      const r = await fetch(it.previews['preview-hq-mp3']);
+      if (!r.ok) throw new Error('baixar');
+      const blob = await r.blob();
+      const file = new File([blob], it.name.replace(/\.[^.]+$/, '') + '.mp3', { type: 'audio/mpeg' });
+      await libAdd(file, 'snd');
+      toast('Guardado na biblioteca: ' + it.name);
+    } catch (e) { toast('Não consegui baixar este som. Tente outro, ou baixe pelo site e envie como arquivo.'); }
+    delete fsSaving[id]; render();
+  }
+  function fsPanel() {
+    let h = '<section class="panel"><h2>Buscar no Freesound</h2>';
+    if (!fsKey) {
+      h += '<p class="hint">Busque sons livres (licença CC0, sem exigir crédito) sem sair do app. Precisa de uma chave gratuita: entre em freesound.org, abra <a href="https://freesound.org/apiv2/apply" target="_blank" rel="noopener">freesound.org/apiv2/apply</a>, crie uma credencial e copie o campo <em>Key</em>. A chave fica só neste aparelho.</p>' +
+        '<form id="fs-keyform" class="add-row"><div class="field"><label for="fs-key">Chave do Freesound</label><input type="text" id="fs-key" autocomplete="off" spellcheck="false"></div><button type="submit" class="btn primary">Guardar chave</button></form></section>';
+      return h;
+    }
+    h += '<form id="fs-form" class="add-row"><div class="field"><label for="fs-q">O que procurar</label><input type="text" id="fs-q" value="' + esc(fsQ) + '" placeholder="Ex.: tavern, rain, wolf howl" autocomplete="off"></div>' +
+      '<div class="field"><label for="fs-len">Tipo</label><select id="fs-len"><option value="fx"' + (fsLen === 'fx' ? ' selected' : '') + '>Efeitos (até 20 s)</option><option value="amb"' + (fsLen === 'amb' ? ' selected' : '') + '>Ambientes (25 s ou mais)</option></select></div>' +
+      '<button type="submit" class="btn primary"' + (fsBusy ? ' disabled' : '') + '>' + (fsBusy ? 'Buscando…' : 'Buscar') + '</button></form>';
+    if (fsMsg) h += '<p class="hint" role="status">' + esc(fsMsg) + '</p>';
+    if (fsRes && fsRes.length) {
+      h += '<ul class="lib-list">' + fsRes.map(function (x) {
+        const saved = LIBR.items.some(function (l) { return l.fs === x.id; });
+        return '<li class="lib-row"><button type="button" class="btn quiet sm lib-play" data-action="fsPlay" data-id="' + x.id + '" aria-label="Ouvir ' + esc(x.name) + '">' + (fsPlay === x.id ? '■' : '▶') + '</button>' +
+          '<span class="lib-n" title="' + esc(x.name) + '">' + esc(x.name) + '</span><span class="tag">' + fmtDur(x.duration) + ' · ' + esc(x.username) + '</span>' +
+          '<button type="button" class="btn sm primary" data-action="fsSave" data-id="' + x.id + '"' + (fsSaving[x.id] ? ' disabled' : '') + '>' + (fsSaving[x.id] ? 'Guardando…' : 'Guardar') + '</button></li>';
+      }).join('') + '</ul>';
+    }
+    h += '<p class="hint"><button type="button" class="linkbtn" data-action="fsKeyClear">Trocar chave</button></p></section>';
+    return h;
+  }
   function renderLib() {
     const head = '<section class="head"><p class="eyebrow">Biblioteca</p><h1>Seus sons e imagens</h1><p class="lede">Envie uma vez e use em qualquer cena ou aventura. Os arquivos ficam guardados na nuvem.</p></section>';
     if (!sbUser()) return head + '<section class="panel"><h2>Entre para usar a biblioteca</h2><p class="hint">A biblioteca guarda os arquivos na sua conta, para abrir em qualquer aparelho.</p><div class="row"><button type="button" class="btn primary" data-action="gateOpen">Entrar</button></div></section>';
@@ -1226,7 +1293,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       '<section class="panel lib-up" id="lib-drop"><h2>' + (isImg ? 'Enviar imagens' : 'Enviar sons') + '</h2>' +
       '<p class="hint">' + (isImg ? 'Escolha uma ou várias imagens. Elas são reduzidas ao tamanho de tela antes de subir.' : 'Escolha um ou vários arquivos mp3, m4a, ogg ou wav, ou arraste-os para cá. Arquivos longos (mais de 25 s) entram como Ambiente; os curtos, como Efeito. Dá para trocar depois.') + '</p>' +
       '<div class="row"><label class="btn primary file-btn">' + (isImg ? 'Escolher imagens' : 'Escolher sons') + '<input type="file" id="lib-file" multiple accept="' + (isImg ? 'image/*' : 'audio/*') + '"></label>' + (libBusy ? '<span class="hint" role="status">' + esc(libBusy) + '</span>' : '') + '</div></section>' +
-      '<section class="panel"><div class="field"><label for="lib-q">Buscar</label><input type="text" id="lib-q" value="' + esc(libQ) + '" placeholder="Nome do arquivo" autocomplete="off"></div>' + libRows(false) + '</section>';
+      (isImg ? '' : fsPanel()) +
+      '<section class="panel"><h2>Seus arquivos</h2><div class="field"><label for="lib-q">Filtrar</label><input type="text" id="lib-q" value="' + esc(libQ) + '" placeholder="Nome do arquivo" autocomplete="off"></div>' + libRows(false) + '</section>';
   }
   function renderPicker() {
     const el = $('#libdlg');
@@ -1535,7 +1603,10 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   /* ---------- áudio ---------- */
   const AS = navigator.audioSession || null;
   function setSession(type) { if (!AS) return; try { AS.type = type; } catch (e) { /* recusado */ } }
-  let ctx = null, master = null, fxBus = null, noiseBuf = null;
+  let ctx = null, master = null, fxBus = null, ambBus = null, noiseBuf = null;
+  let talking = false;
+  const FADES = [['0.8', 'Rápida'], ['2.5', 'Suave'], ['5', 'Longa']];
+  const fadeSec = function () { const v = parseFloat(lsGet('ht-fade')); return v > 0 ? v : 2.5; };
 
   function makeNoise() {
     const len = ctx.sampleRate * 3;
@@ -1563,6 +1634,9 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       lim.connect(ctx.destination);
       fxBus = ctx.createGain();
       fxBus.connect(master);
+      ambBus = ctx.createGain();
+      ambBus.gain.value = talking ? DUCK : 1;
+      ambBus.connect(master);
       noiseBuf = makeNoise();
     }
     if (ctx.state !== 'running') ctx.resume();
@@ -1768,7 +1842,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   function startAmb(c, level) {
     const out = ctx.createGain(), stops = [];
     out.gain.value = 0;
-    out.connect(master);
+    out.connect(ambBus);
     if (c.src === 'file') {
       const s = ctx.createBufferSource();
       s.buffer = fileBuffers[c.id]; s.loop = true;
@@ -1779,18 +1853,19 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     }
     const now = ctx.currentTime;
     out.gain.setValueAtTime(0.0001, now);
-    out.gain.linearRampToValueAtTime(level, now + 0.8);
+    out.gain.linearRampToValueAtTime(level, now + fadeSec());
     return { out: out, stops: stops };
   }
   function stopAmb(id) {
     const a = active[id];
     if (!a) return;
     delete active[id];
-    rampTo(a.out.gain, 0, 0.15);
+    const f = fadeSec();
+    rampTo(a.out.gain, 0, f / 4);
     setTimeout(function () {
       a.stops.forEach(function (fn) { try { fn(); } catch (e) { /* já parado */ } });
       try { a.out.disconnect(); } catch (e) { /* já solto */ }
-    }, 900);
+    }, f * 1100 + 100);
   }
   function toggleAmb(id) {
     const c = findCue(id);
@@ -1798,6 +1873,18 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (active[id]) { stopAmb(id); return; }
     ensure();
     active[id] = startAmb(c, posToGain(ambLevel(c), 1.2) * ambK(c));
+  }
+  const DUCK = 0.22;
+  async function spDuck(on) {
+    if (!spStore.get()) return;
+    const dq = spCurDev ? '&device_id=' + encodeURIComponent(spCurDev) : '';
+    try { await spApi('PUT', '/me/player/volume?volume_percent=' + Math.round(on ? spVol * 0.3 : spVol) + dq); } catch (e) { /* o iPad não aceita; sem aviso */ }
+  }
+  function setTalking(on) {
+    talking = on;
+    if (ambBus) rampTo(ambBus.gain, on ? DUCK : 1, on ? 0.15 : 0.5);
+    spDuck(on);
+    if (mode === 'mesa') renderDock();
   }
   function stopAll() {
     Object.keys(active).forEach(stopAmb);
@@ -1969,6 +2056,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       '<section class="panel" data-sec="som"><h2>Música</h2><div class="form-row">' + inp('Nome', 'music.name', S.music.name) + inp('Termos de busca', 'music.terms', S.music.terms) + inp('Link do Spotify (playlist, álbum ou faixa)', 'music.url', S.music.url) + '</div></section>' +
       '<section class="panel" data-sec="som"><h2>Sons</h2><div>' + cues + '</div>' +
       '<div class="row"><button type="button" class="btn primary" data-action="libOpen" data-id="snd">Adicionar da biblioteca</button></div>' +
+      '<div class="add-row"><div class="field"><label for="fade-sel">Transição dos ambientes (entrar e sair)</label><select id="fade-sel">' + FADES.map(function (f) { return '<option value="' + f[0] + '"' + (parseFloat(f[0]) === fadeSec() ? ' selected' : '') + '>' + f[1] + ' (' + f[0].replace('.', ',') + ' s)</option>'; }).join('') + '</select></div></div>' +
       '<div class="add-row"><div class="field"><label for="add-lib">Ou um som básico (sintetizado)</label><select id="add-lib">' + (libOpts || '<option value="">Tudo já está na cena</option>') + '</select></div><button type="button" class="btn quiet" data-action="cueAdd"' + (libOpts ? '' : ' disabled') + '>Adicionar</button></div>' +
       '<div class="add-row"><div class="field"><label for="new-kind">Seu arquivo de áudio será</label><select id="new-kind"><option value="fx">Efeito (toca uma vez)</option><option value="amb">Ambiente (em loop)</option></select></div><label class="btn quiet file-btn">Enviar novo áudio<input type="file" id="file-audio" accept="audio/*" multiple></label></div>' +
       '<p class="hint">Os sons que você envia vão para a Biblioteca e podem ser usados em outras cenas. Aceita mp3, m4a, ogg e wav.</p></section>' +
@@ -1984,7 +2072,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       '<button type="button" class="step" data-action="fear" data-d="-1" aria-label="Gastar um Medo">−</button><output class="fear-v" aria-live="polite">' + S.fear + '</output>' +
       '<button type="button" class="step" data-action="fear" data-d="1" aria-label="Ganhar um Medo">+</button><span class="dots" aria-hidden="true">' + dots + '</span></div>' +
       '<label class="dock-vol"><span>Volume dos sons</span><input type="range" id="vol-master" min="0" max="1" step="0.005" value="' + S.vol + '"></label>' +
-      '<button type="button" class="btn" data-action="stop">Parar tudo</button></div>';
+      '<div class="dock-r"><button type="button" class="btn' + (talking ? ' primary' : ' quiet') + '" data-action="talk" aria-pressed="' + talking + '" title="Abaixa os ambientes e a música enquanto você fala">' + (talking ? 'Falando…' : 'Falando') + '</button>' +
+      '<button type="button" class="btn" data-action="stop">Parar tudo</button></div></div>';
   }
   let sbLast = '';
   function saveStatus() {
@@ -2138,6 +2227,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     const a = el.getAttribute('data-action'), id = el.getAttribute('data-id'), i = Number(el.getAttribute('data-i'));
     if (a === 'mode') { mode = el.getAttribute('data-mode'); libStop(); libDelArm = null; render(); window.scrollTo(0, 0); return; }
     if (a === 'fear') { S.fear = Math.max(0, Math.min(12, S.fear + Number(el.getAttribute('data-d')))); save(); renderDock(); return; }
+    if (a === 'talk') { setTalking(!talking); return; }
     if (a === 'stop') { stopAll(); render(); return; }
     if (a === 'fx') { playFx(findCue(id)); return; }
     if (a === 'amb') { toggleAmb(id); render(); return; }
@@ -2186,6 +2276,9 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (a === 'noteUp' && i > 0) { const n = S.notes.splice(i, 1)[0]; S.notes.splice(i - 1, 0, n); commit(); return; }
     if (a === 'noteDown' && i < S.notes.length - 1) { const n = S.notes.splice(i, 1)[0]; S.notes.splice(i + 1, 0, n); commit(); return; }
     if (a === 'libTab') { libTab = id; libQ = ''; libDelArm = null; if (libPick) libPick.type = id; render(); return; }
+    if (a === 'fsPlay') { fsPreview(id); return; }
+    if (a === 'fsSave') { fsSave(id); return; }
+    if (a === 'fsKeyClear') { fsKey = ''; fsRes = null; lsSet(FS_KEY, ''); render(); return; }
     if (a === 'libPlay') { libPreview(id); return; }
     if (a === 'libUse') { if (libPick && libPick.type === 'img') addLibImage(id); else addLibSound(id); renderPicker(); return; }
     if (a === 'libDel') {
@@ -2243,8 +2336,14 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   });
 
   let libNameT = null;
+  document.addEventListener('submit', function (e) {
+    const f = e.target;
+    if (f.id === 'fs-keyform') { e.preventDefault(); const v = $('#fs-key').value.trim(); if (v) { fsKey = v; lsSet(FS_KEY, v); render(); } return; }
+    if (f.id === 'fs-form') { e.preventDefault(); fsSearch(); }
+  });
   document.addEventListener('input', function (e) {
     const t = e.target;
+    if (t.id === 'fs-q') { fsQ = t.value; return; }
     if (t.id === 'lib-q') { libQ = t.value; if (libPick) { const b = $('.pick-body'); if (b) b.innerHTML = libRows(true); } else { const keep = t.selectionStart; render(); } return; }
     if (t.getAttribute && t.getAttribute('data-libname')) {
       const it = libFind(t.getAttribute('data-libname'));
@@ -2274,6 +2373,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
 
   document.addEventListener('change', function (e) {
     const t = e.target;
+    if (t.id === 'fs-len') { fsLen = t.value; return; }
+    if (t.id === 'fade-sel') { lsSet('ht-fade', t.value); return; }
     if (t.getAttribute && t.getAttribute('data-libkind')) { const it = libFind(t.getAttribute('data-libkind')); if (it) { it.kind = t.value; libSave(); } return; }
     if (t.id === 'lib-file' && t.files && t.files.length) { libAddMany(t.files, libTab === 'img' ? 'img' : 'snd', false); t.value = ''; return; }
     if (t.id === 'sp-vol') { spVol = Number(t.value); spSetVol(spVol); return; }
