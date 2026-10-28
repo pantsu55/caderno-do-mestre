@@ -12,15 +12,16 @@
 <title>Hollow Table · Jogador</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Literata:ital,opsz,wght@0,7..72,400..700;1,7..72,400..700&display=swap" rel="stylesheet">
 <style>
-:root { color-scheme: dark; --bg: #0A0912; --surface: #131122; --surface-2: #1B1830; --line: #2A2645; --fg: #E9E6F7; --muted: #9A95B8; --accent: #5EE1F5; --accent-ink: #031219; --accent-soft: #0E2B36; --ok: #6EE0A8; --bad: #FF8F8F; --hot: #FFB86B; --font: 'Atkinson Hyperlegible', system-ui, sans-serif; --serif: 'Cinzel', Georgia, serif; --mono: 'JetBrains Mono', ui-monospace, monospace; }
+:root { color-scheme: dark; --bg: #0F0D1C; --surface: #17142B; --surface-2: #211D3B; --line: #2D2850; --fg: #ECE8F8; --muted: #A39DC6; --accent: #B9AEFF; --accent-ink: #15112F; --accent-soft: #2E2858; --ok: #74DDA8; --bad: #F0808A; --hot: #FFB27A; --font: 'Atkinson Hyperlegible', system-ui, sans-serif; --serif: 'Literata', Georgia, serif; --mono: 'Literata', Georgia, serif; }
 * { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.5 var(--font); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
 [hidden] { display: none !important; }
 main { max-width: 860px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
-h1, h2 { font-family: var(--serif); margin: 0; letter-spacing: 0.03em; }
+h1, h2 { font-family: var(--serif); font-weight: 600; margin: 0; letter-spacing: 0; }
+.die, .step output, .result .n, .log .r { font-variant-numeric: lining-nums tabular-nums; }
 h1 { font-size: 24px; }
 h2 { font-size: 17px; }
 p { margin: 0; }
@@ -43,7 +44,7 @@ input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px s
 .skip { background: none; border: 0; color: var(--muted); font: inherit; text-decoration: underline; cursor: pointer; min-height: 40px; }
 .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0 8px; flex-wrap: wrap; }
 .top .who { display: flex; gap: 8px; }
-.sys { display: inline-block; font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent-soft); background: var(--accent-soft); border-radius: 999px; padding: 2px 10px; }
+.sys { display: inline-block; font-size: 13px; font-weight: 700; color: var(--accent); background: var(--accent-soft); border-radius: 999px; padding: 2px 10px; }
 .camps { display: grid; gap: 12px; width: min(460px, 100%); }
 .camp { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; color: var(--fg); font: inherit; cursor: pointer; display: grid; gap: 6px; }
 .camp:hover { border-color: var(--accent); }
@@ -67,13 +68,13 @@ input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px s
 .seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
 .result { text-align: center; padding: 14px 8px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); min-height: 112px; display: grid; place-content: center; gap: 4px; }
 .result .n { font: 700 48px/1 var(--mono); }
-.result .t { color: var(--muted); font-family: var(--mono); font-size: 14px; }
+.result .t { color: var(--muted); font-size: 14px; }
 .result .g { font-family: var(--serif); font-size: 18px; }
 .good { color: var(--ok); } .bad { color: var(--bad); } .hot { color: var(--hot); }
 .log { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
 .log li { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; align-items: baseline; }
 .log .w { font-weight: 700; }
-.log .e { color: var(--muted); font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }
+.log .e { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
 .log .r { font: 700 18px var(--mono); }
 .log .tm { color: var(--muted); font-size: 12px; }
 .sysbox { display: grid; gap: 10px; }
@@ -154,7 +155,7 @@ details.more .in { display: grid; gap: 14px; padding: 4px 0 16px; }
 .avatar input { position: absolute; inset: 0; opacity: 0; cursor: pointer; }
 .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
 .stat { background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; padding: 10px 8px; display: grid; gap: 6px; justify-items: center; text-align: center; min-width: 0; }
-.stat .k { font: 700 12px var(--mono); letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; }
+.stat .k { font: 700 13px var(--font); color: var(--muted); }
 .stat input { text-align: center; font: 700 22px var(--mono); padding: 4px; min-height: 44px; }
 .stat .m { font: 700 16px var(--mono); color: var(--accent); }
 .mono { font-family: var(--mono); }
