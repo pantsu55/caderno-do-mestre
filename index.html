@@ -466,7 +466,6 @@ input[type="range"] { width: 100%; height: 34px; margin: 0; accent-color: var(--
 .cloud.flash .dot { box-shadow: 0 0 0 2px var(--surface), 0 0 10px var(--ok); }
 @keyframes cloud-run { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -158.372; } }
 @keyframes cloud-dot { 50% { opacity: 0.35; } }
-@media (prefers-reduced-motion: reduce) { .cloud .trail path { animation: none; } }
 @keyframes pulse { 50% { opacity: 0.25; } }
 
 /* menus suspensos */
@@ -662,8 +661,9 @@ details.note[open] summary .caret { transform: rotate(180deg); }
 .tst.fumble .tst-c { border-color: color-mix(in srgb, var(--hp) 55%, var(--line)); box-shadow: 0 18px 44px -12px rgba(0, 0, 0, 0.7), 0 0 34px -10px var(--hp); }
 .tst.item .tst-c { background: linear-gradient(100deg, color-mix(in srgb, var(--active) 18%, transparent), transparent 60%), color-mix(in srgb, var(--surface-2) 96%, transparent); }
 .tst.item .tst-av { border-color: var(--active-line); }
-.tst-t { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--active)); transform-origin: left center; animation: tst-time 20s linear forwards; opacity: 0.85; }
+.tst-t { position: absolute; left: 0; right: 0; bottom: 0; height: 2px; background: linear-gradient(90deg, var(--accent), var(--active)); transform-origin: left center; animation: tst-time var(--tt, 20s) linear forwards; opacity: 0.85; }
 @keyframes tst-in { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; transform: none; } }
+@keyframes tst-fade { from { opacity: 0; } }
 @keyframes tst-time { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 @media (max-width: 560px) { .mtoasts { left: var(--gutter); right: var(--gutter-r); width: auto; } .tst-n { font-size: 26px; } }
 
@@ -979,6 +979,15 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
+  /* com o movimento reduzido no sistema, continuam só os pedidos de propósito: o rastro da nuvem
+     (pequeno, na borda do botão) e os avisos que aparecem e somem esmaecendo, sem deslizar */
+  .cloud { transition: background 0.3s, box-shadow 0.6s, color 0.3s !important; }
+  .cloud .trail g { transition: opacity 0.8s ease !important; }
+  .cloud .trail path { animation: cloud-run 14s linear var(--ps, 0s) infinite !important; }
+  .cloud .trail .fast path { animation: cloud-run 1.25s linear var(--pf, 0s) infinite !important; }
+  .tst { animation: tst-fade 0.4s ease !important; transition: grid-template-rows 0.45s ease, margin 0.45s ease, opacity 0.4s ease !important; }
+  .tst.out { transform: none !important; }
+  .tst-t { animation: tst-time var(--tt, 20s) linear forwards !important; }
 }
 </style>
 
@@ -1026,7 +1035,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     }).join('');
   }
   /* ---------- ícones (traço simples, herdam a cor do texto) ---------- */
-  const APP_VER = '0.44';
+  const APP_VER = '0.45';
   const RAVEN = '<svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>';
   const SV = function (p, extra) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '>' + p + '</svg>'; };
   const ICO = {
@@ -2043,7 +2052,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     const el = document.createElement('div');
     el.className = 'tst ' + (cls || '');
     el.title = 'Toque para fechar';
-    el.innerHTML = '<div class="tst-w"><div class="tst-c">' + html + '<i class="tst-t" style="animation-duration:' + ms + 'ms"></i></div></div>';
+    el.innerHTML = '<div class="tst-w"><div class="tst-c">' + html + '<i class="tst-t" style="--tt:' + ms + 'ms"></i></div></div>';
     box.appendChild(el);
     const live = box.querySelectorAll('.tst:not(.out)'), max = window.innerWidth < 560 ? 2 : 3;
     for (let k = 0; k < live.length - max; k++) tstOut(live[k]);
