@@ -640,7 +640,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   <div class="top-in">
     <div class="brand">
       <svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>
-      <span>Hollow Table</span><span class="ver" id="ver">versão 0.25</span>
+      <span>Hollow Table</span><span class="ver" id="ver">versão 0.26</span>
     </div>
     <div class="top-r">
       <div class="seg" role="radiogroup" aria-label="Modo">
@@ -939,9 +939,9 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (!IDX.advs.some(function (e) { return e.id === IDX.cur; })) IDX.cur = IDX.advs[0].id;
     if (A.id !== IDX.cur && lsRaw(ADV_KEY(IDX.cur))) advLoad(IDX.cur);
   }
-  async function sbSync(force) {
+  async function sbSync(force, quiet) {
     if (!sbUser() || sbBusy) return;
-    sbBusy = true; setSb('busy');
+    sbBusy = true; if (!quiet) setSb('busy');
     try {
       const rl = await sbList(), conflicts = [];
       await sbMigrateLegacy(rl);
@@ -1061,7 +1061,15 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     setSb(sbUser() ? 'busy' : 'out');
     if (sbUser()) { sbHydrate(S); sbSync(); }
     document.addEventListener('visibilitychange', function () { if (!document.hidden) sbSync(); });
+    window.addEventListener('focus', function () { sbSync(); });
+    window.addEventListener('pageshow', function () { sbSync(); });
     window.addEventListener('online', function () { sbSync(); });
+    /* confere a nuvem de tempos em tempos, sem atrapalhar quem está digitando */
+    setInterval(function () {
+      const t = document.activeElement && document.activeElement.tagName;
+      if (document.hidden || !sbUser() || sbBusy || sbState === 'conflict' || /^(INPUT|TEXTAREA|SELECT)$/.test(t || '')) return;
+      sbSync(false, true);
+    }, 15000);
   }
 
 
