@@ -397,7 +397,7 @@ input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px s
       $('#o-qty').textContent = dice.qty; $('#o-mod').textContent = (dice.mod > 0 ? '+' : '') + dice.mod;
       return;
     }
-    if (el.dataset.adv != null &&) { dice.adv = parseInt(el.dataset.adv, 10); document.querySelectorAll('[data-adv]').forEach(function (b) { b.setAttribute('aria-pressed', String(parseInt(b.dataset.adv, 10) === dice.adv)); }); return; }
+    if (el.dataset.adv != null) { dice.adv = parseInt(el.dataset.adv, 10); document.querySelectorAll('[data-adv]').forEach(function (b) { b.setAttribute('aria-pressed', String(parseInt(b.dataset.adv, 10) === dice.adv)); }); return; }
     if (el.dataset.tab) { tab = el.dataset.tab; document.querySelectorAll('.tab').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tab === tab)); }); drawPane(); return; }
     if (el.dataset.camp) { cur = camps.filter(function (c) { return c.id === el.dataset.camp; })[0]; tab = 'dados'; last = null; drawLobby(); return; }
     if (el.dataset.note) { noteId = el.dataset.note; noteDelArm = false; paintNotes(); return; }
