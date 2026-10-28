@@ -137,6 +137,9 @@ input[type="email"]:focus-visible, input[type="password"]:focus-visible { outlin
 .top-r { display: flex; align-items: center; gap: 10px; margin-left: auto; }
 .cloud { display: inline-flex; align-items: center; justify-content: center; position: relative; flex: none; width: 46px; height: 46px; padding: 0; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--muted); cursor: pointer; }
 .cloud svg { width: 22px; height: 22px; }
+.cloud svg.ring { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.cloud .prog { fill: none; stroke: var(--active); stroke-width: 2.4; stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset 0.25s linear; }
+.cloud[data-st="out"] .prog { display: none; }
 .cloud::after { content: ""; position: absolute; top: 6px; right: 6px; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); box-shadow: 0 0 0 2px var(--surface); }
 .cloud[data-st="ok"] { color: var(--fg); }
 .cloud[data-st="ok"]::after { background: var(--ok); }
@@ -641,14 +644,14 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   <div class="top-in">
     <div class="brand">
       <svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>
-      <span>Hollow Table</span><span class="ver" id="ver">versão 0.27</span>
+      <span>Hollow Table</span><span class="ver" id="ver">versão 0.28</span>
     </div>
     <div class="top-r">
       <div class="seg" role="radiogroup" aria-label="Modo">
       <button type="button" role="radio" aria-checked="false" data-action="mode" data-mode="prep">Preparar</button>
       <button type="button" role="radio" aria-checked="true" data-action="mode" data-mode="mesa">Mesa</button>
     </div>
-      <button type="button" class="cloud" id="cloud" data-st="out" data-action="cloud" aria-label="Nuvem: entrar" title="Nuvem"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5H7z"/></svg></button>
+      <button type="button" class="cloud" id="cloud" data-st="out" data-action="cloud" aria-label="Nuvem: entrar" title="Nuvem"><svg class="ring" viewBox="0 0 46 46" aria-hidden="true"><rect class="prog" x="1.5" y="1.5" width="43" height="43" rx="11" pathLength="100"/></svg><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5H7z"/></svg></button>
     </div>
   </div>
   <nav class="scenes" id="scenes" aria-label="Cenas"></nav>
@@ -811,6 +814,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   const SBC = { url: 'https://ksucnjrmcagzepxahync.supabase.co', key: 'sb_publishable_zg_rPvJ15I_wbaFZ2qemeg_Xnsalgsh' };
   const lsGet = function (k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
   const lsSet = function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* sem armazenamento */ } };
+  const SB_EVERY = 15000;
+  let sbNext = 0;
   let sbState = 'out', sbMsg = '', sbTimer = null, sbBusy = false, sbVer = 0, sbConflict = null;
   const SB_LABEL = { out: 'entrar', ok: 'tudo salvo', busy: 'sincronizando…', off: 'sem conexão', err: 'erro ao sincronizar', conflict: 'conflito de versões' };
   function sbUser() { const x = lsGet('cdm-sb', null); return x && x.user ? x.user : null; }
@@ -953,6 +958,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       else { sbLast = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); setSb('ok'); }
     } catch (e) { setSb(navigator.onLine ? 'err' : 'off'); }
     sbBusy = false;
+    sbNext = Date.now() + SB_EVERY;
     if (dlg) renderDlg();
     if (mode === 'prep' && ptab === 'nuvem') render();
   }
@@ -1073,12 +1079,20 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     window.addEventListener('focus', function () { sbSync(); });
     window.addEventListener('pageshow', function () { sbSync(); });
     window.addEventListener('online', function () { sbSync(); });
-    /* confere a nuvem de tempos em tempos, sem atrapalhar quem está digitando */
+    /* confere a nuvem de tempos em tempos, sem atrapalhar quem está digitando; o anel do ícone mostra a espera */
+    sbNext = Date.now() + SB_EVERY;
     setInterval(function () {
+      const now = Date.now(), left = Math.max(0, sbNext - now), b = $('#cloud'), r = b && $('.prog', b);
+      if (r) r.style.strokeDashoffset = String(sbUser() ? 100 * left / SB_EVERY : 100);
+      if (b && sbUser()) {
+        const tip = 'Nuvem: ' + (SB_LABEL[sbState] || '') + (sbState === 'ok' && left > 0 ? ' · próxima conferência em ' + Math.ceil(left / 1000) + ' s' : '');
+        if (b.title !== tip) b.title = tip;
+      }
+      if (left > 0) return;
       const t = document.activeElement && document.activeElement.tagName;
       if (document.hidden || !sbUser() || sbBusy || sbState === 'conflict' || /^(INPUT|TEXTAREA|SELECT)$/.test(t || '')) return;
       sbSync(false, true);
-    }, 15000);
+    }, 250);
   }
 
 
