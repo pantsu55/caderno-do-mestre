@@ -276,6 +276,19 @@ input[type="range"] { width: 100%; height: 36px; accent-color: var(--active); ma
 
 /* preparar */
 .prep-grid { display: grid; gap: 28px; }
+.adv-chip { display: inline-flex; align-items: center; gap: 8px; max-width: 240px; border-color: var(--active); font-weight: 700; }
+.adv-chip svg { width: 16px; height: 16px; flex: none; color: var(--active); }
+.adv-chip span { overflow: hidden; text-overflow: ellipsis; }
+.dlg-card { width: min(460px, 100%); text-align: left; justify-items: stretch; }
+.dlg-card h1 { text-align: center; }
+.adv-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.adv-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; border: 1px solid var(--line); background: var(--surface); border-radius: 12px; padding: 8px 10px; }
+.adv-row.warn { border-color: var(--hp); }
+.adv-row span { flex: 1 1 200px; min-width: 0; }
+.adv-row input { flex: 1 1 160px; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-height: 40px; color: var(--fg); font: inherit; }
+.adv-pick { flex: 1 1 140px; min-width: 0; text-align: left; border: 0; background: none; font: inherit; font-weight: 600; padding: 6px 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adv-pick[aria-current="true"]::before { content: "● "; color: var(--active); }
+.dlg-card form { display: grid; gap: 12px; margin-top: 4px; }
 .ptabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
 .prep-grid[data-ptab="cena"] > [data-sec]:not([data-sec="cena"]) { display: none; }
 .prep-grid[data-ptab="notas"] > [data-sec]:not([data-sec="notas"]) { display: none; }
@@ -627,7 +640,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   <div class="top-in">
     <div class="brand">
       <svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>
-      <span>Hollow Table</span><span class="ver" id="ver">versão 0.24</span>
+      <span>Hollow Table</span><span class="ver" id="ver">versão 0.25</span>
     </div>
     <div class="top-r">
       <div class="seg" role="radiogroup" aria-label="Modo">
@@ -653,6 +666,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     <button type="button" class="skip" data-action="gateSkip">Continuar sem entrar</button>
   </div>
 </div>
+<div class="gate dlg" id="advdlg" hidden role="dialog" aria-modal="true" aria-label="Aventuras"></div>
 <main class="wrap" id="main"></main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <footer class="dock" id="dock" hidden></footer>
@@ -712,7 +726,6 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   /* ---------- estado ---------- */
   const KEY = 'caderno-do-mestre-v2';
   const PLAYERS = ['Ana', 'Bruno', 'Carla'];
-  const SCENES = ['O Quadro de Contratos', 'Sinoeira', null, 'O Dia das Perguntas', 'Brejo adentro', 'A Capela Afogada'];
   const defaults = function () {
     return {
       title: 'A Primeira Noite', place: 'Moinho dos Okk', when: 'Noite 1', kind: 'Combate', time: '45 min', budget: 'Orçamento 5 de 14 pontos',
@@ -738,35 +751,55 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
         { id: 'i4', caption: 'O sino debaixo d\'água', src: IMG.sino }
       ],
       countdown: { name: 'Toques do sino', max: 3, value: 0, cue: 'sino', done: 'No terceiro toque, os Afogados restantes recuam para o canal.' },
-      fear: 0, vol: 0.92,
+      fear: 0, vol: 0.92, sample: true,
       adv: { afogados: [0, 0, 0, 0], rolfHp: 0, rolfStress: 0 }
     };
   };
-  function fromSaved(saved) {
-    const base = defaults();
+  /* ---------- aventuras e cenas ---------- */
+  const IDX_KEY = 'hollow-table-index';
+  const ADV_KEY = function (id) { return 'ht-adv-' + id; };
+  const uid = function () { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); };
+  const lsRaw = function (k) { try { return JSON.parse(localStorage.getItem(k) || 'null'); } catch (e) { return null; } };
+  function blankScene(title) {
+    return { title: title || 'Nova cena', place: '', when: '', kind: 'Exploração', time: '', budget: '', summary: '',
+      notes: [{ title: 'A cena', open: true, text: '' }], music: { name: '', terms: '', url: '' }, cues: defaults().cues, images: [],
+      countdown: null, adv: null, fear: 0, vol: 0.92 };
+  }
+  function sceneFrom(saved) {
     const ups = (saved.upImages || []).map(function (i) { return { id: i.id, caption: i.caption, path: i.path, src: '' }; });
-    const out = Object.assign(base, saved, { images: base.images.concat(ups) });
+    const out = Object.assign(blankScene(), saved, { images: (saved.sample ? defaults().images : []).concat(ups) });
     delete out.upImages;
+    if (!(out.vol >= 0 && out.vol <= 1)) out.vol = 0.92;
     return out;
   }
-  function load() {
-    try {
-      const raw = localStorage.getItem(KEY);
-      if (!raw) return null;
-      return fromSaved(JSON.parse(raw));
-    } catch (e) { return null; }
-  }
-  let S = load() || defaults();
-  if (!(S.vol >= 0 && S.vol <= 1)) S.vol = 0.92;
-  function snapshot() {
-    return Object.assign({}, S, {
+  function sceneSnap(sc) {
+    return Object.assign({}, sc, {
       images: undefined,
-      upImages: S.images.filter(function (i) { return i.path; }).map(function (i) { return { id: i.id, caption: i.caption, path: i.path }; }),
-      cues: S.cues.filter(function (c) { return c.src === 'synth' || c.path; }).map(function (c) { return c.src === 'synth' ? c : { id: c.id, kind: c.kind, src: 'file', label: c.label, path: c.path }; })
+      upImages: sc.images.filter(function (i) { return i.path; }).map(function (i) { return { id: i.id, caption: i.caption, path: i.path }; }),
+      cues: sc.cues.filter(function (c) { return c.src === 'synth' || c.path; }).map(function (c) { return c.src === 'synth' ? c : { id: c.id, kind: c.kind, src: 'file', label: c.label, path: c.path }; })
     });
   }
-  function saveLocal() { try { localStorage.setItem(KEY, JSON.stringify(snapshot())); } catch (e) { /* sem armazenamento */ } }
-  function save() { saveLocal(); sbDirty(); }
+  function advFrom(saved) {
+    const list = saved.scenes && saved.scenes.length ? saved.scenes : [blankScene('Primeira cena')];
+    const scenes = list.map(sceneFrom);
+    return { id: saved.id, name: saved.name || 'Aventura', cur: Math.max(0, Math.min(scenes.length - 1, saved.cur | 0)), scenes: scenes };
+  }
+  function advSnap(a) { return { id: a.id, name: a.name, cur: a.cur, scenes: a.scenes.map(sceneSnap) }; }
+  let IDX = lsRaw(IDX_KEY), A = null;
+  (function boot() {
+    if (IDX && IDX.advs && IDX.advs.length) {
+      const saved = lsRaw(ADV_KEY(IDX.cur)) || lsRaw(ADV_KEY(IDX.advs[0].id));
+      if (saved) { A = advFrom(saved); IDX.cur = A.id; return; }
+    }
+    const legacy = lsRaw(KEY);
+    A = { id: uid(), name: 'Os Sinos de Sinoeira', cur: 0, scenes: [legacy ? sceneFrom(Object.assign({ sample: true }, legacy)) : defaults()] };
+    IDX = { advs: [{ id: A.id, name: A.name }], cur: A.id };
+    try { localStorage.setItem(ADV_KEY(A.id), JSON.stringify(advSnap(A))); localStorage.setItem(IDX_KEY, JSON.stringify(IDX)); } catch (e) { /* sem armazenamento */ }
+  })();
+  let S = A.scenes[A.cur];
+  function saveIdx() { try { localStorage.setItem(IDX_KEY, JSON.stringify(IDX)); } catch (e) { /* sem armazenamento */ } }
+  function saveLocal() { try { localStorage.setItem(ADV_KEY(A.id), JSON.stringify(advSnap(A))); } catch (e) { /* sem armazenamento */ } saveIdx(); }
+  function save() { saveLocal(); sbDirty('adv:' + A.id); }
   const PTABS = [['cena', 'Cena'], ['notas', 'Notas'], ['som', 'Música e sons'], ['imagens', 'Imagens'], ['visual', 'Aparência'], ['nuvem', 'Nuvem']];
   let ptab = 'cena';
   let mode = 'mesa', tab = 'notas', revealed = null, audience = ['todos'];
@@ -813,71 +846,122 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (!r.ok) throw new Error(r.status === 400 ? 'E-mail ou senha incorretos.' : 'Não consegui entrar agora. Tente de novo.');
     sbStore(j);
   }
-  async function sbPull() {
-    const r = await sbReq('/rest/v1/docs?kind=eq.state&select=data,updated_at');
-    if (!r.ok) throw new Error('pull');
-    const a = await r.json();
-    return a[0] || null;
+  const metaGet = function () { return lsGet('cdm-sbmeta2', {}); };
+  function metaSet(kind, v) {
+    const m = metaGet();
+    if (v === null) delete m[kind]; else m[kind] = Object.assign(m[kind] || {}, v);
+    lsSet('cdm-sbmeta2', m);
   }
-  async function sbPush() {
-    const r = await sbReq('/rest/v1/docs?on_conflict=owner,kind', { method: 'POST', headers: { 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=representation' }, body: JSON.stringify({ kind: 'state', data: snapshot() }) });
-    if (!r.ok) throw new Error('push');
-    const a = await r.json();
-    return a[0].updated_at;
-  }
-  function applyState(data) {
-    S = fromSaved(data);
-    if (!(S.vol >= 0 && S.vol <= 1)) S.vol = 0.92;
-    revealed = null;
-    saveLocal();
-    renderScenes();
-    sbHydrate();
-    render();
-  }
-  function sbDirty() {
-    sbVer++;
-    const m = lsGet('cdm-sbmeta', {});
-    m.dirty = true;
-    lsSet('cdm-sbmeta', m);
+  const verMap = {};
+  function sbDirty(kind) {
+    verMap[kind] = (verMap[kind] || 0) + 1;
+    metaSet(kind, { dirty: true });
     updateSaveBar();
     if (sbUser() && sbState !== 'conflict') { clearTimeout(sbTimer); sbTimer = setTimeout(sbSync, 1500); }
+  }
+  function anyDirty() { const m = metaGet(); return Object.keys(m).some(function (k) { return m[k] && m[k].dirty; }); }
+  function docPayload(kind) {
+    if (kind === 'index') return { advs: IDX.advs };
+    const id = kind.slice(4);
+    return id === A.id ? advSnap(A) : lsRaw(ADV_KEY(id));
+  }
+  async function sbList() {
+    const r = await sbReq('/rest/v1/docs?select=kind,updated_at');
+    if (!r.ok) throw new Error('lista');
+    const out = {};
+    (await r.json()).forEach(function (d) { out[d.kind] = d.updated_at; });
+    return out;
+  }
+  async function sbPullDoc(kind) {
+    const r = await sbReq('/rest/v1/docs?kind=eq.' + encodeURIComponent(kind) + '&select=data,updated_at');
+    if (!r.ok) throw new Error('pull');
+    return (await r.json())[0] || null;
+  }
+  async function sbPushDoc(kind) {
+    const data = docPayload(kind);
+    if (!data) return null;
+    const r = await sbReq('/rest/v1/docs?on_conflict=owner,kind', { method: 'POST', headers: { 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=representation' }, body: JSON.stringify({ kind: kind, data: data }) });
+    if (!r.ok) throw new Error('push');
+    return (await r.json())[0].updated_at;
+  }
+  function sbDeleteDoc(kind) { sbReq('/rest/v1/docs?kind=eq.' + encodeURIComponent(kind), { method: 'DELETE' }).catch(function () { /* ok */ }); }
+  function applyDoc(kind, data) {
+    if (kind === 'index') {
+      const advs = data.advs || [], keep = IDX.cur;
+      IDX.advs.forEach(function (e) {
+        if (!advs.some(function (x) { return x.id === e.id; })) { try { localStorage.removeItem(ADV_KEY(e.id)); } catch (x) { /* ok */ } metaSet('adv:' + e.id, null); }
+      });
+      IDX.advs = advs.slice();
+      IDX.cur = IDX.advs.some(function (x) { return x.id === keep; }) ? keep : (IDX.advs[0] ? IDX.advs[0].id : keep);
+      saveIdx(); renderScenes();
+    } else {
+      const id = kind.slice(4);
+      try { localStorage.setItem(ADV_KEY(id), JSON.stringify(data)); } catch (x) { /* ok */ }
+      if (id === A.id) {
+        const keepCur = A.cur;
+        A = advFrom(data); A.cur = Math.min(keepCur, A.scenes.length - 1); S = A.scenes[A.cur];
+        revealed = null; if (tab === 'adv' && !S.adv) tab = 'notas';
+        sbHydrate(S); renderScenes(); render();
+      }
+    }
+  }
+  async function sbMigrateLegacy(rl) {
+    if (rl.index || !rl.state) return;
+    const old = lsGet('cdm-sbmeta', {});
+    if (!old.dirty && old.at !== rl.state) {
+      const r = await sbPullDoc('state');
+      if (r && r.data) { A.scenes[0] = sceneFrom(Object.assign({ sample: true }, r.data)); S = A.scenes[A.cur]; saveLocal(); renderScenes(); sbHydrate(S); render(); }
+    }
+    sbDeleteDoc('state');
+  }
+  async function syncDoc(kind, remAt, force, conflicts) {
+    const m = metaGet()[kind] || {}, ver = verMap[kind] || 0;
+    if (!remAt) {
+      const at = await sbPushDoc(kind);
+      if (at) metaSet(kind, { at: at, dirty: (verMap[kind] || 0) !== ver });
+      return;
+    }
+    if (!m.at || remAt !== m.at) {
+      const r = await sbPullDoc(kind);
+      if (!r) return;
+      if (m.at && m.dirty) { conflicts.push({ kind: kind, rem: r }); return; }
+      applyDoc(kind, r.data);
+      metaSet(kind, { at: r.updated_at, dirty: false });
+      return;
+    }
+    if (m.dirty || force === true) {
+      const at = await sbPushDoc(kind);
+      if (at) metaSet(kind, { at: at, dirty: (verMap[kind] || 0) !== ver });
+    }
+  }
+  function ensureCurrent() {
+    if (!IDX.advs.length) { advCreate('Minha primeira aventura'); return; }
+    if (!IDX.advs.some(function (e) { return e.id === IDX.cur; })) IDX.cur = IDX.advs[0].id;
+    if (A.id !== IDX.cur && lsRaw(ADV_KEY(IDX.cur))) advLoad(IDX.cur);
   }
   async function sbSync(force) {
     if (!sbUser() || sbBusy) return;
     sbBusy = true; setSb('busy');
-    const ver = sbVer;
     try {
-      const m = lsGet('cdm-sbmeta', {}), rem = await sbPull();
-      if (!rem) {
-        const at = await sbPush();
-        lsSet('cdm-sbmeta', { at: at, dirty: sbVer !== ver });
-      } else if (!m.at) {
-        try { localStorage.setItem('cdm-prelogin', localStorage.getItem(KEY) || ''); } catch (e) { /* ok */ }
-        applyState(rem.data);
-        lsSet('cdm-sbmeta', { at: rem.updated_at, dirty: false });
-        toast('Carreguei sua aventura da nuvem.');
-      } else if (rem.updated_at !== m.at) {
-        if (m.dirty) { sbConflict = rem; setSb('conflict'); sbBusy = false; if (mode === 'prep') render(); return; }
-        applyState(rem.data);
-        lsSet('cdm-sbmeta', { at: rem.updated_at, dirty: false });
-        toast('Atualizado com a versão da nuvem.');
-      } else if (m.dirty || force === true) {
-        const at = await sbPush();
-        lsSet('cdm-sbmeta', { at: at, dirty: sbVer !== ver });
-      }
-      sbLast = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
-      setSb('ok');
+      const rl = await sbList(), conflicts = [];
+      await sbMigrateLegacy(rl);
+      await syncDoc('index', rl.index, force, conflicts);
+      for (const e of IDX.advs.slice()) await syncDoc('adv:' + e.id, rl['adv:' + e.id], force, conflicts);
+      ensureCurrent();
+      if (conflicts.length) { sbConflict = conflicts; setSb('conflict'); }
+      else { sbLast = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); setSb('ok'); }
     } catch (e) { setSb(navigator.onLine ? 'err' : 'off'); }
     sbBusy = false;
-    if (mode === 'prep') render();
+    if (mode === 'prep' && ptab === 'nuvem') render();
   }
   async function sbResolve(useCloud) {
-    const rem = sbConflict; sbConflict = null;
-    if (!rem) return;
+    const list = sbConflict || []; sbConflict = null;
     try {
-      if (useCloud) { applyState(rem.data); lsSet('cdm-sbmeta', { at: rem.updated_at, dirty: false }); }
-      else { const at = await sbPush(); lsSet('cdm-sbmeta', { at: at, dirty: false }); }
-      setSb('ok');
+      for (const c of list) {
+        if (useCloud) { applyDoc(c.kind, c.rem.data); metaSet(c.kind, { at: c.rem.updated_at, dirty: false }); }
+        else { const at = await sbPushDoc(c.kind); if (at) metaSet(c.kind, { at: at, dirty: false }); }
+      }
+      ensureCurrent(); setSb('ok');
     } catch (e) { setSb('err'); }
     render();
   }
@@ -902,14 +986,15 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       return true;
     } catch (e) { return false; }
   }
-  async function sbHydrate() {
+  async function sbHydrate(sc) {
+    sc = sc || S;
     if (!sbUser()) return;
     let ch = false;
-    for (const im of S.images) {
+    for (const im of sc.images) {
       if (im.path && !im.src) { try { im.src = URL.createObjectURL(await sbDownload(im.path)); ch = true; } catch (e) { /* tenta depois */ } }
     }
-    if (ch) render();
-    for (const c of S.cues) {
+    if (ch && sc === S) render();
+    for (const c of sc.cues) {
       if (c.src === 'file' && c.path && !fileBuffers[c.id]) {
         try {
           const buf = await (await sbDownload(c.path)).arrayBuffer();
@@ -920,12 +1005,22 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     }
   }
   function sbExport() {
-    const blob = new Blob([JSON.stringify({ app: 'hollow-table', saved: new Date().toISOString(), data: snapshot() }, null, 2)], { type: 'application/json' });
+    const advs = IDX.advs.map(function (e) { return e.id === A.id ? advSnap(A) : lsRaw(ADV_KEY(e.id)); }).filter(Boolean);
+    const blob = new Blob([JSON.stringify({ app: 'hollow-table', version: 2, saved: new Date().toISOString(), advs: advs }, null, 2)], { type: 'application/json' });
     const a = document.createElement('a');
     a.href = URL.createObjectURL(blob);
     a.download = 'hollow-table-backup-' + new Date().toISOString().slice(0, 10) + '.json';
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+  }
+  function restoreBackup(j) {
+    const list = Array.isArray(j.advs) ? j.advs : (j.data && Array.isArray(j.data.notes) ? [{ id: uid(), name: 'Backup importado', cur: 0, scenes: [Object.assign({ sample: true }, j.data)] }] : null);
+    if (!list || !list.length) throw new Error('formato');
+    stopAll();
+    IDX.advs.forEach(function (e) { try { localStorage.removeItem(ADV_KEY(e.id)); } catch (x) { /* ok */ } sbDeleteDoc('adv:' + e.id); metaSet('adv:' + e.id, null); });
+    IDX.advs = list.map(function (a) { a.id = a.id || uid(); try { localStorage.setItem(ADV_KEY(a.id), JSON.stringify(a)); } catch (x) { /* ok */ } sbDirty('adv:' + a.id); return { id: a.id, name: a.name || 'Aventura' }; });
+    IDX.cur = IDX.advs[0].id; saveIdx(); sbDirty('index');
+    advLoad(IDX.cur);
   }
   function cloudPanel() {
     const u = sbUser();
@@ -955,7 +1050,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     go.disabled = true; go.textContent = 'Entrando…';
     sbLogin($('#g-email').value.trim(), $('#g-pass').value).then(function () {
       $('#g-pass').value = '';
-      hideGate(); sbSync(); sbHydrate(); render();
+      hideGate(); sbSync(); sbHydrate(S); render();
     }).catch(function (er) { err.textContent = er.message; }).then(function () { go.disabled = false; go.textContent = 'Entrar'; });
   }
   function sbInit() {
@@ -964,7 +1059,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     try { skipped = sessionStorage.getItem('cdm-skip') === '1'; } catch (e) { /* ok */ }
     if (!sbUser() && !skipped) showGate();
     setSb(sbUser() ? 'busy' : 'out');
-    if (sbUser()) { sbHydrate(); sbSync(); }
+    if (sbUser()) { sbHydrate(S); sbSync(); }
     document.addEventListener('visibilitychange', function () { if (!document.hidden) sbSync(); });
     window.addEventListener('online', function () { sbSync(); });
   }
@@ -1163,6 +1258,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     spSay('Não começou a tocar em ' + pick.name + '. Tentativas: ' + log.join(' → ') + '. ' + (j ? 'Estado: ' + (j.item ? '"' + j.item.name + '"' : 'sem faixa') + ', pausado.' + (j.device ? ' Aparelho do estado: ' + j.device.name + ' (' + j.device.type + '), restrito=' + !!j.device.is_restricted + ', sessão privada=' + !!j.device.is_private_session + '.' : '') + (j.actions && j.actions.disallows ? ' Bloqueado: ' + (Object.keys(j.actions.disallows).join(', ') || 'nada') + '.' : '') : 'O Spotify não informa reprodução ativa.'));
   }
   function musicHtml() {
+    if (!S.music.url) return '<div class="music"><div class="m-txt"><p class="lbl-s">Música · Spotify</p><p class="m-name">Sem música nesta cena</p><p class="m-terms">Cole um link do Spotify em Preparar, na aba Música e sons.</p></div></div>';
     const pause = '<path d="M7 5h4v14H7zM13 5h4v14h-4z" fill="currentColor"/>', playI = '<path d="M8 5.5v13l11-6.5z" fill="currentColor"/>';
     const txt = '<div class="m-txt"><p class="lbl-s">Música · Spotify</p><p class="m-name">' + esc(S.music.name) + '</p><p class="m-terms">' + esc(S.music.terms) + '</p>' + (spMsg ? '<p class="sp-msg" role="status">' + esc(spMsg) + '</p>' : '') + spDevHtml();
     if (SP.enabled && spModeGet() === 'app') {
@@ -1482,6 +1578,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   }
   function renderCountdown() {
     const cd = S.countdown;
+    if (!cd) return '';
     let pips = '';
     for (let i = 0; i < cd.max; i++) {
       pips += '<button type="button" class="pip pip-lg' + (i < cd.value ? ' on' : '') + '" data-action="pip" data-key="cd" data-i="' + i + '" aria-pressed="' + (i < cd.value) + '" aria-label="' + esc(cd.name) + ': ' + (i + 1) + '"></button>';
@@ -1507,8 +1604,9 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       '<ul class="feat"><li><strong>Convocar os Afogados</strong> (1 Medo). Um grupo sobe do canal.</li><li><strong>Balestra enferrujada.</strong> Longe, 1d8+2 físico.</li><li><strong>Arrastar.</strong> Corpo a corpo, 1d6+2. Em sucesso, o alvo fica Preso (Dif. 12).</li><li><strong>Cai em lama.</strong> Se Rolf cai, os demais Afogados se desfazem.</li></ul></article>';
   }
   function audText() { return audience.indexOf('todos') >= 0 ? 'todos' : audience.join(', '); }
-  const TABS = [['notas', 'Notas'], ['adv', 'Adversários'], ['img', 'Imagens']];
+  const TABS_ALL = [['notas', 'Notas'], ['adv', 'Adversários'], ['img', 'Imagens']];
   function renderMesa() {
+    if (tab === 'adv' && !S.adv) tab = 'notas';
     const fx = S.cues.filter(function (c) { return c.kind === 'fx'; });
     const amb = S.cues.filter(function (c) { return c.kind === 'amb'; });
     let body = '';
@@ -1536,7 +1634,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
         '<p class="hint">Tela dos jogadores simulada. Na versão final, a imagem aparece no celular de quem você escolher.</p>' +
         '<div class="gallery">' + gallery + '</div>';
     }
-    const tabs = TABS.map(function (t) {
+    const tabs = TABS_ALL.filter(function (t) { return t[0] !== 'adv' || S.adv; }).map(function (t) {
       return '<button type="button" role="tab" class="tab" aria-selected="' + (tab === t[0]) + '" data-action="tab" data-id="' + t[0] + '">' + t[1] + '</button>';
     }).join('');
     const ambs = amb.map(function (c) {
@@ -1547,8 +1645,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     const fxs = fx.map(function (c) {
       return '<button type="button" class="fx' + (c.src === 'synth' && LIB[c.id].wide ? ' wide' : '') + '" data-action="fx" data-id="' + c.id + '"><span class="n">' + esc(label(c)) + '</span><span class="m">' + fmtDur(dur(c)) + '</span></button>';
     }).join('');
-    return '<section class="head"><p class="eyebrow">Cena 3 de 6 · ' + esc(S.when) + ' · ' + esc(S.place) + '</p><h1>' + esc(S.title) + '</h1>' +
-      '<div class="tags"><span class="tag tag-hot">' + esc(S.kind) + '</span><span class="tag">' + esc(S.time) + '</span><span class="tag">' + esc(S.budget) + '</span></div></section>' +
+    return '<section class="head"><p class="eyebrow">' + esc(['Cena ' + (A.cur + 1) + ' de ' + A.scenes.length, S.when, S.place].filter(Boolean).join(' · ')) + '</p><h1>' + esc(S.title) + '</h1>' +
+      '<div class="tags">' + [[S.kind, ' tag-hot'], [S.time, ''], [S.budget, '']].filter(function (t) { return t[0]; }).map(function (t) { return '<span class="tag' + t[1] + '">' + esc(t[0]) + '</span>'; }).join('') + '</div></section>' +
       '<div class="cols"><div class="col">' + renderCountdown() +
       '<section class="panel"><div class="tabs" role="tablist" aria-label="Seções da cena">' + tabs + '</div><div class="tab-body">' + body + '</div></section></div>' +
       '<aside class="console" aria-label="Som">' +
@@ -1578,6 +1676,22 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   function area(label, path, value, rows) {
     return '<div class="field"><label for="f-' + path + '">' + label + '</label><textarea id="f-' + path + '" data-bind="' + path + '" rows="' + (rows || 4) + '">' + esc(value) + '</textarea></div>';
   }
+  function cdPanel(maxOpts, cdCue) {
+    if (!S.countdown) return '<section class="panel" data-sec="cena"><h2>Contagem</h2><p class="hint">Uma contagem de passos para a cena, como os toques de um sino ou um relógio de perigo. Aparece no topo da Mesa.</p><div class="row"><button type="button" class="btn quiet" data-action="cdAdd">Adicionar contagem</button></div></section>';
+    return '<section class="panel" data-sec="cena"><h2>Contagem</h2><div class="form-row">' + inp('Nome', 'countdown.name', S.countdown.name) +
+      '<div class="field"><label for="f-countdown.max">Passos</label><select id="f-countdown.max" data-bind="countdown.max">' + maxOpts + '</select></div>' +
+      '<div class="field"><label for="f-countdown.cue">Som ao avançar</label><select id="f-countdown.cue" data-bind="countdown.cue">' + cdCue + '</select></div></div>' +
+      area('Quando chegar ao fim', 'countdown.done', S.countdown.done, 2) + '<div class="row"><button type="button" class="btn quiet sm" data-action="cdDel">Remover contagem</button></div></section>';
+  }
+  function scenePanel() {
+    const n = A.scenes.length;
+    return '<section class="panel" data-sec="cena"><h2>Esta cena</h2><div class="row">' +
+      '<button type="button" class="btn quiet sm" data-action="sceneLeft"' + (A.cur === 0 ? ' disabled' : '') + '>← Mover para antes</button>' +
+      '<button type="button" class="btn quiet sm" data-action="sceneRight"' + (A.cur === n - 1 ? ' disabled' : '') + '>Mover para depois →</button>' +
+      '<button type="button" class="btn quiet sm" data-action="sceneDup">Duplicar</button>' +
+      '<button type="button" class="btn quiet sm" data-action="sceneDel"' + (n < 2 ? ' disabled' : '') + '>' + (armDel ? 'Confirmar exclusão' : 'Excluir cena') + '</button>' +
+      (armDel ? '<button type="button" class="btn quiet sm" data-action="sceneDelNo">Cancelar</button>' : '') + '</div></section>';
+  }
   function renderPrep() {
     const present = {};
     S.cues.forEach(function (c) { if (c.src === 'synth') present[c.id] = 1; });
@@ -1596,12 +1710,12 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       return '<div class="thumb"><img src="' + im.src + '" alt="' + esc(im.caption) + '"><div class="field"><label for="f-images.' + i + '.caption">Legenda</label><input type="text" id="f-images.' + i + '.caption" data-bind="images.' + i + '.caption" value="' + esc(im.caption) + '"></div><button type="button" class="btn quiet sm" data-action="imgDel" data-id="' + im.id + '">Remover</button></div>';
     }).join('');
     const cdCue = ['<option value="">Nenhum</option>'].concat(S.cues.filter(function (c) { return c.kind === 'fx'; }).map(function (c) {
-      return '<option value="' + c.id + '"' + (S.countdown.cue === c.id ? ' selected' : '') + '>' + esc(label(c)) + '</option>';
+      return '<option value="' + c.id + '"' + (S.countdown && S.countdown.cue === c.id ? ' selected' : '') + '>' + esc(label(c)) + '</option>';
     })).join('');
-    const maxOpts = [2, 3, 4, 5, 6].map(function (n) { return '<option value="' + n + '"' + (S.countdown.max === n ? ' selected' : '') + '>' + n + '</option>'; }).join('');
+    const maxOpts = [2, 3, 4, 5, 6].map(function (n) { return '<option value="' + n + '"' + (S.countdown && S.countdown.max === n ? ' selected' : '') + '>' + n + '</option>'; }).join('');
     const kindOpts = KINDS.map(function (k) { return '<option' + (S.kind === k ? ' selected' : '') + '>' + k + '</option>'; }).join('');
     const tabsHtml = PTABS.map(function (t) { return '<button type="button" class="chip" data-action="ptab" data-id="' + t[0] + '"' + (ptab === t[0] ? ' aria-current="true"' : '') + '>' + t[1] + '</button>'; }).join('');
-    return '<section class="head"><p class="eyebrow">Preparar · Cena 3 de 6</p><h1>Monte a cena</h1><p class="lede">Tudo o que você edita aqui aparece na Mesa. Use Salvar para guardar na nuvem na hora; o app também salva sozinho.</p></section>' +
+    return '<section class="head"><p class="eyebrow">Preparar · ' + esc(A.name) + ' · Cena ' + (A.cur + 1) + ' de ' + A.scenes.length + '</p><h1>Monte a cena</h1><p class="lede">Tudo o que você edita aqui aparece na Mesa. Use Salvar para guardar na nuvem na hora; o app também salva sozinho.</p></section>' +
       '<nav class="ptabs" aria-label="Seções do Preparar">' + tabsHtml + '</nav>' +
       '<div class="prep-grid" data-ptab="' + ptab + '">' +
       '<section class="panel" data-sec="visual"><h2>Aparência</h2><div class="pal-grid" role="group" aria-label="Paleta de cores">' +
@@ -1618,10 +1732,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       '<div class="add-row"><div class="field"><label for="new-kind">Seu arquivo de áudio será</label><select id="new-kind"><option value="fx">Efeito (toca uma vez)</option><option value="amb">Ambiente (em loop)</option></select></div><label class="btn quiet file-btn">Anexar áudio<input type="file" id="file-audio" accept="audio/*"></label></div>' +
       '<p class="hint">Aceita mp3, m4a e wav. Baixe efeitos de fontes livres, como o Freesound.</p></section>' +
       '<section class="panel" data-sec="imagens"><h2>Imagens</h2><div class="thumbs">' + imgs + '</div><div class="row"><label class="btn quiet file-btn">Anexar imagem<input type="file" id="file-img" accept="image/*"></label></div></section>' +
-      '<section class="panel" data-sec="cena"><h2>Contagem</h2><div class="form-row">' + inp('Nome', 'countdown.name', S.countdown.name) +
-      '<div class="field"><label for="f-countdown.max">Passos</label><select id="f-countdown.max" data-bind="countdown.max">' + maxOpts + '</select></div>' +
-      '<div class="field"><label for="f-countdown.cue">Som ao avançar</label><select id="f-countdown.cue" data-bind="countdown.cue">' + cdCue + '</select></div></div>' +
-      area('Quando chegar ao fim', 'countdown.done', S.countdown.done, 2) + '</section>' +
+      cdPanel(maxOpts, cdCue) + scenePanel() +
       cloudPanel() + '</div>';
   }
 
@@ -1636,13 +1747,12 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   }
   let sbLast = '';
   function saveStatus() {
-    const m = lsGet('cdm-sbmeta', {});
     if (!sbUser()) return { k: 'local', t: 'Salvo neste aparelho' };
     if (sbState === 'busy') return { k: 'busy', t: 'Salvando…' };
     if (sbState === 'conflict') return { k: 'warn', t: 'Conflito de versões. Veja a aba Nuvem' };
     if (sbState === 'off') return { k: 'warn', t: 'Sem conexão. Salvo neste aparelho' };
     if (sbState === 'err') return { k: 'warn', t: 'Não consegui salvar na nuvem' };
-    if (m.dirty) return { k: 'dirty', t: 'Alterações ainda não enviadas' };
+    if (anyDirty()) return { k: 'dirty', t: 'Alterações ainda não enviadas' };
     return { k: 'ok', t: 'Tudo salvo na nuvem' + (sbLast ? ' às ' + sbLast : '') };
   }
   function renderSaveBar() {
@@ -1651,12 +1761,101 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       '<div class="dock-r"><button type="button" class="btn quiet" data-action="mode" data-mode="mesa">Ir para a Mesa</button><button type="button" class="btn primary" data-action="saveNow">Salvar</button></div></div>';
   }
   function updateSaveBar() { if (mode === 'prep') renderSaveBar(); }
+  const pathInUse = function (p) { return A.scenes.some(function (sc) { return sc.images.concat(sc.cues).some(function (x) { return x.path === p; }); }); };
+  function carry(next) { next.fear = S.fear; next.vol = S.vol; }
+  function afterSceneChange() {
+    revealed = null; if (tab === 'adv' && !S.adv) tab = 'notas';
+    armDel = false;
+    renderScenes(); sbHydrate(S); render(); window.scrollTo(0, 0);
+  }
+  function setScene(i) {
+    if (i === A.cur || !A.scenes[i]) return;
+    stopAll();
+    carry(A.scenes[i]);
+    A.cur = i; S = A.scenes[i];
+    saveLocal(); afterSceneChange();
+  }
+  function sceneInsert(sc) {
+    stopAll(); carry(sc);
+    A.scenes.splice(A.cur + 1, 0, sc); A.cur += 1; S = sc;
+    save(); afterSceneChange();
+  }
+  function sceneAdd() { sceneInsert(blankScene('Cena ' + (A.scenes.length + 1))); }
+  function sceneDup() { const c = JSON.parse(JSON.stringify(S)); c.title = (S.title || 'Cena') + ' (cópia)'; sceneInsert(c); }
+  function sceneMove(d) {
+    const j = A.cur + d;
+    if (j < 0 || j >= A.scenes.length) return;
+    const t = A.scenes[j]; A.scenes[j] = A.scenes[A.cur]; A.scenes[A.cur] = t; A.cur = j;
+    save(); renderScenes(); render();
+  }
+  function sceneDel() {
+    if (A.scenes.length < 2) return;
+    stopAll();
+    const gone = A.scenes.splice(A.cur, 1)[0];
+    A.cur = Math.min(A.cur, A.scenes.length - 1); S = A.scenes[A.cur];
+    gone.images.concat(gone.cues).forEach(function (x) { if (x.path && !pathInUse(x.path)) sbRemove(x.path); });
+    save(); afterSceneChange();
+  }
+  function advLoad(id) {
+    const saved = lsRaw(ADV_KEY(id));
+    if (!saved) return false;
+    stopAll();
+    const fear = S ? S.fear : 0, vol = S ? S.vol : 0.92;
+    A = advFrom(saved); S = A.scenes[A.cur]; S.fear = fear; S.vol = vol;
+    IDX.cur = id; saveIdx(); tab = 'notas'; afterSceneChange();
+    return true;
+  }
+  function advCreate(name) {
+    const a = { id: uid(), name: (name || '').trim() || 'Nova aventura', cur: 0, scenes: [blankScene('Primeira cena')] };
+    try { localStorage.setItem(ADV_KEY(a.id), JSON.stringify(advSnap(a))); } catch (e) { /* ok */ }
+    IDX.advs.push({ id: a.id, name: a.name }); IDX.cur = a.id; saveIdx();
+    sbDirty('index'); sbDirty('adv:' + a.id);
+    advLoad(a.id);
+  }
+  function advRename(id, name) {
+    name = name.trim();
+    if (!name) return;
+    const e = IDX.advs.filter(function (x) { return x.id === id; })[0];
+    if (!e) return;
+    e.name = name;
+    if (id === A.id) { A.name = name; saveLocal(); sbDirty('adv:' + id); }
+    else { const raw = lsRaw(ADV_KEY(id)); if (raw) { raw.name = name; try { localStorage.setItem(ADV_KEY(id), JSON.stringify(raw)); } catch (x) { /* ok */ } sbDirty('adv:' + id); } }
+    saveIdx(); sbDirty('index'); renderScenes();
+  }
+  function advDelete(id) {
+    if (IDX.advs.length < 2) return;
+    const raw = id === A.id ? advSnap(A) : lsRaw(ADV_KEY(id));
+    if (raw) raw.scenes.forEach(function (sc) {
+      (sc.upImages || []).concat((sc.cues || []).filter(function (c) { return c.path; })).forEach(function (x) { sbRemove(x.path); });
+    });
+    IDX.advs = IDX.advs.filter(function (x) { return x.id !== id; });
+    try { localStorage.removeItem(ADV_KEY(id)); } catch (x) { /* ok */ }
+    metaSet('adv:' + id, null); sbDeleteDoc('adv:' + id);
+    sbDirty('index');
+    if (id === A.id) { IDX.cur = IDX.advs[0].id; advLoad(IDX.cur); } else saveIdx();
+  }
+  let dlg = null, armDel = false;
+  function renderDlg() {
+    const el = $('#advdlg');
+    if (!el) return;
+    if (!dlg) { el.hidden = true; return; }
+    el.hidden = false;
+    const rows = IDX.advs.map(function (e) {
+      if (dlg.mode === 'rename' && dlg.id === e.id) return '<li class="adv-row"><input type="text" id="adv-rn" value="' + esc(e.name) + '" aria-label="Novo nome da aventura"><button type="button" class="btn sm primary" data-action="advRenameOk" data-id="' + e.id + '">Salvar</button><button type="button" class="btn sm quiet" data-action="advCancel">Cancelar</button></li>';
+      if (dlg.mode === 'del' && dlg.id === e.id) return '<li class="adv-row warn"><span>Excluir “' + esc(e.name) + '” e todas as cenas?</span><button type="button" class="btn sm" data-action="advDelOk" data-id="' + e.id + '">Excluir</button><button type="button" class="btn sm quiet" data-action="advCancel">Cancelar</button></li>';
+      return '<li class="adv-row"><button type="button" class="adv-pick" data-action="advPick" data-id="' + e.id + '"' + (e.id === A.id ? ' aria-current="true"' : '') + '>' + esc(e.name) + '</button>' +
+        '<button type="button" class="btn sm quiet" data-action="advRename" data-id="' + e.id + '">Renomear</button><button type="button" class="btn sm quiet" data-action="advDel" data-id="' + e.id + '"' + (IDX.advs.length < 2 ? ' disabled' : '') + '>Excluir</button></li>';
+    }).join('');
+    el.innerHTML = '<div class="gate-card dlg-card"><h1>Aventuras</h1><ul class="adv-list">' + rows + '</ul>' +
+      '<form id="adv-new"><div class="field"><label for="adv-nn">Nova aventura</label><input type="text" id="adv-nn" placeholder="Nome da aventura" autocomplete="off"></div><button type="submit" class="btn primary">Criar aventura</button></form>' +
+      '<button type="button" class="skip" data-action="advClose">Fechar</button></div>';
+    if (dlg.mode === 'rename') setTimeout(function () { const f = $('#adv-rn'); if (f) { f.focus(); f.select(); } }, 20);
+  }
   function renderScenes() {
-    $('#scenes').innerHTML = SCENES.map(function (n, i) {
-      return i === 2
-        ? '<button type="button" class="chip" aria-current="true">' + (i + 1) + '. ' + esc(S.title) + '</button>'
-        : '<button type="button" class="chip" disabled title="Vazia neste protótipo">' + (i + 1) + '. ' + esc(n) + '</button>';
-    }).join('') + '<button type="button" class="chip" disabled title="Em breve">+ Nova cena</button>';
+    $('#scenes').innerHTML = '<button type="button" class="chip adv-chip" data-action="advOpen" aria-haspopup="dialog" title="Trocar de aventura"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 4h11a3 3 0 0 1 3 3v13H8a3 3 0 0 1-3-3z"/><path d="M5 17a3 3 0 0 1 3-3h11"/></svg><span>' + esc(A.name) + '</span></button>' +
+      A.scenes.map(function (sc, i) {
+        return '<button type="button" class="chip" data-action="scene" data-i="' + i + '"' + (i === A.cur ? ' aria-current="true"' : '') + '>' + (i + 1) + '. ' + esc(sc.title || 'Sem título') + '</button>';
+      }).join('') + '<button type="button" class="chip" data-action="sceneAdd">+ Nova cena</button>';
   }
   function render() {
     document.body.classList.add('has-dock');
@@ -1747,13 +1946,30 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       else if (!active[id]) { toggleAmb(id); setTimeout(function () { stopAmb(id); }, 4000); }
       return;
     }
-    if (a === 'cueDel') { const gc = findCue(id); if (gc && gc.path) sbRemove(gc.path); stopAmb(id); S.cues = S.cues.filter(function (c) { return c.id !== id; }); delete fileBuffers[id]; commit(); return; }
+    if (a === 'cueDel') { const gc = findCue(id); stopAmb(id); S.cues = S.cues.filter(function (c) { return c.id !== id; }); if (gc && gc.path && !pathInUse(gc.path)) sbRemove(gc.path); delete fileBuffers[id]; commit(); return; }
     if (a === 'cueAdd') {
       const k = $('#add-lib').value;
       if (k && LIB[k]) { S.cues.push({ id: k, kind: LIB[k].kind, src: 'synth' }); commit(); }
       return;
     }
+    if (a !== 'sceneDel') armDel = false;
     if (a === 'ptab') { ptab = id; render(); return; }
+    if (a === 'scene') { setScene(i); return; }
+    if (a === 'sceneAdd') { sceneAdd(); return; }
+    if (a === 'sceneDup') { sceneDup(); toast('Cena duplicada.'); return; }
+    if (a === 'sceneLeft') { sceneMove(-1); return; }
+    if (a === 'sceneRight') { sceneMove(1); return; }
+    if (a === 'sceneDel') { if (!armDel) { armDel = true; render(); return; } sceneDel(); toast('Cena excluída.'); return; }
+    if (a === 'sceneDelNo') { armDel = false; render(); return; }
+    if (a === 'cdAdd') { S.countdown = { name: 'Contagem', max: 3, value: 0, cue: '', done: '' }; commit(); return; }
+    if (a === 'cdDel') { S.countdown = null; commit(); return; }
+    if (a === 'advOpen') { dlg = { mode: 'list' }; renderDlg(); return; }
+    if (a === 'advClose' || a === 'advCancel') { dlg = a === 'advCancel' ? { mode: 'list' } : null; renderDlg(); return; }
+    if (a === 'advPick') { dlg = null; renderDlg(); if (id !== A.id) advLoad(id); return; }
+    if (a === 'advRename') { dlg = { mode: 'rename', id: id }; renderDlg(); return; }
+    if (a === 'advRenameOk') { const f = $('#adv-rn'); if (f) advRename(id, f.value); dlg = { mode: 'list' }; renderDlg(); return; }
+    if (a === 'advDel') { dlg = { mode: 'del', id: id }; renderDlg(); return; }
+    if (a === 'advDelOk') { dlg = { mode: 'list' }; advDelete(id); renderDlg(); return; }
     if (a === 'saveNow') {
       saveLocal();
       if (!sbUser()) { toast('Salvo neste aparelho. Entre na Nuvem para abrir no iPad.'); return; }
@@ -1769,7 +1985,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (a === 'sbExport') { sbExport(); return; }
     if (a === 'sbCloud') { sbResolve(true); return; }
     if (a === 'sbLocal') { sbResolve(false); return; }
-    if (a === 'imgDel') { const gone = S.images.filter(function (im) { return im.id === id; })[0]; if (gone && gone.path) sbRemove(gone.path); S.images = S.images.filter(function (im) { return im.id !== id; }); if (revealed === id) revealed = null; commit(); return; }
+    if (a === 'imgDel') { const gone = S.images.filter(function (im) { return im.id === id; })[0]; S.images = S.images.filter(function (im) { return im.id !== id; }); if (gone && gone.path && !pathInUse(gone.path)) sbRemove(gone.path); if (revealed === id) revealed = null; commit(); return; }
   });
 
   document.addEventListener('input', function (e) {
@@ -1807,9 +2023,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     }
     if (t.id === 'file-restore' && t.files && t.files[0]) {
       t.files[0].text().then(function (tx) {
-        const j = JSON.parse(tx), d = j && j.data;
-        if (!d || !Array.isArray(d.notes)) throw new Error('formato');
-        applyState(d); sbDirty(); toast('Backup restaurado.');
+        const j = JSON.parse(tx);
+        restoreBackup(j); toast('Backup restaurado.');
       }).catch(function () { toast('Este arquivo não parece um backup do Hollow Table.'); });
       t.value = '';
       return;
@@ -1848,6 +2063,18 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
 
   document.addEventListener('keydown', function (e) {
     if ((e.ctrlKey || e.metaKey) && (e.key === 's' || e.key === 'S') && mode === 'prep') { e.preventDefault(); const b = $('[data-action="saveNow"]'); if (b) b.click(); }
+  });
+
+  document.addEventListener('submit', function (e) {
+    if (e.target && e.target.id === 'adv-new') {
+      e.preventDefault();
+      const f = $('#adv-nn');
+      dlg = null; renderDlg(); advCreate(f ? f.value : '');
+    }
+  });
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target && e.target.id === 'adv-rn') { e.preventDefault(); const b = $('[data-action="advRenameOk"]'); if (b) b.click(); }
+    if (e.key === 'Escape' && dlg) { dlg = null; renderDlg(); }
   });
 
   document.addEventListener('toggle', function (e) {
