@@ -583,6 +583,12 @@ details.room-box[open] summary .caret { transform: rotate(180deg); }
 .feed-list .fr { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-family: var(--font-mono); font-size: 22px; font-weight: 500; }
 .feed-list .fr.good { color: var(--ok); } .feed-list .fr.bad { color: #ff8f8f; } .feed-list .fr.hot { color: #ffb86b; }
 .feed-empty { color: var(--muted); border-style: dashed !important; }
+.feed-list li.ev { background: linear-gradient(90deg, rgba(139, 123, 255, 0.10), transparent 70%), var(--surface); border-color: rgba(139, 123, 255, 0.35); }
+.feed-list li.ev .fw svg { width: 15px; height: 15px; vertical-align: -2px; margin-right: 6px; color: var(--active); }
+.feed-list li.ev .fe { color: var(--fg); }
+.feed-list li.ev .fw, .feed-list li.ev .fe { grid-column: 1; }
+.jog-b { gap: 8px; }
+.jog-b .btn svg { width: 16px; height: 16px; vertical-align: -3px; margin-right: 6px; }
 
 /* console de som */
 .console {
@@ -882,7 +888,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   </div>
 </div>
 <div class="gate dlg" id="advdlg" hidden role="dialog" aria-modal="true" aria-label="Aventuras"></div>
-<aside class="drawer" id="jogdrawer" hidden aria-label="Fichas dos jogadores"><div class="drawer-h"><h2>Fichas dos jogadores</h2><button type="button" class="btn quiet sm" data-action="jogClose">Fechar</button></div><iframe title="Fichas dos jogadores"></iframe></aside>
+<aside class="drawer" id="jogdrawer" hidden aria-label="Jogadores"><div class="drawer-h"><h2>Jogadores</h2><button type="button" class="btn quiet sm" data-action="jogClose">Fechar</button></div><iframe title="Fichas e mochilas dos jogadores"></iframe></aside>
 <div class="gate dlg" id="prodlg" hidden role="dialog" aria-modal="true" aria-label="Perfil"></div>
 <div class="gate dlg" id="libdlg" hidden role="dialog" aria-modal="true" aria-label="Biblioteca"></div>
 <main class="app" id="main"></main>
@@ -907,7 +913,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     }).join('');
   }
   /* ---------- ícones (traço simples, herdam a cor do texto) ---------- */
-  const APP_VER = '0.39';
+  const APP_VER = '0.40';
   const RAVEN = '<svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>';
   const SV = function (p, extra) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '>' + p + '</svg>'; };
   const ICO = {
@@ -937,7 +943,8 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     gear: SV('<circle cx="12" cy="12" r="3"/><path d="M12 2.8v2.4M12 18.8v2.4M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M2.8 12h2.4M18.8 12h2.4M4.9 19.1l1.7-1.7M17.4 6.6l1.7-1.7"/>'),
     login: SV('<path d="M14 4h3.5A1.5 1.5 0 0 1 19 5.5v13a1.5 1.5 0 0 1-1.5 1.5H14"/><path d="M10 8l4 4-4 4M14 12H4"/>'),
     cloud: SV('<path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5H7z"/>', ' stroke-width="1.7"'),
-    link: SV('<path d="M10 14a4.5 4.5 0 0 0 6.4 0l2.8-2.8a4.5 4.5 0 0 0-6.4-6.4L11.5 6"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-2.8 2.8a4.5 4.5 0 0 0 6.4 6.4L12.5 18"/>')
+    link: SV('<path d="M10 14a4.5 4.5 0 0 0 6.4 0l2.8-2.8a4.5 4.5 0 0 0-6.4-6.4L11.5 6"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-2.8 2.8a4.5 4.5 0 0 0 6.4 6.4L12.5 18"/>'),
+    bag: SV('<path d="M6 10a6 6 0 0 1 12 0v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/><path d="M9.5 4.6V4a2.5 2.5 0 0 1 5 0v.6"/><path d="M9 14h6v4H9z"/>')
   };
   const safeUrl = function (u) { return /^https:\/\//i.test(u) ? u : '#'; };
   const fmtDur = function (n) { return n.toFixed(1).replace('.', ',') + ' s'; };
@@ -1693,7 +1700,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       '<section class="sec"><div class="sec-h"><h2>Excluir</h2><p class="hint">Apaga a mesa online, as rolagens e o acesso dos jogadores a esta aventura. A aventura continua.</p></div><button type="button" class="btn add' + (campDelArm ? ' danger-fill' : ' danger') + '" data-action="campDel">' + (campDelArm ? 'Confirmar exclusão da mesa online' : 'Excluir mesa online') + '</button></section>';
   }
   function pageOnline() {
-    return '<div class="page" data-keep="page"><div class="page-in"><header class="page-h"><p class="eyebrow">Mesa online</p><h1>Jogadores</h1><p class="lede">A mesa online de ' + esc(A.name) + '. Cada jogador entra com a própria conta para rolar dados, anotar e preencher a ficha; você acompanha tudo na Mesa, na aba Jogadores.</p></header>' + onlinePanel() + '</div></div>';
+    return '<div class="page" data-keep="page"><div class="page-in"><header class="page-h"><p class="eyebrow">Mesa online</p><h1>Jogadores</h1><p class="lede">A mesa online de ' + esc(A.name) + '. Cada jogador entra com a própria conta para rolar dados, anotar, preencher a ficha e cuidar da mochila; você acompanha tudo e dá saque pela Mesa, na aba Jogadores.</p></header>' + onlinePanel() + '</div></div>';
   }
   function profileOpen(msg, ok) {
     const el = $('#prodlg'), u = sbUser();
@@ -1725,8 +1732,12 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   function feedRows(list) {
     if (!list.length) return '<li class="feed-empty">Nenhuma rolagem ainda.</li>';
     return list.slice(0, 12).map(function (r, k) {
-      const res = r.result || {}, d = new Date(r.at);
-      return '<li class="' + (k < feedNew ? 'fresh' : '') + '"><span class="fw">' + esc(r.who) + '<small>' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '</small></span><span class="fe">' + esc((r.label ? r.label + ': ' : '') + (res.text || r.expr)) + (res.tag ? ', ' + esc(res.tag) : '') + '</span><b class="fr ' + esc(res.tone || '') + '">' + esc(res.total) + '</b></li>';
+      const res = r.result || {}, d = new Date(r.at), tm = '<small>' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '</small>';
+      if (r.kind === 'item') {
+        const hasN = res.total !== undefined && res.total !== null && res.total !== '';
+        return '<li class="ev' + (k < feedNew ? ' fresh' : '') + '"><span class="fw">' + ICO.bag + esc(r.who) + tm + '</span><span class="fe">' + esc(r.label) + (res.tag ? ' · ' + esc(res.tag) : '') + '</span>' + (hasN ? '<b class="fr good">' + esc(res.total) + '</b>' : '') + '</li>';
+      }
+      return '<li class="' + (k < feedNew ? 'fresh' : '') + '"><span class="fw">' + esc(r.who) + tm + '</span><span class="fe">' + esc((r.label ? r.label + ': ' : '') + (res.text || r.expr)) + (res.tag ? ', ' + esc(res.tag) : '') + '</span><b class="fr ' + esc(res.tone || '') + '">' + esc(res.total) + '</b></li>';
     }).join('');
   }
   let feedUnseen = 0;
@@ -1736,7 +1747,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (campFor !== A.id) { if (!campBusy) { await campLoad(); render(); } return; }
     if (!CAMP) return;
     try {
-      const r = await sbReq('/rest/v1/rolls?campaign_id=eq.' + CAMP.id + '&select=id,who,label,expr,result,at&order=id.desc&limit=12');
+      const r = await sbReq('/rest/v1/rolls?campaign_id=eq.' + CAMP.id + '&select=id,who,label,expr,result,at,kind&order=id.desc&limit=12');
       if (!r.ok) return;
       const j = await r.json(), sig = j.map(function (x) { return x.id; }).join(',');
       if (sig === feedSig) return;
@@ -1746,15 +1757,17 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       if (feedNew && tab !== 'jog') feedUnseen += feedNew;
       const el = $('#rollfeed'); if (el) el.innerHTML = feedHtml;
       const bd = $('#jog-badge'); if (bd) bd.hidden = !(feedUnseen && tab !== 'jog');
-      if (feedNew && j[0]) { const r0 = j[0], res = r0.result || {}; toast(r0.who + ' rolou ' + (r0.label ? r0.label + ': ' : '') + res.total + (res.tag ? ' (' + res.tag + ')' : '')); }
+      if (feedNew && j[0]) { const r0 = j[0], res = r0.result || {}; toast(r0.kind === 'item' ? r0.who + ' ' + r0.label + (res.total !== undefined && res.total !== '' ? ': ' + res.total : '') : r0.who + ' rolou ' + (r0.label ? r0.label + ': ' : '') + res.total + (res.tag ? ' (' + res.tag + ')' : '')); }
     } catch (e) { /* tenta depois */ }
   }
-  function jogOpen() {
+  function jogOpen(t) {
     const d = $('#jogdrawer');
     if (!d) return;
-    const src = 'jogar.html?embed=fichas&adv=' + encodeURIComponent(A.id);
+    const want = t === 'mochilas' ? 'mochilas' : 'fichas';
+    const base = 'jogar.html?embed=fichas&adv=' + encodeURIComponent(A.id) + '&tab=';
     const f = d.querySelector('iframe');
-    if (f.getAttribute('src') !== src) f.setAttribute('src', src);
+    if ((f.getAttribute('src') || '').indexOf(base) !== 0) f.setAttribute('src', base + want);
+    else { try { f.contentWindow.postMessage({ ht: 'tab', tab: want }, location.origin); } catch (e) { /* abre como estava */ } }
     d.hidden = false;
   }
   function cloudPanel() {
@@ -2449,11 +2462,11 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   function jogHtml() {
     if (!sbUser()) return '<p class="empty-hint">Entre na nuvem para usar a mesa online.</p>';
     if (campFor !== A.id || CAMP === undefined) { if (!campBusy) setTimeout(campLoad, 0); return '<p class="empty-hint" role="status">Carregando a mesa online…</p>'; }
-    if (!CAMP) return '<div class="empty-cta"><p>Esta aventura ainda não tem mesa online. Com ela, cada jogador entra com a própria conta para rolar dados, anotar e preencher a ficha, e as rolagens aparecem aqui.</p><button type="button" class="btn primary" data-action="mode" data-mode="online">Criar mesa online</button></div>';
+    if (!CAMP) return '<div class="empty-cta"><p>Esta aventura ainda não tem mesa online. Com ela, cada jogador entra com a própria conta para rolar dados, anotar, preencher a ficha e cuidar da mochila, e as rolagens aparecem aqui.</p><button type="button" class="btn primary" data-action="mode" data-mode="online">Criar mesa online</button></div>';
     const ms = CAMP.members || [];
     return '<div class="jog-h"><div class="who-row">' + (ms.length ? ms.map(function (m) { return '<span class="who-chip">' + esc(m.name) + '</span>'; }).join('') : '<span class="hint">Nenhum jogador ainda.</span>') + '</div>' +
-      '<button type="button" class="btn quiet sm" data-action="jogOpen"' + (ms.length ? '' : ' disabled') + '>Ver fichas</button></div>' +
-      '<h3 class="sub-h">Rolagens</h3><ul class="feed-list" id="rollfeed">' + (feedHtml || '<li class="feed-empty">Carregando…</li>') + '</ul>';
+      '<div class="row jog-b"><button type="button" class="btn quiet sm" data-action="jogOpen" data-t="fichas"' + (ms.length ? '' : ' disabled') + '>Fichas</button><button type="button" class="btn quiet sm" data-action="jogOpen" data-t="mochilas">' + ICO.bag + 'Mochilas e saque</button></div></div>' +
+      '<h3 class="sub-h">Rolagens e itens</h3><ul class="feed-list" id="rollfeed">' + (feedHtml || '<li class="feed-empty">Carregando…</li>') + '</ul>';
   }
   function consoleHtml(amb, fx) {
     const ambs = amb.map(function (c) {
@@ -2939,7 +2952,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (a !== 'sceneDel') armDel = false;
     if (a === 'ptab') { ptab = id; if (id === 'online' && (CAMP === undefined || campFor !== A.id) && !campBusy) campLoad(); render(); return; }
     if (a === 'profile') { profileOpen(); return; }
-    if (a === 'jogOpen') { jogOpen(); return; }
+    if (a === 'jogOpen') { jogOpen(el.getAttribute('data-t')); return; }
     if (a === 'jogClose') { $('#jogdrawer').hidden = true; return; }
     if (a === 'proClose') { $('#prodlg').hidden = true; return; }
     if (a === 'campCreate') { campCreate(); return; }

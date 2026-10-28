@@ -193,6 +193,86 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
 .embed main { padding-bottom: 24px; max-width: none; }
 .embed body { padding-top: 8px; }
 .embed .rtoast { bottom: 16px; }
+.emb-tabs { display: flex; gap: 6px; padding: 2px 0 10px; border-bottom: 1px solid var(--line); margin-bottom: 4px; }
+.nav button { position: relative; }
+.nb { position: absolute; top: 7px; right: 22%; width: 9px; height: 9px; border-radius: 50%; background: var(--hot); box-shadow: 0 0 10px rgba(255, 184, 107, 0.7); }
+@media (min-width: 760px) { .nb { top: 6px; right: 6px; } }
+
+/* ---- mochila ---- */
+.dlg { place-items: start center; }
+.dlg > .card { margin-block: auto; }
+.dlg .card.wide { width: min(640px, 100%); }
+.between { justify-content: space-between; align-items: center; }
+.card h2 svg { width: 18px; height: 18px; vertical-align: -3px; margin-right: 6px; color: var(--accent); }
+.bag-grid { display: grid; gap: 14px; align-items: start; }
+@media (min-width: 900px) { .bag-grid { grid-template-columns: minmax(0, 1.55fr) minmax(290px, 1fr); } }
+.bag-main, .bag-side { display: grid; gap: 14px; min-width: 0; align-content: start; }
+.bag-tools { display: grid; gap: 10px; }
+.bag-tools .btn svg { width: 18px; height: 18px; vertical-align: -3px; margin-right: 6px; }
+.chips { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px 0; }
+.chips::-webkit-scrollbar { display: none; }
+.chips.wrap { flex-wrap: wrap; overflow: visible; }
+.chip { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--line); color: var(--muted); border-radius: 999px; font: inherit; font-size: 14px; min-height: 40px; padding: 0 14px; cursor: pointer; white-space: nowrap; }
+.chip svg { width: 16px; height: 16px; }
+.chip .ct { font-family: var(--mono); font-size: 12px; opacity: 0.75; }
+.chip[aria-pressed="true"] { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.chip:disabled { opacity: 0.45; cursor: default; }
+.grp { display: grid; gap: 8px; }
+.grp-h { display: flex; align-items: center; gap: 10px; font: 700 12px var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin: 4px 0 0; }
+.grp-h .ct { color: var(--accent); }
+.grp-h::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.its { display: grid; gap: 8px; }
+.it { --r: transparent; --rc: var(--fg); position: relative; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.it::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--r); }
+.r-inc { --r: #6EE0A8; --rc: #9BF2C6; } .r-rar { --r: #6FA8FF; --rc: #A3C6FF; } .r-mr { --r: #B48BFF; --rc: #D0B5FF; } .r-len { --r: #FFB86B; --rc: #FFCC91; } .r-art { --r: #FF7A90; --rc: #FFA2B1; }
+.it.open { box-shadow: 0 0 0 1px var(--accent-soft), 0 10px 30px rgba(0, 0, 0, 0.35); }
+.it-main { display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 12px; align-items: center; background: none; border: 0; color: inherit; font: inherit; text-align: left; padding: 10px 8px 10px 14px; cursor: pointer; min-height: 60px; min-width: 0; }
+.it-ic { width: 38px; height: 38px; border-radius: 11px; background: var(--surface-2); border: 1px solid var(--line); display: grid; place-items: center; color: var(--muted); }
+.it-ic svg { width: 20px; height: 20px; }
+.it.eq .it-ic { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); box-shadow: 0 0 16px rgba(94, 225, 245, 0.28); }
+.it-tx { min-width: 0; display: grid; gap: 2px; }
+.it-n { font-weight: 700; color: var(--rc, var(--fg)); overflow-wrap: anywhere; }
+.it-s { color: var(--muted); font: 13px/1.4 var(--mono); overflow-wrap: anywhere; }
+.it-q { font: 700 15px var(--mono); padding: 3px 9px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); white-space: nowrap; }
+.it-acts { display: flex; gap: 6px; padding: 8px 12px 8px 0; }
+.it-more { grid-column: 1 / -1; border-top: 1px solid var(--line); padding: 12px 14px 14px; display: grid; gap: 10px; background: rgba(4, 3, 10, 0.25); }
+.it-more .row { gap: 8px; }
+.it-notes { white-space: pre-wrap; font-size: 15px; overflow-wrap: anywhere; }
+.it-meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font: 13px var(--mono); color: var(--muted); }
+.it-meta b { color: var(--fg); font-weight: 700; }
+.warnl { color: var(--hot); }
+.danger { color: var(--bad) !important; border-color: var(--bad) !important; }
+@media (max-width: 560px) { .it { grid-template-columns: 1fr; } .it-acts { padding: 0 12px 12px 64px; flex-wrap: wrap; } }
+.purse { display: grid; grid-template-columns: repeat(auto-fit, minmax(50px, 1fr)); gap: 8px; }
+.coin { --cc: var(--fg); display: grid; justify-items: center; gap: 2px; padding: 9px 6px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); min-width: 0; }
+.coin b { font: 700 20px/1.1 var(--mono); color: var(--cc); }
+.coin span { font: 700 11px var(--mono); letter-spacing: 0.08em; color: var(--muted); text-transform: uppercase; }
+.c-pc { --cc: #E5A077; } .c-pp { --cc: #D5DCEA; } .c-pe { --cc: #E7DB95; } .c-po, .c-punhado, .c-bolsa, .c-bau { --cc: #F5C66B; } .c-pl { --cc: #BDEAF3; } .c-din { --cc: #6EE0A8; }
+.crow { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 8px 10px 8px 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+.crow b { font: 700 17px var(--mono); color: var(--cc, var(--fg)); }
+.meter { height: 10px; border-radius: 999px; background: var(--bg); border: 1px solid var(--line); overflow: hidden; }
+.meter i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #5EE1F5, #8B7BFF); box-shadow: 0 0 12px rgba(139, 123, 255, 0.5); }
+.meter.over i { background: linear-gradient(90deg, var(--hot), var(--bad)); }
+.enc { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; }
+.enc span { text-align: center; font: 700 11px/1.2 var(--mono); color: var(--muted); padding: 7px 2px; border-radius: 8px; background: var(--surface-2); border: 1px solid var(--line); overflow-wrap: anywhere; }
+.enc span.on { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+.defv { font: 700 21px/1.25 var(--mono); display: flex; flex-wrap: wrap; gap: 2px 16px; }
+.ev .r { font-size: 18px; }
+.ev .e { font: 14px/1.45 var(--font); color: var(--fg); }
+.cat { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; max-height: min(50vh, 460px); overflow-y: auto; overscroll-behavior: contain; }
+.cat button { width: 100%; display: grid; grid-template-columns: 38px minmax(0, 1fr) auto; gap: 10px; align-items: center; text-align: left; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; color: var(--fg); font: inherit; padding: 8px 10px 8px 8px; cursor: pointer; min-height: 58px; }
+.cat button:hover { border-color: var(--accent); }
+.cat .it-ic { background: var(--surface); }
+.cat .it-s { font-size: 12px; }
+.cat .plus { font: 700 16px var(--mono); color: var(--accent); min-width: 48px; text-align: center; }
+.cat .plus.done { color: var(--ok); }
+.seg.full { display: flex; width: 100%; }
+.seg.full button { flex: 1; }
+.itf { display: grid; gap: 12px; }
+.itf .row { gap: 10px; }
+.itf textarea { min-height: 96px; }
+.step input { width: 96px; text-align: center; font: 700 18px var(--mono); min-height: 42px; padding: 4px; }
+.coin-in { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
 </style>
 </head>
 <body>
@@ -210,6 +290,12 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
   const app = $('#app');
   const QS = new URLSearchParams(location.search), EMBED = QS.get('embed') === 'fichas', EMBED_ADV = QS.get('adv') || '';
   if (EMBED) document.documentElement.classList.add('embed');
+  let embTab = QS.get('tab') === 'mochilas' ? 'mochilas' : 'fichas';
+  window.addEventListener('message', function (e) {
+    if (e.origin !== location.origin || !e.data || e.data.ht !== 'tab' || !EMBED) return;
+    embTab = e.data.tab === 'mochilas' ? 'mochilas' : 'fichas';
+    if (cur && tab !== embTab) { tab = embTab; drawLobby(); }
+  });
 
   /* ---------- sessão ---------- */
   function me() { const x = lsGet('cdm-sb', null); return x && x.user ? x.user : null; }
@@ -262,7 +348,7 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
       '<button type="button" class="ghost" data-a="profile">Perfil</button><button type="button" class="ghost" data-a="out">Sair</button></div></div>';
   }
   function drawCamps() {
-    stopLog();
+    stopLog(); stopBag();
     if (camps === null) { app.innerHTML = topBar('Hollow Table') + '<div class="center"><p class="muted" role="status">' + (loadErr ? esc(loadErr) : 'Carregando suas mesas…') + '</p>' + (loadErr ? '<button class="btn q" data-a="retry">Tentar de novo</button>' : '') + '</div>'; return; }
     if (!camps.length) { app.innerHTML = topBar('Hollow Table') + '<div class="center"><h2>Nenhuma mesa ainda</h2><p class="muted">Peça ao Mestre para adicionar o seu e-mail (' + esc(me().email) + ') à mesa.</p></div>'; return; }
     app.innerHTML = topBar('Suas mesas') + '<div class="center" style="place-content:start center"><div class="camps">' + camps.map(function (c) {
@@ -276,26 +362,33 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
   const ICO = {
     dados: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M12 2.5l8.5 4.9v9.2L12 21.5l-8.5-4.9V7.4z"/><path d="M12 2.5v19M3.5 7.4l8.5 4.9 8.5-4.9"/></svg>',
     ficha: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9.5" r="2.6"/><path d="M7.5 17c.8-2.3 2.5-3.4 4.5-3.4s3.7 1.1 4.5 3.4"/></svg>',
-    notas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7"/></svg>'
+    notas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7"/></svg>',
+    mochila: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/><path d="M9.5 4.6V4a2.5 2.5 0 0 1 5 0v.6"/><path d="M9 14h6v4H9zM6 13h3M15 13h3"/></svg>'
   };
+  function isOwner() { return !!(cur && me() && cur.owner === me().id); }
   function drawLobby() {
     const u = me();
     const who = [cur.owner === u.id ? '<b>Mestre (você)</b>' : 'Mestre'].concat((cur.members || []).map(function (m) { return m.user_id === u.id ? '<b>' + esc(m.name) + ' (você)</b>' : esc(m.name); }));
-    if (EMBED) { app.innerHTML = '<div class="pane one" id="pane"></div>'; drawPane(); return; }
+    if (EMBED) {
+      app.innerHTML = '<div class="emb-tabs" role="tablist" aria-label="Ver">' + [['fichas', 'Fichas'], ['mochilas', 'Mochilas']].map(function (t) { return '<button type="button" class="tab" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</div><div class="pane one" id="pane"></div>';
+      drawPane(); return;
+    }
+    const own = cur.owner === u.id;
     app.innerHTML = topBar(cur.name, '<span class="sys">' + esc(SYS[cur.system] || cur.system) + '</span>') +
       '<div class="roster" aria-label="Quem está na mesa">' + who.map(function (w) { return '<span>' + w + '</span>'; }).join('') + '</div>' +
-      '<nav class="nav" role="tablist" aria-label="Ferramentas">' + [['dados', 'Dados'], cur.owner === u.id ? ['fichas', 'Fichas'] : ['ficha', 'Ficha'], ['notas', 'Anotações']].map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + ICO[t[0] === 'fichas' ? 'ficha' : t[0]] + '<span>' + t[1] + '</span></button>'; }).join('') + '</nav>' +
+      '<nav class="nav" role="tablist" aria-label="Ferramentas">' + [['dados', 'Dados', 'dados'], own ? ['fichas', 'Fichas', 'ficha'] : ['ficha', 'Ficha', 'ficha'], own ? ['mochilas', 'Mochilas', 'mochila'] : ['mochila', 'Mochila', 'mochila'], ['notas', 'Anotações', 'notas']].map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + ICO[t[2]] + '<span>' + t[1] + '</span>' + (t[2] === 'mochila' ? '<span class="nb" id="nb-m" hidden></span>' : '') + '</button>'; }).join('') + '</nav>' +
       '<div class="pane" id="pane"></div>';
     drawPane();
   }
   function drawPane() {
-    stopLog();
+    stopLog(); stopBag();
     const p = $('#pane');
     if (!p) return;
     p.classList.toggle('one', tab !== 'dados');
     if (tab === 'dados') { p.innerHTML = diceHtml(); startLog(); }
     else if (tab === 'ficha') { p.innerHTML = sheetPaneHtml(); loadSheet(me().id, false); }
     else if (tab === 'fichas') { p.innerHTML = fichasHtml(); loadSheet(shView, true); }
+    else if (tab === 'mochila' || tab === 'mochilas') { p.innerHTML = '<div id="bag"></div>'; bagStart(); }
     else { p.innerHTML = notesHtml(); loadNotes(); }
   }
 
@@ -412,11 +505,24 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
   async function pollLog() {
     if (!cur || tab !== 'dados') return;
     try {
-      const r = await api('/rest/v1/rolls?campaign_id=eq.' + cur.id + '&select=id,who,label,expr,result,at&order=id.desc&limit=30');
+      const r = await api('/rest/v1/rolls?campaign_id=eq.' + cur.id + '&select=id,who,label,expr,result,at,kind&order=id.desc&limit=30');
       if (!r.ok) return;
-      const j = await r.json(), sig = JSON.stringify(j.map(function (x) { return x.id; }));
-      if (sig !== (pollLog.sig || '')) { pollLog.sig = sig; rolls = j; const el = $('#log'); if (el) el.innerHTML = logHtml(); }
+      const j = await r.json(), rl = j.filter(function (x) { return x.kind !== 'item'; }), sig = JSON.stringify(rl.map(function (x) { return x.id; }));
+      if (sig !== (pollLog.sig || '')) { pollLog.sig = sig; rolls = rl; const el = $('#log'); if (el) el.innerHTML = logHtml(); }
+      giftCheck(j.filter(function (x) { return x.kind === 'item'; }));
     } catch (e) { /* tenta depois */ }
+  }
+  /* aviso quando alguém passa um item para você (visto em qualquer aba que consulte o registro) */
+  let giftSeen = null;
+  function giftCheck(evs) {
+    const top = evs.reduce(function (a, x) { return Math.max(a, x.id); }, 0);
+    if (giftSeen === null || giftSeen.cid !== cur.id) { giftSeen = { cid: cur.id, id: top }; return; }
+    const u = me(), fresh = evs.filter(function (x) { return x.id > giftSeen.id && x.result && x.result.to === u.id && x.who !== myName(); });
+    if (top > giftSeen.id) giftSeen.id = top;
+    if (!fresh.length) return;
+    const x = fresh[0];
+    msgToast(x.who + ' ' + x.label);
+    const nb = $('#nb-m'); if (nb && tab !== 'mochila') nb.hidden = false;
   }
   function startLog() { stopLog(); pollLog.sig = ''; paintResult(); const el = $('#log'); if (el) el.innerHTML = logHtml(); pollLog(); logT = setInterval(function () { if (!document.hidden) pollLog(); }, 3000); }
   function stopLog() { if (logT) { clearInterval(logT); logT = null; } }
@@ -466,7 +572,7 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
   const AT_G = [['st', 'ST', 'Força', 10], ['dx', 'DX', 'Destreza', 20], ['iq', 'IQ', 'Inteligência', 20], ['ht', 'HT', 'Vitalidade', 10]];
   const DIFF_G = [['F', 'Fácil', 0], ['M', 'Média', -1], ['D', 'Difícil', -2], ['MD', 'Muito difícil', -3]];
   function sheetDefault(sys) {
-    if (sys === 'daggerheart') return { ancestry: '', community: '', cls: '', sub: '', level: 1, tr: { agi: 0, for: 0, acu: 0, ins: 0, pre: 0, con: 0 }, evasion: 10, armor: { max: 3, v: 0 }, armorName: '', thr: { major: 7, severe: 14 }, hp: { max: 6, v: 0 }, stress: { max: 6, v: 0 }, hope: { max: 6, v: 2 }, exps: [{ n: '', b: 2 }], weapons: [{ n: '', tr: '', rng: '', dmg: '' }], gold: { h: 0, b: 0, c: 0 }, cards: [], bio: '' };
+    if (sys === 'daggerheart') return { ancestry: '', community: '', cls: '', sub: '', level: 1, prof: 1, tr: { agi: 0, for: 0, acu: 0, ins: 0, pre: 0, con: 0 }, evasion: 10, armor: { max: 3, v: 0 }, armorName: '', thr: { major: 7, severe: 14 }, hp: { max: 6, v: 0 }, stress: { max: 6, v: 0 }, hope: { max: 6, v: 2 }, exps: [{ n: '', b: 2 }], weapons: [{ n: '', tr: '', rng: '', dmg: '' }], gold: { h: 0, b: 0, c: 0 }, cards: [], bio: '' };
     if (sys === 'dnd5e') {
       const sk = {}; SK5.forEach(function (x) { sk[x[0]] = 0; });
       return { race: '', cls: '', sub: '', level: 1, bg: '', align: '', at: { for: 10, des: 10, con: 10, int: 10, sab: 10, car: 10 }, sv: { for: false, des: false, con: false, int: false, sab: false, car: false }, sk: sk, ac: 10, speed: '9 m', hp: { max: 10, cur: 10, tmp: 0 }, hd: '1d8', death: { ok: 0, fail: 0 }, insp: false, atks: [{ n: '', b: 0, dmg: '1d6' }], spAt: 'int', slots: [1, 2, 3, 4, 5, 6, 7, 8, 9].map(function () { return { max: 0, v: 0 }; }), spells: '', coins: { pc: 0, pp: 0, pe: 0, po: 0, pl: 0 }, feats: '', bio: '' };
@@ -549,12 +655,12 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
     return '<div class="card"><h2>Traços</h2><div class="stats">' + TR_DH.map(function (t) {
       return '<div class="stat"><span class="k">' + t[1] + '</span><input type="number" inputmode="numeric" data-k="tr.' + t[0] + '" data-num="1" value="' + d.tr[t[0]] + '" min="-5" max="9" aria-label="' + t[1] + '"' + dis() + '>' + rollBtn('dual', 'dh:' + t[0], t[1], 'Dualidade') + '</div>';
     }).join('') + '</div></div>' +
-      '<div class="card"><h2>Defesa</h2><div class="row">' + fN('Evasão', 'evasion', { grow: 1 }) + fN('Limiar Maior', 'thr.major', { grow: 1 }) + fN('Limiar Grave', 'thr.severe', { grow: 1 }) + '</div>' + fT('Armadura', 'armorName', { ph: 'Ex.: Gibão de couro' }) + track('Espaços de armadura', 'armor', 'arm') + '</div>' +
+      '<div class="card"><h2>Defesa</h2><div class="row">' + fN('Evasão', 'evasion', { grow: 1 }) + fN('Limiar Maior', 'thr.major', { grow: 1 }) + fN('Limiar Grave', 'thr.severe', { grow: 1 }) + fN('Proficiência', 'prof', { grow: 1, min: 1, max: 8 }) + '</div><p class="hint-s">A Proficiência diz quantos dados de dano você rola com a arma (1 no nível 1; sobe nos níveis 2, 5 e 8).</p>' + fT('Armadura', 'armorName', { ph: 'Ex.: Gibão de couro' }) + track('Espaços de armadura', 'armor', 'arm') + '</div>' +
       '<div class="card"><h2>Condição</h2>' + track('Pontos de Vida', 'hp', 'hp') + track('Estresse', 'stress', 'st') + track('Esperança', 'hope', 'hope') + '</div>' +
       '<div class="card"><h2>Experiências</h2>' + listRows('exps', function (x, i) { return fT('Experiência', 'exps.' + i + '.n', { grow: 3 }) + fN('Bônus', 'exps.' + i + '.b', { grow: 1, basis: 70 }); }, '+ Experiência') + '</div>' +
-      '<div class="card"><h2>Armas</h2>' + listRows('weapons', function (x, i) { return fT('Arma', 'weapons.' + i + '.n', { grow: 3 }) + fT('Traço', 'weapons.' + i + '.tr', { grow: 1, basis: 90 }) + fT('Alcance', 'weapons.' + i + '.rng', { grow: 1, basis: 90 }) + fT('Dano', 'weapons.' + i + '.dmg', { grow: 1, basis: 90, ph: 'd8+2' }) + rollBtn('dmg', 'weapons.' + i + '.dmg', (x.n || 'Arma') + ' (dano)', 'Dano'); }, '+ Arma') + '</div>' +
+      '<div class="card"><h2>Armas</h2><p class="hint-s">As armas da Mochila já rolam ataque e dano com os seus traços.</p>' + listRows('weapons', function (x, i) { return fT('Arma', 'weapons.' + i + '.n', { grow: 3 }) + fT('Traço', 'weapons.' + i + '.tr', { grow: 1, basis: 90 }) + fT('Alcance', 'weapons.' + i + '.rng', { grow: 1, basis: 90 }) + fT('Dano', 'weapons.' + i + '.dmg', { grow: 1, basis: 90, ph: 'd8+2' }) + rollBtn('dmg', 'weapons.' + i + '.dmg', (x.n || 'Arma') + ' (dano)', 'Dano'); }, '+ Arma') + '</div>' +
       '<div class="card"><h2>Cartas de domínio</h2>' + listRows('cards', function (x, i) { return fT('Carta', 'cards.' + i + '.n', { grow: 2 }) + fN('Nível', 'cards.' + i + '.lvl', { grow: 1, basis: 70 }) + '<div class="field" style="flex:1 1 100%"><label>Efeito</label><textarea data-k="cards.' + i + '.txt" rows="2" style="min-height:0"' + dis() + '>' + esc(x.txt || '') + '</textarea></div>'; }, '+ Carta') + '</div>' +
-      '<div class="card"><h2>Ouro</h2><div class="row">' + fN('Punhados', 'gold.h', { grow: 1, min: 0 }) + fN('Bolsas', 'gold.b', { grow: 1, min: 0 }) + fN('Baús', 'gold.c', { grow: 1, min: 0 }) + '</div></div>';
+      '<p class="hint-s" style="grid-column:1/-1">O ouro, os itens e os consumíveis ficam na Mochila.</p>';
   }
   /* D&D 5e */
   const md5 = function (s) { return Math.floor((num(s) - 10) / 2); };
@@ -582,26 +688,30 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
       '<label class="chk"><input type="checkbox" data-chk="insp"' + (d.insp ? ' checked' : '') + dis() + '> Inspiração</label></div>' +
       '<div class="card"><h2>Salvaguardas</h2>' + svs + '</div>' +
       '<div class="card"><h2>Perícias</h2><p class="hint-s">Toque no círculo: vazio, proficiente (●), especialista (★).</p>' + sks + '</div>' +
-      '<div class="card"><h2>Ataques</h2>' + listRows('atks', function (x, i) { return fT('Ataque', 'atks.' + i + '.n', { grow: 3 }) + fN('Bônus', 'atks.' + i + '.b', { grow: 1, basis: 70 }) + fT('Dano', 'atks.' + i + '.dmg', { grow: 1, basis: 90, ph: '1d8+3' }) + '<div class="row" style="gap:6px">' + rollBtn('d20', 'atk:' + i, (x.n || 'Ataque'), 'Acerto') + rollBtn('dmg', 'atks.' + i + '.dmg', (x.n || 'Ataque') + ' (dano)', 'Dano') + '</div>'; }, '+ Ataque') + '</div>' +
+      '<div class="card"><h2>Ataques</h2><p class="hint-s">As armas da Mochila já rolam acerto e dano com os seus atributos.</p>' + listRows('atks', function (x, i) { return fT('Ataque', 'atks.' + i + '.n', { grow: 3 }) + fN('Bônus', 'atks.' + i + '.b', { grow: 1, basis: 70 }) + fT('Dano', 'atks.' + i + '.dmg', { grow: 1, basis: 90, ph: '1d8+3' }) + '<div class="row" style="gap:6px">' + rollBtn('d20', 'atk:' + i, (x.n || 'Ataque'), 'Acerto') + rollBtn('dmg', 'atks.' + i + '.dmg', (x.n || 'Ataque') + ' (dano)', 'Dano') + '</div>'; }, '+ Ataque') + '</div>' +
       '<div class="card"><h2>Magia</h2><div class="row"><div class="field" style="flex:1 1 140px"><label>Atributo de conjuração</label><select data-k="spAt"' + dis() + '>' + AT5.map(function (a) { return '<option value="' + a[0] + '"' + (d.spAt === a[0] ? ' selected' : '') + '>' + a[2] + '</option>'; }).join('') + '</select></div><div class="field" style="flex:1 1 90px"><label>CD</label><b class="mono big">' + calc('cd', function () { const x = sysData(); return 8 + prof5() + md5(x.at[x.spAt]); }) + '</b></div><div class="field" style="flex:1 1 90px"><label>Ataque mágico</label><div class="row" style="gap:6px;align-items:center"><b class="mono big">' + calc('spa', function () { const x = sysData(); return sgn(prof5() + md5(x.at[x.spAt])); }) + '</b>' + rollBtn('d20', 'spa', 'Ataque mágico') + '</div></div></div>' +
       '<h2 style="margin-top:4px">Espaços de magia</h2>' + (shRO ? '' : '<p class="hint-s">Quantos espaços por círculo:</p>') + slotMax + (slots ? '<p class="hint-s">Toque para marcar os espaços gastos.</p><div class="slots">' + slots + '</div>' : '') + fA('Magias conhecidas e preparadas', 'spells', 5) + '</div>' +
-      '<div class="card"><h2>Moedas</h2><div class="row">' + [['pc', 'PC'], ['pp', 'PP'], ['pe', 'PE'], ['po', 'PO'], ['pl', 'PL']].map(function (c) { return fN(c[1], 'coins.' + c[0], { grow: 1, basis: 60, min: 0 }); }).join('') + '</div></div>' +
-      '<div class="card"><h2>Características e talentos</h2>' + fA('', 'feats', 6) + '</div>';
+      '<div class="card"><h2>Características e talentos</h2>' + fA('', 'feats', 6) + '</div>' +
+      '<p class="hint-s" style="grid-column:1/-1">As moedas e os itens ficam na Mochila.</p>';
   }
   /* GURPS */
-  function gAt(k) {
-    const d = sysData(), a = d.at, s = d.sec;
+  /* versões puras (recebem os dados da ficha) para a Mochila usar sem mexer na ficha aberta */
+  function gAtO(d, k) {
+    const a = d.at, s = d.sec;
     if (k === 'per') return num(a.iq) + num(s.per);
     if (k === 'will') return num(a.iq) + num(s.will);
     return num(a[k]);
   }
-  function gSpd() { const d = sysData(); return (num(d.at.dx) + num(d.at.ht)) / 4 + num(d.sec.spd) * 0.25; }
-  function gNH(i) {
-    const s = sysData().skills[i]; if (!s) return 0;
+  function gNHO(d, s) {
+    if (!s) return 0;
     const p = num(s.p), off = (DIFF_G.filter(function (x) { return x[0] === s.df; })[0] || DIFF_G[1])[2];
     const bonus = p < 1 ? -99 : (p < 2 ? 0 : (p < 4 ? 1 : 2 + Math.floor((p - 4) / 4)));
-    return bonus === -99 ? 0 : gAt(s.at) + off + bonus + num(s.m);
+    return bonus === -99 ? 0 : gAtO(d, s.at) + off + bonus + num(s.m);
   }
+  function gSpdO(d) { return (num(d.at.dx) + num(d.at.ht)) / 4 + num(d.sec.spd) * 0.25; }
+  function gAt(k) { return gAtO(sysData(), k); }
+  function gSpd() { return gSpdO(sysData()); }
+  function gNH(i) { const d = sysData(); return gNHO(d, d.skills[i]); }
   function gSpent() {
     const d = sysData(), a = d.at, s = d.sec;
     let t = (num(a.st) - 10) * 10 + (num(a.dx) - 10) * 20 + (num(a.iq) - 10) * 20 + (num(a.ht) - 10) * 10;
@@ -746,6 +856,956 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
     clearTimeout(rtT); rtT = setTimeout(function () { el.hidden = true; }, 6000);
   }
 
+  /* ---------- mochila ---------- */
+  const SVI = function (p) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true">' + p + '</svg>'; };
+  const IK = {
+    arma: SVI('<path d="M19.8 4.2 17.8 7.8 8.8 16.8 7.2 15.2 16.2 6.2z"/><path d="M5.2 13.2l5.6 5.6M7.6 16.4 4.2 19.8"/>'),
+    armadura: SVI('<path d="M12 3.2 19 6v5.6c0 4.3-2.9 7.6-7 9.2-4.1-1.6-7-4.9-7-9.2V6z"/><path d="M12 3.2v17.6"/>'),
+    consumivel: SVI('<path d="M9.5 3.5h5M10.5 3.5v4.2L6.2 15a4 4 0 0 0 3.4 6h4.8a4 4 0 0 0 3.4-6l-4.3-7.3V3.5"/><path d="M7.4 13.5h9.2"/>'),
+    equipamento: SVI('<path d="M4.5 8.5 12 4.5l7.5 4v7L12 19.5l-7.5-4z"/><path d="M4.5 8.5 12 12.5l7.5-4M12 12.5v7"/>'),
+    tesouro: SVI('<path d="M7 4.5h10l3.5 4.5L12 20 3.5 9z"/><path d="M3.5 9h17M9.5 4.5 8 9l4 11 4-11-1.5-4.5"/>'),
+    outro: SVI('<path d="M3.5 12.2V4.5a1 1 0 0 1 1-1h7.7l8.3 8.3a1 1 0 0 1 0 1.4l-6.9 6.9a1 1 0 0 1-1.4 0z"/><circle cx="8" cy="8" r="1.4"/>'),
+    moeda: SVI('<ellipse cx="12" cy="6.5" rx="7" ry="3"/><path d="M5 6.5v5c0 1.66 3.13 3 7 3s7-1.34 7-3v-5"/><path d="M5 11.5v5c0 1.66 3.13 3 7 3s7-1.34 7-3v-5"/>'),
+    bau: SVI('<path d="M4 10h16v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/><path d="M4 10V8a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v2"/><path d="M11 12.5h2v3h-2z"/>'),
+    plus: SVI('<path d="M12 5v14M5 12h14"/>')
+  };
+  const KIND = { arma: ['Armas', 'Arma'], armadura: ['Armaduras', 'Armadura ou escudo'], consumivel: ['Consumíveis', 'Consumível'], equipamento: ['Equipamento', 'Equipamento'], tesouro: ['Tesouros', 'Tesouro'], outro: ['Outros', 'Outro'] };
+  const KORD = ['arma', 'armadura', 'consumivel', 'equipamento', 'tesouro', 'outro'];
+  const RARS = { dnd5e: [['', 'Comum'], ['inc', 'Incomum'], ['rar', 'Raro'], ['mr', 'Muito raro'], ['len', 'Lendário'], ['art', 'Artefato']], daggerheart: [['', 'Comum'], ['inc', 'Incomum'], ['rar', 'Raro'], ['len', 'Lendário']], gurps: [['', 'Comum'], ['inc', 'Incomum'], ['rar', 'Raro'], ['len', 'Lendário']] };
+  const COINS = {
+    dnd5e: [{ k: 'pc', s: 'PC', po: 0.01 }, { k: 'pp', s: 'PP', po: 0.1 }, { k: 'pe', s: 'PE', po: 0.5 }, { k: 'po', s: 'PO', po: 1 }, { k: 'pl', s: 'PL', po: 10 }],
+    daggerheart: [{ k: 'punhado', s: 'Punhados', one: 'punhado de ouro', many: 'punhados de ouro' }, { k: 'bolsa', s: 'Bolsas', one: 'bolsa de ouro', many: 'bolsas de ouro' }, { k: 'bau', s: 'Baús', one: 'baú de ouro', many: 'baús de ouro' }],
+    gurps: [{ k: 'din', s: '$' }]
+  };
+  const PURSE_T = { dnd5e: 'Moedas', daggerheart: 'Ouro', gurps: 'Dinheiro' };
+  const RNG_DH = ['Corpo a corpo', 'Muito perto', 'Perto', 'Longe', 'Muito longe'];
+  const TRN = { agi: 'Agilidade', for: 'Força', acu: 'Acuidade', ins: 'Instinto', pre: 'Presença', con: 'Conhecimento' };
+  const TOS = { daggerheart: [['', 'Nenhum'], ['hp', 'Recupera PV'], ['stress', 'Recupera Estresse'], ['hope', 'Ganha Esperança']], dnd5e: [['', 'Nenhum'], ['hp', 'Recupera PV']], gurps: [['', 'Nenhum'], ['hp', 'Recupera PV'], ['fp', 'Recupera PF']] };
+  const TO_S = { hp: 'recupera PV', stress: 'recupera Estresse', hope: 'ganha Esperança', fp: 'recupera PF' };
+  const DT5 = ['cortante', 'perfurante', 'contundente', 'ácido', 'elétrico', 'fogo', 'frio', 'força', 'necrótico', 'psíquico', 'radiante', 'trovejante', 'venenoso'];
+  /* GURPS: dano de GdP (golpe de ponta) e GeB (golpe em balanço) por ST, de 1 a 30: [dados, ajuste] */
+  const GTHR = [[1, -6], [1, -6], [1, -5], [1, -5], [1, -4], [1, -4], [1, -3], [1, -3], [1, -2], [1, -2], [1, -1], [1, -1], [1, 0], [1, 0], [1, 1], [1, 1], [1, 2], [1, 2], [2, -1], [2, -1], [2, 0], [2, 0], [2, 1], [2, 1], [2, 2], [2, 2], [3, -1], [3, -1], [3, 0], [3, 0]];
+  const GSW = [[1, -5], [1, -5], [1, -4], [1, -4], [1, -3], [1, -3], [1, -2], [1, -2], [1, -1], [1, 0], [1, 1], [1, 2], [2, -1], [2, 0], [2, 1], [2, 2], [3, -1], [3, 0], [3, 1], [3, 2], [4, -1], [4, 0], [4, 1], [4, 2], [5, -1], [5, 0], [5, 1], [5, 1], [5, 2], [5, 2]];
+
+  /* catálogo por sistema (valores editáveis depois de adicionados) */
+  const CATS = {};
+  function catalog() {
+    const s = cur.system;
+    if (CATS[s]) return CATS[s];
+    const L = [];
+    const add = function (k, n, w, v, d, t, q, r) {
+      const dd = { src: n };
+      Object.keys(d || {}).forEach(function (x) { const y = d[x]; if (y !== undefined && y !== '' && y !== 0 && y !== false && y !== null) dd[x] = y; });
+      if (r) dd.r = r;
+      L.push({ k: k, n: n, w: w || 0, v: v || '', d: dd, t: t || '', q: q || 1 });
+    };
+    if (s === 'dnd5e') {
+      [
+        ['Adaga', '1d4', 'perfurante', 'fin', 0.5, '2 po', 'acuidade, leve, arremesso (6/18 m)'],
+        ['Azagaia', '1d6', 'perfurante', 'for', 1, '5 pp', 'arremesso (9/36 m)'],
+        ['Bordão', '1d6', 'contundente', 'for', 2, '2 pp', 'versátil (1d8)', '1d8'],
+        ['Clava', '1d4', 'contundente', 'for', 1, '1 pp', 'leve'],
+        ['Lança', '1d6', 'perfurante', 'for', 1.5, '1 po', 'arremesso (6/18 m), versátil (1d8)', '1d8'],
+        ['Maça', '1d6', 'contundente', 'for', 2, '5 po', ''],
+        ['Machadinha', '1d6', 'cortante', 'for', 1, '5 po', 'leve, arremesso (6/18 m)'],
+        ['Martelo leve', '1d4', 'contundente', 'for', 1, '2 po', 'leve, arremesso (6/18 m)'],
+        ['Arco curto', '1d6', 'perfurante', 'des', 1, '25 po', 'munição (24/96 m), duas mãos'],
+        ['Besta leve', '1d8', 'perfurante', 'des', 2.5, '25 po', 'munição (24/96 m), recarga, duas mãos'],
+        ['Dardo', '1d4', 'perfurante', 'fin', 0.125, '5 pc', 'acuidade, arremesso (6/18 m)'],
+        ['Funda', '1d4', 'contundente', 'des', 0, '1 pp', 'munição (9/36 m)'],
+        ['Cimitarra', '1d6', 'cortante', 'fin', 1.5, '25 po', 'acuidade, leve'],
+        ['Espada curta', '1d6', 'perfurante', 'fin', 1, '10 po', 'acuidade, leve'],
+        ['Espada longa', '1d8', 'cortante', 'for', 1.5, '15 po', 'versátil (1d10)', '1d10'],
+        ['Espada grande', '2d6', 'cortante', 'for', 3, '50 po', 'pesada, duas mãos'],
+        ['Rapieira', '1d8', 'perfurante', 'fin', 1, '25 po', 'acuidade'],
+        ['Machado de batalha', '1d8', 'cortante', 'for', 2, '10 po', 'versátil (1d10)', '1d10'],
+        ['Machado grande', '1d12', 'cortante', 'for', 3.5, '30 po', 'pesada, duas mãos'],
+        ['Martelo de guerra', '1d8', 'contundente', 'for', 1, '15 po', 'versátil (1d10)', '1d10'],
+        ['Malho', '2d6', 'contundente', 'for', 5, '10 po', 'pesada, duas mãos'],
+        ['Maça estrela', '1d8', 'perfurante', 'for', 2, '15 po', ''],
+        ['Mangual', '1d8', 'contundente', 'for', 1, '10 po', ''],
+        ['Alabarda', '1d10', 'cortante', 'for', 3, '20 po', 'pesada, alcance, duas mãos'],
+        ['Tridente', '1d6', 'perfurante', 'for', 2, '5 po', 'arremesso (6/18 m), versátil (1d8)', '1d8'],
+        ['Chicote', '1d4', 'cortante', 'fin', 1.5, '2 po', 'acuidade, alcance'],
+        ['Arco longo', '1d8', 'perfurante', 'des', 1, '50 po', 'munição (45/180 m), pesada, duas mãos'],
+        ['Besta de mão', '1d6', 'perfurante', 'des', 1.5, '75 po', 'munição (9/36 m), leve, recarga'],
+        ['Besta pesada', '1d10', 'perfurante', 'des', 9, '50 po', 'munição (30/120 m), pesada, recarga, duas mãos']
+      ].forEach(function (a) { add('arma', a[0], a[4], a[5], { dmg: a[1], dt: a[2], at: a[3], prop: a[6], v2: a[7] }); });
+      [
+        ['Armadura acolchoada', 'leve', 11, 0, 1, 4, '5 po'], ['Armadura de couro', 'leve', 11, 0, 0, 5, '10 po'], ['Couro batido', 'leve', 12, 0, 0, 6.5, '45 po'],
+        ['Gibão de peles', 'media', 12, 0, 0, 6, '10 po'], ['Camisão de malha', 'media', 13, 0, 0, 10, '50 po'], ['Brunea', 'media', 14, 0, 1, 22.5, '50 po'], ['Peitoral', 'media', 14, 0, 0, 10, '400 po'], ['Meia-armadura', 'media', 15, 0, 1, 20, '750 po'],
+        ['Cota de anéis', 'pesada', 14, 0, 1, 20, '30 po'], ['Cota de malha', 'pesada', 16, 13, 1, 27.5, '75 po'], ['Cota de talas', 'pesada', 17, 15, 1, 30, '200 po'], ['Armadura de placas', 'pesada', 18, 15, 1, 32.5, '1.500 po'],
+        ['Escudo', 'escudo', 2, 0, 0, 3, '10 po']
+      ].forEach(function (a) { add('armadura', a[0], a[5], a[6], { ct: a[1], ac: a[2], st: a[3], fur: !!a[4] }); });
+      [
+        ['Poção de cura', '2d4+2', 'hp', 0.25, '50 po', 'Recupera 2d4 + 2 pontos de vida.'],
+        ['Poção de cura maior', '4d4+4', 'hp', 0.25, '', 'Recupera 4d4 + 4 pontos de vida.', 1, 'inc'],
+        ['Poção de cura superior', '8d4+8', 'hp', 0.25, '', 'Recupera 8d4 + 8 pontos de vida.', 1, 'rar'],
+        ['Poção de cura suprema', '10d4+20', 'hp', 0.25, '', 'Recupera 10d4 + 20 pontos de vida.', 1, 'mr'],
+        ['Antitoxina', '', '', 0, '50 po', 'Vantagem em salvaguardas contra veneno por 1 hora.'],
+        ['Água benta (frasco)', '2d6', '', 0.5, '25 po', 'Arremesso até 6 m: 2d6 de dano radiante em corruptores e mortos-vivos.'],
+        ['Fogo de alquimista (frasco)', '1d4', '', 0.5, '50 po', 'Arremesso até 6 m: o alvo sofre 1d4 de dano de fogo no início de cada turno, até usar uma ação para apagar (CD 10, Destreza).'],
+        ['Óleo (frasco)', '', '', 0.5, '1 pp', 'Encharca um alvo: se ele sofrer dano de fogo em 1 minuto, sofre mais 5 de fogo. Derramado e aceso, queima por 2 rodadas.'],
+        ['Ração de viagem (1 dia)', '', '', 1, '5 pp', ''],
+        ['Tocha', '', '', 0.5, '1 pc', 'Queima por 1 hora: luz plena em 6 m e penumbra por mais 6 m.'],
+        ['Flecha', '', '', 0.025, '1 po (20)', 'Munição para arcos.', 20],
+        ['Virote', '', '', 0.038, '1 po (20)', 'Munição para bestas.', 20],
+        ['Kit de curandeiro (usos)', '', '', 0.15, '5 po (10 usos)', 'Cada uso estabiliza uma criatura com 0 PV, sem teste de Medicina.', 10]
+      ].forEach(function (a) { add('consumivel', a[0], a[3], a[4], { use: a[1], to: a[2] }, a[5], a[6], a[7]); });
+      [
+        ['Mochila', 2.5, '2 po'], ['Saco de dormir', 3.5, '1 po'], ['Corda de cânhamo (15 m)', 5, '1 po'], ['Corda de seda (15 m)', 2.5, '10 po'], ['Cantil', 2.5, '2 pp', 'Pesa assim cheio.'],
+        ['Pederneira', 0.5, '5 pp', 'Acende uma tocha ou uma fogueira com uma ação.'], ['Lanterna coberta', 1, '5 po', 'Luz plena em 9 m e penumbra por mais 9 m. Um frasco de óleo dura 6 horas.'],
+        ['Pé de cabra', 2.5, '2 po', 'Vantagem em testes de Força quando a alavanca ajuda.'], ['Ferramentas de ladrão', 0.5, '25 po'], ['Gancho de escalada', 2, '2 po'], ['Algemas', 3, '2 po', 'Escapar ou quebrar: CD 20.'],
+        ['Espelho de aço', 0.25, '5 po'], ['Foco arcano (cristal)', 0.5, '10 po'], ['Símbolo sagrado (amuleto)', 0.5, '5 po'], ['Bolsa de componentes', 1, '25 po'], ['Livro de magias', 1.5, '50 po']
+      ].forEach(function (a) { add('equipamento', a[0], a[1], a[2], {}, a[3]); });
+      [['Gema (10 po)', '10 po'], ['Gema (50 po)', '50 po'], ['Gema (100 po)', '100 po'], ['Gema (500 po)', '500 po'], ['Objeto de arte (25 po)', '25 po'], ['Objeto de arte (250 po)', '250 po']].forEach(function (a) { add('tesouro', a[0], 0, a[1]); });
+      add('arma', 'Espada longa +1', 1.5, '', { dmg: '1d8', dt: 'cortante', at: 'for', prop: 'versátil (1d10)', v2: '1d10', b: 1 }, '+1 nas jogadas de ataque e de dano.', 1, 'inc');
+      add('outro', 'Capa de proteção', 0.5, '', { att: true, acb: 1 }, '+1 na CA e nas salvaguardas enquanto estiver em sintonia.', 1, 'inc');
+      add('outro', 'Anel de proteção', 0, '', { att: true, acb: 1 }, '+1 na CA e nas salvaguardas enquanto estiver em sintonia.', 1, 'rar');
+      add('equipamento', 'Bolsa devoradora', 7.5, '', {}, 'Guarda até 250 kg, sem passar de 1,8 m³, e pesa sempre 7,5 kg. Pegar um item dela leva uma ação.', 1, 'inc');
+    } else if (s === 'daggerheart') {
+      [
+        ['Espada larga', 'agi', 0, 'd8', 1, 0, 'Confiável: +1 nas rolagens de ataque.', { atk: 1 }],
+        ['Espada longa', 'agi', 0, 'd10+3', 2, 0],
+        ['Machado de batalha', 'for', 0, 'd10+3', 2, 0],
+        ['Montante', 'for', 0, 'd10+3', 2, 0, 'Maciça: −1 de Evasão; role um dado de dano extra e descarte o menor.', { xd: true }],
+        ['Maça', 'for', 0, 'd8+1', 1, 0],
+        ['Martelo de guerra', 'for', 0, 'd12+3', 2, 0, 'Pesada: −1 de Evasão.'],
+        ['Adaga', 'acu', 0, 'd8+1', 1, 0],
+        ['Bordão', 'ins', 0, 'd10+3', 2, 0],
+        ['Sabre', 'pre', 0, 'd8+1', 1, 0],
+        ['Rapieira', 'pre', 0, 'd8', 1, 0, 'Rápida: ao atacar, marque 1 de Estresse para mirar outra criatura no alcance.'],
+        ['Alabarda', 'for', 1, 'd10+2', 2, 0, 'Desajeitada: −1 de Acuidade.'],
+        ['Lança', 'acu', 1, 'd8+3', 2, 0],
+        ['Arco curto', 'agi', 3, 'd6+3', 2, 0],
+        ['Besta', 'acu', 3, 'd6+1', 1, 0],
+        ['Arco longo', 'agi', 4, 'd8+3', 2, 0, 'Desajeitada: −1 de Acuidade.'],
+        ['Manoplas arcanas', 'for', 0, 'd10+3', 2, 1],
+        ['Machado consagrado', 'for', 0, 'd8+1', 1, 1],
+        ['Anéis brilhantes', 'agi', 1, 'd10+2', 2, 1],
+        ['Runas da mão', 'ins', 1, 'd10', 1, 1],
+        ['Lâmina retornável', 'acu', 2, 'd8', 1, 1, 'Retorno: arremessada dentro do alcance, volta para a sua mão logo depois do ataque.'],
+        ['Cajado curto', 'ins', 2, 'd8+1', 1, 1],
+        ['Cajado duplo', 'ins', 3, 'd6+3', 2, 1],
+        ['Cetro', 'pre', 3, 'd6', 2, 1, 'Versátil: também pode ser usado com Presença, Corpo a corpo, d8.'],
+        ['Varinha', 'con', 3, 'd6+1', 1, 1],
+        ['Grande cajado', 'con', 4, 'd6', 2, 1, 'Poderosa: role um dado de dano extra e descarte o menor.', { xd: true }],
+        ['Espada curta', 'agi', 0, 'd8', 1, 0, 'Pareada: +2 no dano da arma principal contra alvos em Corpo a corpo.', { sec: true }],
+        ['Adaga pequena', 'acu', 0, 'd8', 1, 0, 'Pareada: +2 no dano da arma principal contra alvos em Corpo a corpo.', { sec: true }],
+        ['Escudo redondo', 'for', 0, 'd4', 1, 0, 'Protetor: +1 na Pontuação de Armadura.', { sec: true, asc: 1 }],
+        ['Escudo de torre', 'for', 0, 'd6', 1, 0, 'Barreira: +2 na Pontuação de Armadura; −1 de Evasão.', { sec: true, asc: 2 }],
+        ['Besta de mão', 'acu', 3, 'd6+1', 1, 0, '', { sec: true }],
+        ['Gancho', 'acu', 2, 'd6', 1, 0, 'Enganchar: num ataque bem-sucedido, você pode puxar o alvo para Corpo a corpo.', { sec: true }]
+      ].forEach(function (a) { add('arma', a[0], 0, '', Object.assign({ tr: a[1], rng: RNG_DH[a[2]], dmg: a[3], hands: a[4], dt: a[5] ? 'mag' : 'fis' }, a[7] || {}), a[6] || ''); });
+      [['Gibão acolchoado', 5, 11, 3, 'Flexível: +1 de Evasão.'], ['Armadura de couro', 6, 13, 3, ''], ['Cota de malha', 7, 15, 4, 'Pesada: −1 de Evasão.'], ['Armadura completa', 8, 17, 4, 'Muito pesada: −2 de Evasão; −1 de Agilidade.']]
+        .forEach(function (a) { add('armadura', a[0], 0, '', { thr: [a[1], a[2]], sc: a[3] }, a[4]); });
+      add('consumivel', 'Poção de Vida Menor', 0, '', { use: '1d4', to: 'hp' }, 'Recupere 1d4 PV.');
+      add('consumivel', 'Poção de Vigor Menor', 0, '', { use: '1d4', to: 'stress' }, 'Recupere 1d4 de Estresse.');
+      add('consumivel', 'Tocha', 0, '', {}, '');
+      add('equipamento', 'Corda (15 m)', 0, '', {}, '');
+      add('equipamento', 'Suprimentos básicos', 0, '', {}, 'O essencial para a estrada: comida, água, cobertor e afins.');
+    } else {
+      [
+        ['Adaga', 'GdP-1', 'perf', '', '', 'C, 1', 5, 0.125, '$20', 'Faca'],
+        ['Faca grande', 'GeB-2', 'cort', 'GdP', 'perf', 'C, 1', 6, 0.5, '$40', 'Faca'],
+        ['Espada curta', 'GeB', 'cort', 'GdP', 'perf', '1', 8, 1, '$400', 'Espada Curta'],
+        ['Espada larga', 'GeB+1', 'cort', 'GdP+1', 'cont', '1', 10, 1.5, '$500', 'Espada Larga'],
+        ['Montante', 'GeB+3', 'cort', 'GdP+3', 'perf', '1, 2', 12, 3.5, '$900', 'Espada de Duas Mãos'],
+        ['Machado', 'GeB+2', 'cort', '', '', '1', 11, 2, '$50', 'Machado/Maça'],
+        ['Maça', 'GeB+3', 'cont', '', '', '1', 12, 2.5, '$50', 'Machado/Maça'],
+        ['Lança', 'GdP+2', 'perf', '', '', '1', 9, 2, '$40', 'Lança'],
+        ['Bastão', 'GeB+2', 'cont', 'GdP+2', 'cont', '1, 2', 7, 2, '$10', 'Bastão'],
+        ['Rapieira', 'GdP+1', 'perf', '', '', '1, 2', 9, 1.375, '$500', 'Rapieira'],
+        ['Arco curto', 'GdP', 'perf', '', '', '', 7, 1, '$50', 'Arco'],
+        ['Arco longo', 'GdP+2', 'perf', '', '', '', 11, 1.5, '$200', 'Arco'],
+        ['Besta', 'GdP+4', 'perf', '', '', '', 7, 3, '$150', 'Besta']
+      ].forEach(function (a) { add('arma', a[0], a[7], a[8], { dmg: a[1], dt: a[2], dmg2: a[3], dt2: a[4], alc: a[5], st: a[6], sk: a[9] }); });
+      [['Jaqueta de couro', 1, 0, 2, '$50', 'Protege tronco e braços.'], ['Armadura de couro', 2, 0, 5, '$100', 'Protege tronco e virilha.'], ['Camisão de malha', 4, 0, 8, '$150', 'RD 4, mas só 2 contra dano por contusão.'], ['Cota de malha longa', 4, 0, 12.5, '$230', 'RD 4, mas só 2 contra dano por contusão.'], ['Escudo pequeno', 0, 1, 4, '$40', 'DB +1 nas defesas ativas.'], ['Escudo médio', 0, 2, 7.5, '$60', 'DB +2 nas defesas ativas.']]
+        .forEach(function (a) { add('armadura', a[0], a[3], a[4], { rd: a[1], db: a[2] }, a[5]); });
+      [['Tocha', 0.5, '$3', 'Queima por 1 hora.'], ['Ração (uma refeição)', 0.25, '$2', ''], ['Flecha', 0.05, '$2', 'Munição para arcos.', 20], ['Virote', 0.03, '$2', 'Munição para bestas.', 20]]
+        .forEach(function (a) { add('consumivel', a[0], a[1], a[2], {}, a[3], a[4]); });
+      [['Mochila pequena', 1.5, '$60'], ['Cobertor', 2, '$20'], ['Corda (9 m)', 0.75, '$5', 'Aguenta até 150 kg.'], ['Cantil (1 litro)', 0.5, '$10'], ['Lanterna', 1, '$20'], ['Pé de cabra', 1.5, '$20'], ['Kit de primeiros socorros', 1, '$50', '+1 em Primeiros Socorros.'], ['Gazuas', 0, '$50', 'Necessárias para Arrombamento.']]
+        .forEach(function (a) { add('equipamento', a[0], a[1], a[2], {}, a[3]); });
+    }
+    CATS[s] = L;
+    return L;
+  }
+
+  /* utilidades */
+  const fold = function (s) { return String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim(); };
+  const fmtN = function (n) { return Number(n || 0).toLocaleString('pt-BR', { maximumFractionDigits: 2 }); };
+  const fmtKg = function (x) { return fmtN(Math.round(x * 100) / 100) + '\u00a0kg'; };
+  const byName = function (a, b) { return a.name.localeCompare(b.name, 'pt-BR'); };
+  function joinPt(a) { return a.length < 2 ? (a[0] || '') : a.slice(0, -1).join(', ') + ' e ' + a[a.length - 1]; }
+  function memberName(uid) { const m = (cur.members || []).filter(function (x) { return x.user_id === uid; })[0]; return m ? m.name : 'alguém'; }
+  function coinDef(k) { return (COINS[cur.system] || []).filter(function (c) { return c.k === k; })[0] || null; }
+  function coinWhat(k, n) {
+    const c = coinDef(k);
+    if (!c) return fmtN(n) + ' ' + k;
+    if (cur.system === 'gurps') return '$' + fmtN(n);
+    if (cur.system === 'daggerheart') return fmtN(n) + ' ' + (n === 1 ? c.one : c.many);
+    return fmtN(n) + ' ' + c.s;
+  }
+  function coinSums(list) {
+    const o = {};
+    (COINS[cur.system] || []).forEach(function (c) { o[c.k] = 0; });
+    list.forEach(function (x) { if (x.kind === 'moeda' && o[x.name] !== undefined) o[x.name] += x.qty; });
+    return o;
+  }
+  function rarLbl(r) { const x = (RARS[cur.system] || []).filter(function (y) { return y[0] === r; })[0]; return x ? x[1] : ''; }
+
+  /* ficha de quem está sendo visto (para bônus, carga e defesa) */
+  let BS = null, bsFor = '';
+  function bagSD() { return deepFill(JSON.parse(JSON.stringify((BS && BS[cur.system]) || {})), sheetDefault(cur.system)); }
+  const md5o = function (d, a) { return Math.floor((num(d.at[a]) - 10) / 2); };
+  const prof5o = function (d) { return 2 + Math.floor((Math.max(1, num(d.level)) - 1) / 4); };
+  function atMod5(d, w) { return w.at === 'des' ? md5o(d, 'des') : (w.at === 'fin' ? Math.max(md5o(d, 'for'), md5o(d, 'des')) : md5o(d, 'for')); }
+  function dhDmgExpr(d, w) {
+    const m = String(w.dmg || '').replace(/\s+/g, '').match(/^(\d*)d(\d+)([+-]\d+)?$/i);
+    if (!m) return '';
+    const p = Math.max(1, Math.min(8, num(d.prof) || 1));
+    return (w.xd ? (p + 1) + 'd' + m[2] + 'kh' + p : p + 'd' + m[2]) + (m[3] || '');
+  }
+  function gDmgExpr(d, txt) {
+    const t = String(txt || '').toLowerCase().replace(/\s+/g, '');
+    if (!t) return '';
+    const m = t.match(/^(gdp|geb|thr|sw)([+-]\d+)?$/);
+    if (m) {
+      const st = Math.max(1, Math.min(30, num(d.at.st) || 10)), row = (m[1] === 'gdp' || m[1] === 'thr' ? GTHR : GSW)[st - 1];
+      const add = row[1] + (m[2] ? parseInt(m[2], 10) : 0);
+      return row[0] + 'd6' + (add ? (add > 0 ? '+' + add : String(add)) : '');
+    }
+    const f = t.replace(/(\d+)d(?!\d)/g, '$1d6');
+    return /^\d+d6([+-]\d+)?$/.test(f) ? f : '';
+  }
+  function gDmgTxt(t) { return String(t || '').trim().replace(/^gdp/i, 'GdP').replace(/^geb/i, 'GeB'); }
+  function gWeapNH(d, w) {
+    const nm = fold(w.sk);
+    if (nm) { const sk = (d.skills || []).filter(function (s) { return fold(s.n) === nm; })[0]; if (sk) return gNHO(d, sk); }
+    if (num(w.nh) > 0) return num(w.nh);
+    return num(d.at.dx) || 10;
+  }
+
+  /* estado */
+  let ITEMS = null, EVTS = [], bagT = null, bagSig = '', bagErr = '', bagFlt = '', itOpen = '', delArm = '', bagView = null, bagMsg = '', bagMsgT = null, bagBusy = 0, itFor = null;
+  function bagHolder() { return isOwner() ? bagView : me().id; }
+
+  /* texto curto de cada item */
+  function itSum(it) {
+    const d = it.data || {}, s = cur.system, p = [];
+    if (it.kind === 'arma') {
+      if (s === 'dnd5e') { if (d.dmg) p.push(d.dmg + (num(d.b) ? ' ' + sgn(num(d.b)) : '') + (d.dt ? ' ' + d.dt : '')); if (d.prop) p.push(d.prop); }
+      else if (s === 'daggerheart') { if (d.tr) p.push(TRN[d.tr] || d.tr); if (d.rng) p.push(d.rng); if (d.dmg) p.push(d.dmg + (d.dt === 'mag' ? ' mág.' : ' fís.')); p.push(num(d.hands) === 2 ? 'duas mãos' : 'uma mão'); if (d.sec) p.push('secundária'); }
+      else { if (d.dmg) p.push(gDmgTxt(d.dmg) + (d.dt ? ' ' + d.dt : '')); if (d.dmg2) p.push(gDmgTxt(d.dmg2) + (d.dt2 ? ' ' + d.dt2 : '')); if (d.alc) p.push('alc. ' + d.alc); if (num(d.st)) p.push('ST ' + d.st); }
+    } else if (it.kind === 'armadura') {
+      if (s === 'dnd5e') {
+        p.push(d.ct === 'escudo' ? '+' + (num(d.ac) || 2) + ' CA' : 'CA ' + num(d.ac) + (d.ct === 'leve' ? ' + Des' : (d.ct === 'media' ? ' + Des (máx. 2)' : '')));
+        if (num(d.b)) p.push(sgn(num(d.b)) + ' mágica');
+        if (num(d.st)) p.push('For ' + d.st);
+        if (d.fur) p.push('desv. em Furtividade');
+      } else if (s === 'daggerheart') { if (d.thr) p.push('Limiares ' + num(d.thr[0]) + '/' + num(d.thr[1])); if (num(d.sc)) p.push('Armadura ' + d.sc); }
+      else { if (num(d.rd)) p.push('RD ' + d.rd); if (num(d.db)) p.push('DB +' + d.db); }
+    } else if (it.kind === 'consumivel' && d.use) p.push(d.use + (d.to && TO_S[d.to] ? ' · ' + TO_S[d.to] : ''));
+    if (s === 'dnd5e' && it.kind !== 'armadura' && num(d.acb)) p.push(sgn(num(d.acb)) + ' CA');
+    if (d.att) p.push(d.attuned ? 'em sintonia' : 'exige sintonia');
+    if (s !== 'daggerheart' && num(it.weight)) p.push(fmtKg(num(it.weight) * Math.max(1, num(it.qty))));
+    return p.join(' · ');
+  }
+  function act(b, id, txt, cls) { return '<button type="button" class="rb' + (cls ? ' ' + cls : '') + '" data-b="' + b + '" data-id="' + id + '">' + txt + '</button>'; }
+  function itRow(it, ctx) {
+    const d = it.data || {}, open = itOpen === it.id, s = cur.system, quick = [];
+    if (ctx === 'mine' && it.kind === 'arma') quick.push(act('atk', it.id, 'Atacar'), act('dmg', it.id, 'Dano'));
+    if (ctx === 'mine' && it.kind === 'consumivel') quick.push(act('use', it.id, 'Usar'));
+    if (ctx === 'stash') quick.push(act('take', it.id, 'Pegar'));
+    const sum = itSum(it), warn = s === 'daggerheart' && it.kind === 'consumivel' && it.qty > 5;
+    let more = '';
+    if (open) {
+      const meta = ['<span>' + esc(KIND[it.kind] ? KIND[it.kind][1] : it.kind) + '</span>'];
+      if (d.r) meta.push('<span>' + esc(rarLbl(d.r)) + '</span>');
+      if (s !== 'daggerheart' && num(it.weight)) meta.push('<span>' + fmtKg(num(it.weight)) + (it.qty > 1 ? ' cada' : '') + '</span>');
+      if (it.value) meta.push('<span>Valor <b>' + esc(it.value) + '</b></span>');
+      if (it.kind === 'arma' && BS && ctx !== 'stash') {
+        const sd = bagSD();
+        if (s === 'daggerheart' && d.dmg) meta.push('<span>Dano com Proficiência ' + Math.max(1, num(sd.prof) || 1) + ': <b>' + esc(dhDmgExpr(sd, d)) + '</b></span>');
+        if (s === 'gurps' && d.dmg) meta.push('<span>Com ST ' + (num(sd.at.st) || 10) + ': <b>' + esc(gDmgExpr(sd, d.dmg).replace(/d6/g, 'd')) + '</b> · NH ' + gWeapNH(sd, d) + '</span>');
+        if (s === 'dnd5e') { const am = atMod5(sd, d) + num(d.b); meta.push('<span>Acerto <b>' + sgn(am + prof5o(sd)) + '</b> · dano <b>' + esc((d.dmg || '') + modStr(am)) + '</b></span>'); }
+      }
+      if (warn) meta.push('<span class="warnl">No Daggerheart cada um carrega até 5 de cada consumível.</span>');
+      const bt = [];
+      if (ctx === 'mine') {
+        if (it.kind === 'arma' && s === 'dnd5e' && d.v2) bt.push(act('dmg2', it.id, 'Dano com duas mãos'));
+        if (it.kind === 'arma' && s === 'gurps' && d.dmg2) bt.push(act('dmg2', it.id, 'Dano ' + esc(gDmgTxt(d.dmg2))));
+        if (it.kind !== 'consumivel' && it.kind !== 'tesouro') bt.push(act('eq', it.id, it.equipped ? 'Desequipar' : 'Equipar'));
+        if (s === 'dnd5e' && d.att) bt.push(act('att', it.id, d.attuned ? 'Desfazer a sintonia' : 'Entrar em sintonia'));
+        bt.push(act('give', it.id, 'Dar ou guardar no baú'));
+      }
+      if (ctx === 'stash' && it.qty > 1) bt.push(act('takep', it.id, 'Pegar só alguns'));
+      if (ctx === 'view') bt.push(act('give', it.id, 'Mover'));
+      bt.push(act('edit', it.id, 'Editar'));
+      bt.push(act('del', it.id, delArm === it.id ? 'Confirmar exclusão' : 'Excluir', delArm === it.id ? 'danger' : ''));
+      more = '<div class="it-more">' + (it.notes ? '<p class="it-notes">' + esc(it.notes) + '</p>' : '') + '<div class="it-meta">' + meta.join('') + '</div><div class="row">' + bt.join('') + '</div></div>';
+    }
+    return '<article class="it' + (d.r ? ' r-' + esc(d.r) : '') + (it.equipped ? ' eq' : '') + (open ? ' open' : '') + '">' +
+      '<button type="button" class="it-main" data-b="open" data-id="' + it.id + '" aria-expanded="' + open + '"><span class="it-ic">' + (IK[it.kind] || IK.outro) + '</span><span class="it-tx"><span class="it-n">' + esc(it.name) + '</span>' +
+      (sum || warn ? '<span class="it-s">' + esc(sum) + (warn ? ' <span class="warnl">· acima do limite de 5</span>' : '') + '</span>' : '') + '</span>' +
+      (it.qty !== 1 ? '<span class="it-q">×' + fmtN(it.qty) + '</span>' : '') + '</button>' +
+      (quick.length ? '<div class="it-acts">' + quick.join('') + '</div>' : '') + more + '</article>';
+  }
+  function groupsHtml(list, ctx) {
+    const items = list.filter(function (x) { return x.kind !== 'moeda'; });
+    const sec = function (title, arr) {
+      if (!arr.length) return '';
+      return '<section class="grp"><h3 class="grp-h">' + title + ' <span class="ct">' + arr.length + '</span></h3><div class="its">' + arr.map(function (x) { return itRow(x, ctx); }).join('') + '</div></section>';
+    };
+    if (bagFlt) return sec(KIND[bagFlt][0], items.filter(function (x) { return x.kind === bagFlt; }).sort(function (a, b) { return (b.equipped - a.equipped) || byName(a, b); }));
+    let html = sec('Equipado', items.filter(function (x) { return x.equipped; }).sort(byName));
+    KORD.forEach(function (k) { html += sec(KIND[k][0], items.filter(function (x) { return !x.equipped && x.kind === k; }).sort(byName)); });
+    return html;
+  }
+  function filtersHtml(list) {
+    const items = list.filter(function (x) { return x.kind !== 'moeda'; });
+    const ks = KORD.filter(function (k) { return items.some(function (x) { return x.kind === k; }); });
+    if (ks.indexOf(bagFlt) < 0) bagFlt = '';
+    if (ks.length < 2) return '';
+    return '<div class="chips" role="group" aria-label="Filtrar por tipo">' + [['', 'Tudo', items.length]].concat(ks.map(function (k) { return [k, KIND[k][0], items.filter(function (x) { return x.kind === k; }).length]; })).map(function (f) {
+      return '<button type="button" class="chip" data-b="flt" data-k="' + f[0] + '" aria-pressed="' + (bagFlt === f[0]) + '">' + f[1] + ' <span class="ct">' + f[2] + '</span></button>';
+    }).join('') + '</div>';
+  }
+  function purseHtml(list, who) {
+    const cs = COINS[cur.system] || [], amt = coinSums(list), owner = isOwner();
+    let tot = '';
+    if (cur.system === 'dnd5e') { const po = cs.reduce(function (a, c) { return a + amt[c.k] * c.po; }, 0); if (po) tot = 'Equivale a ' + fmtN(po) + ' PO.'; }
+    if (cur.system === 'daggerheart') tot = '10 punhados = 1 bolsa · 10 bolsas = 1 baú.';
+    const has = cs.some(function (c) { return amt[c.k] > 0; });
+    return '<div class="card"><div class="row between"><h2>' + IK.moeda + (who === 'bau' ? PURSE_T[cur.system] + ' do baú' : PURSE_T[cur.system]) + '</h2><button type="button" class="ghost" data-b="purse">Ajustar</button></div>' +
+      '<div class="purse">' + cs.map(function (c) { return '<div class="coin c-' + c.k + '"><b>' + fmtN(amt[c.k]) + '</b><span>' + esc(c.s) + '</span></div>'; }).join('') + '</div>' +
+      (tot ? '<p class="hint-s">' + tot + '</p>' : '') +
+      (owner || has ? '<button type="button" class="btn q sm" data-b="coins">' + (owner ? 'Dar ' + PURSE_T[cur.system].toLowerCase() : 'Dar ou guardar no baú') + '</button>' : '') + '</div>';
+  }
+  function carga(d, list) {
+    const s = cur.system;
+    if (s === 'daggerheart') return null;
+    let kg = 0, coins = 0;
+    list.forEach(function (x) { if (x.kind === 'moeda') coins += x.qty; else kg += num(x.weight) * Math.max(0, x.qty); });
+    if (s === 'dnd5e') {
+      kg += coins * 0.01;
+      const fo = Math.max(1, num(d.at.for) || 10), cap = fo * 7.5;
+      return { kg: kg, cap: cap, pct: Math.min(1, kg / cap), over: kg > cap, fo: fo, coins: coins };
+    }
+    const st = Math.max(1, num(d.at.st) || 10), bc = st * st / 10, mult = [1, 2, 3, 6, 10];
+    let lv = -1;
+    for (let i = 0; i < mult.length; i++) { if (kg <= bc * mult[i] + 1e-9) { lv = i; break; } }
+    const spd = gSpdO(d), mv = Math.floor(spd) + num(d.sec.move), dg = Math.floor(spd) + 3;
+    return { kg: kg, bc: bc, lv: lv, mv: lv < 0 ? 0 : Math.max(1, Math.floor(mv * [1, 0.8, 0.6, 0.4, 0.2][lv])), dg: lv < 0 ? dg - 4 : dg - lv };
+  }
+  function cargaHtml(c) {
+    if (!c) return '';
+    if (cur.system === 'dnd5e') {
+      return '<div class="card"><div class="row between"><h2>Carga</h2><span class="mono">' + fmtKg(c.kg) + ' de ' + fmtKg(c.cap) + '</span></div>' +
+        '<div class="meter' + (c.over ? ' over' : '') + '" role="progressbar" aria-label="Carga" aria-valuemin="0" aria-valuemax="' + c.cap + '" aria-valuenow="' + Math.round(c.kg * 10) / 10 + '"><i style="width:' + Math.round(c.pct * 100) + '%"></i></div>' +
+        '<p class="hint-s' + (c.over ? ' bad' : '') + '">' + (c.over ? 'Acima da capacidade de carga.' : 'Capacidade: Força ' + c.fo + ' × 7,5 kg.') + (c.coins ? ' As moedas contam: 50 pesam 0,5 kg.' : '') + '</p></div>';
+    }
+    const L = ['Nenhuma', 'Leve', 'Média', 'Pesada', 'Muito pesada'];
+    return '<div class="card"><div class="row between"><h2>Carga</h2><span class="mono">' + fmtKg(c.kg) + '</span></div>' +
+      '<div class="enc">' + L.map(function (n, i) { return '<span' + (i === c.lv ? ' class="on"' : '') + '>' + n + '</span>'; }).join('') + '</div>' +
+      '<p class="hint-s' + (c.lv < 0 ? ' bad' : '') + '">' + (c.lv < 0 ? 'Mais de 10× a Base de Carga: não dá para sair do lugar.' : 'Base de Carga ' + fmtKg(c.bc) + ' · Deslocamento ' + c.mv + ' · Esquiva ' + c.dg) + '</p></div>';
+  }
+  function defense(d, list) {
+    const s = cur.system, eq = list.filter(function (x) { return x.equipped; }), arms = eq.filter(function (x) { return x.kind === 'armadura'; });
+    if (s === 'dnd5e') {
+      const extra = eq.filter(function (x) { const a = x.data || {}; return x.kind !== 'armadura' && num(a.acb) && (!a.att || a.attuned); });
+      if (!arms.length && !extra.length) return null;
+      const body = arms.filter(function (x) { return (x.data || {}).ct !== 'escudo'; })[0], sh = arms.filter(function (x) { return (x.data || {}).ct === 'escudo'; })[0], dx = md5o(d, 'des');
+      let ac = 10 + dx;
+      const parts = [];
+      if (body) { const a = body.data || {}; ac = num(a.ac) + (a.ct === 'leve' ? dx : (a.ct === 'media' ? Math.min(2, dx) : 0)) + num(a.b); parts.push(body.name); } else parts.push('sem armadura');
+      if (sh) { ac += (num(sh.data.ac) || 2) + num(sh.data.b); parts.push(sh.name); }
+      extra.forEach(function (x) { ac += num(x.data.acb); parts.push(x.name); });
+      return { v: 'CA ' + ac, sub: parts.join(' + '), same: num(d.ac) === ac, set: function (x) { x.ac = ac; } };
+    }
+    if (s === 'daggerheart') {
+      const body = arms[0], shields = eq.filter(function (x) { return x.kind === 'arma' && num((x.data || {}).asc); });
+      const asc = shields.reduce(function (a, x) { return a + num(x.data.asc); }, 0);
+      if (!body && !asc) return null;
+      const lv = Math.max(1, num(d.level)), a = body ? body.data || {} : {}, t = a.thr || [0, 0];
+      const maj = body ? num(t[0]) + lv : num(d.thr.major), sev = body ? num(t[1]) + lv : num(d.thr.severe), sc = num(a.sc) + asc;
+      const parts = (body ? [body.name] : []).concat(shields.map(function (x) { return x.name; }));
+      return {
+        v: 'Limiares ' + maj + '/' + sev + ' · Armadura ' + sc, sub: parts.join(' + ') + (body ? ' · limiares com o nível ' + lv + ' somado' : ''),
+        same: (!body || (d.armorName === body.name && num(d.thr.major) === maj && num(d.thr.severe) === sev)) && num(d.armor.max) === sc,
+        set: function (x) { if (body) { x.armorName = body.name; x.thr.major = maj; x.thr.severe = sev; } x.armor.max = sc; }
+      };
+    }
+    if (!arms.length) return null;
+    let rd = 0, db = 0;
+    arms.forEach(function (x) { rd = Math.max(rd, num((x.data || {}).rd)); db += num((x.data || {}).db); });
+    return { v: 'RD ' + rd + (db ? ' · DB +' + db : ''), sub: arms.map(function (x) { return x.name; }).join(' + '), same: num(d.dr) === rd, set: function (x) { x.dr = rd; } };
+  }
+  function defHtml(info, owner) {
+    if (!info) return '';
+    return '<div class="card"><h2>' + IK.armadura + 'Defesa com o equipamento</h2><p class="defv">' + info.v.split(' · ').map(function (x) { return '<span>' + esc(x) + '</span>'; }).join('') + '</p><p class="hint-s">' + esc(info.sub) + '</p>' +
+      (owner ? '' : (info.same ? '<p class="hint-s good">A ficha já está assim.</p>' : '<button type="button" class="btn q sm" data-b="def">Passar para a ficha</button>')) + '</div>';
+  }
+  function stashHtml(stash) {
+    const order = (COINS[cur.system] || []).map(function (c) { return c.k; });
+    const coins = stash.filter(function (x) { return x.kind === 'moeda' && x.qty > 0; }).sort(function (a, b) { return order.indexOf(a.name) - order.indexOf(b.name); });
+    const its = stash.filter(function (x) { return x.kind !== 'moeda'; }).sort(byName);
+    return '<div class="card"><h2>' + IK.bau + 'Baú do grupo</h2>' +
+      (!coins.length && !its.length ? '<p class="hint-s">Vazio. Para deixar algo aqui, abra um item e toque em “Dar ou guardar no baú”.</p>' : '') +
+      coins.map(function (c) { return '<div class="crow c-' + esc(c.name) + '"><b>' + esc(coinWhat(c.name, c.qty)) + '</b><button type="button" class="rb" data-b="take" data-id="' + c.id + '">Pegar</button></div>'; }).join('') +
+      (its.length ? '<div class="its">' + its.map(function (x) { return itRow(x, 'stash'); }).join('') + '</div>' : '') + '</div>';
+  }
+  function evHtml() {
+    return '<div class="card"><h2>Movimentações</h2>' + (EVTS.length ? '<ul class="log ev">' + EVTS.map(function (r) {
+      const res = r.result || {}, t = new Date(r.at), hasN = res.total !== undefined && res.total !== null && res.total !== '';
+      return '<li><span class="l"><span class="w">' + esc(r.who) + ' <span class="tm">' + t.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '</span></span><span class="e">' + esc(r.label) + (res.tag ? ' · ' + esc(res.tag) : '') + '</span></span>' + (hasN ? '<span class="r">' + esc(res.total) + '</span>' : '') + '</li>';
+    }).join('') + '</ul>' : '<p class="hint-s">Presentes, trocas e itens usados aparecem aqui.</p>') + '</div>';
+  }
+  function paintBag() {
+    const box = $('#bag');
+    if (!box || !cur) return;
+    if (ITEMS === null) { box.innerHTML = '<p class="muted" role="status">' + esc(bagErr || 'Abrindo a mochila…') + '</p>' + (bagErr ? '<button type="button" class="btn q sm" data-b="retry">Tentar de novo</button>' : ''); return; }
+    const owner = isOwner(), ms = cur.members || [];
+    if (owner && !ms.length) bagView = 'bau';
+    const who = bagHolder();
+    const list = ITEMS.filter(function (x) { return who === 'bau' ? x.user_id === null : x.user_id === who; });
+    const stash = ITEMS.filter(function (x) { return x.user_id === null; });
+    const items = list.filter(function (x) { return x.kind !== 'moeda'; });
+    let head = '';
+    if (owner) {
+      head = '<div class="chips wrap" role="group" aria-label="Mochila de quem" style="margin-bottom:12px">' + ms.map(function (m) { return [m.user_id, m.name]; }).concat([['bau', 'Baú do grupo']]).map(function (v) {
+        const n = ITEMS.filter(function (x) { return x.kind !== 'moeda' && (v[0] === 'bau' ? x.user_id === null : x.user_id === v[0]); }).length;
+        return '<button type="button" class="chip" data-b="view" data-v="' + v[0] + '" aria-pressed="' + (who === v[0]) + '">' + (v[0] === 'bau' ? IK.bau : '') + esc(v[1]) + ' <span class="ct">' + n + '</span></button>';
+      }).join('') + '</div>';
+    }
+    const title = owner ? (who === 'bau' ? 'Baú do grupo' : 'Mochila de ' + memberName(who)) : 'Mochila';
+    const empty = items.length ? '' : '<div class="card"><p class="muted">' + (owner ? (who === 'bau' ? 'O baú do grupo está vazio.' : esc(memberName(who)) + ' ainda não tem itens.') : 'A mochila está vazia. Adicione itens do catálogo ou crie os seus.') + '</p></div>';
+    const sd = bagSD();
+    const main = '<div class="bag-main"><div class="bag-tools"><div class="row between"><h2>' + esc(title) + '</h2><button type="button" class="btn sm" data-b="add">' + IK.plus + (owner ? 'Dar item' : 'Adicionar item') + '</button></div>' +
+      filtersHtml(list) + (bagMsg ? '<p class="sv" role="status">' + esc(bagMsg) + '</p>' : '') +
+      (!owner && !BS && items.some(function (x) { return x.kind === 'arma'; }) ? '<p class="hint-s">Preencha a ficha para os ataques usarem os seus atributos.</p>' : '') + '</div>' +
+      empty + groupsHtml(list, owner ? 'view' : 'mine') + '</div>';
+    const side = '<div class="bag-side">' + purseHtml(list, who) + (who !== 'bau' ? cargaHtml(carga(sd, list)) + defHtml(defense(sd, list), owner) : '') + (owner ? '' : stashHtml(stash)) + evHtml() + '</div>';
+    box.innerHTML = head + '<div class="bag-grid">' + main + side + '</div>';
+  }
+
+  /* carregar e acompanhar */
+  function normIt(x) { x.qty = num(x.qty); x.weight = num(x.weight); x.data = x.data && typeof x.data === 'object' ? x.data : {}; x.value = x.value || ''; x.notes = x.notes || ''; return x; }
+  async function bagLoad() {
+    if (!cur) return;
+    const cid = cur.id;
+    try {
+      const rs = await Promise.all([
+        api('/rest/v1/items?campaign_id=eq.' + cid + '&select=id,user_id,name,qty,kind,weight,value,notes,equipped,data,updated_at&order=created_at.asc,id.asc'),
+        api('/rest/v1/rolls?campaign_id=eq.' + cid + '&kind=eq.item&select=id,who,label,expr,result,at&order=id.desc&limit=6')
+      ]);
+      if (!rs[0].ok) throw new Error('x');
+      const items = await rs[0].json(), ev = rs[1].ok ? await rs[1].json() : EVTS;
+      if (!cur || cur.id !== cid || bagBusy || (tab !== 'mochila' && tab !== 'mochilas')) return;
+      giftCheck(ev);
+      const sig = JSON.stringify(items.map(function (x) { return [x.id, x.qty, x.updated_at]; })) + '|' + ev.map(function (x) { return x.id; }).join(',');
+      bagErr = '';
+      if (sig === bagSig && ITEMS !== null) return;
+      bagSig = sig; itFor = cid;
+      ITEMS = items.map(normIt); EVTS = ev;
+      paintBag();
+    } catch (e) {
+      if (ITEMS === null) { bagErr = 'Não consegui abrir a mochila. Confira a conexão.'; paintBag(); }
+    }
+  }
+  async function bagLoadSheet() {
+    const who = bagHolder();
+    if (!cur || !who || who === 'bau') { BS = null; bsFor = ''; return; }
+    const key = cur.id + ':' + who;
+    bsFor = key;
+    let data = null;
+    try {
+      const r = await api('/rest/v1/pdocs?campaign_id=eq.' + cur.id + '&kind=eq.sheet&user_id=eq.' + who + '&select=data');
+      if (r.ok) { const j = await r.json(); data = j[0] && j[0].data ? j[0].data : null; }
+    } catch (e) { /* sem rede: usa a cópia local */ }
+    if (!data && who === me().id) data = lsGet(skey(who), null);
+    if (bsFor !== key) return;
+    BS = data; paintBag();
+  }
+  function bagStart() {
+    if (itFor !== cur.id) { ITEMS = null; EVTS = []; itOpen = ''; bagFlt = ''; BS = null; bsFor = ''; bagView = null; }
+    if (isOwner()) { const ms = cur.members || []; if (!bagView || (bagView !== 'bau' && !ms.some(function (m) { return m.user_id === bagView; }))) bagView = ms[0] ? ms[0].user_id : 'bau'; }
+    const nb = $('#nb-m'); if (nb) nb.hidden = true;
+    bagSig = ''; bagErr = '';
+    paintBag(); bagLoad(); bagLoadSheet();
+    bagT = setInterval(function () { if (!document.hidden) bagLoad(); }, 4000);
+  }
+  function stopBag() { if (bagT) { clearInterval(bagT); bagT = null; } }
+
+  /* gravar */
+  async function errText(r) { try { const j = await r.json(); return j.message || j.msg || j.hint || ('erro ' + r.status); } catch (e) { return 'erro ' + r.status; } }
+  function bagNote(m) { bagMsg = m; clearTimeout(bagMsgT); bagMsgT = setTimeout(function () { bagMsg = ''; paintBag(); }, 6000); paintBag(); }
+  function bagRefresh() { bagSig = ''; bagLoad(); }
+  async function itPatch(id, patch) {
+    const it = (ITEMS || []).filter(function (x) { return x.id === id; })[0];
+    if (it) Object.assign(it, patch);
+    paintBag(); bagBusy++;
+    try {
+      const r = await api('/rest/v1/items?id=eq.' + id, { method: 'PATCH', headers: Object.assign({ Prefer: 'return=minimal' }, JSONH), body: JSON.stringify(patch) });
+      if (!r.ok) throw new Error(await errText(r));
+    } catch (e) { bagNote('Não consegui salvar: ' + e.message); }
+    finally { bagBusy--; bagRefresh(); }
+  }
+  async function itDel(id) {
+    ITEMS = (ITEMS || []).filter(function (x) { return x.id !== id; });
+    if (itOpen === id) itOpen = '';
+    paintBag(); bagBusy++;
+    try {
+      const r = await api('/rest/v1/items?id=eq.' + id, { method: 'DELETE' });
+      if (!r.ok) throw new Error(await errText(r));
+    } catch (e) { bagNote('Não consegui excluir: ' + e.message); }
+    finally { bagBusy--; bagRefresh(); }
+  }
+  async function itNew(row) {
+    bagBusy++;
+    try {
+      const r = await api('/rest/v1/items', { method: 'POST', headers: Object.assign({ Prefer: 'return=representation' }, JSONH), body: JSON.stringify(Object.assign({ campaign_id: cur.id }, row)) });
+      if (!r.ok) throw new Error(await errText(r));
+      const j = await r.json();
+      if (j[0] && ITEMS) ITEMS.push(normIt(j[0]));
+      return j[0] || null;
+    } catch (e) { bagNote('Não consegui adicionar: ' + e.message); return null; }
+    finally { bagBusy--; paintBag(); }
+  }
+  async function giveRpc(it, to, n) {
+    bagBusy++;
+    try {
+      const r = await api('/rest/v1/rpc/give_item', { method: 'POST', headers: JSONH, body: JSON.stringify({ iid: it.id, to_user: to, n: n }) });
+      if (!r.ok) return await errText(r);
+      return '';
+    } catch (e) { return 'Sem conexão. Tente de novo.'; }
+    finally { bagBusy--; bagRefresh(); }
+  }
+  async function logItem(label, extra) {
+    extra = extra || {};
+    const res = { total: extra.total != null ? extra.total : '', text: extra.text || '', tag: extra.tag || '' };
+    if (extra.to !== undefined) res.to = extra.to;
+    try { await api('/rest/v1/rolls', { method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, JSONH), body: JSON.stringify({ campaign_id: cur.id, who: myName(), label: String(label).slice(0, 200), expr: extra.expr || '', result: res, kind: 'item' }) }); } catch (e) { /* o registro é só informativo */ }
+  }
+  /* muda a própria ficha (poções, defesa) sem depender da aba Ficha estar aberta */
+  async function sheetEdit(fn) {
+    const uid = me().id, s = cur.system;
+    let full = null;
+    try {
+      const r = await api('/rest/v1/pdocs?campaign_id=eq.' + cur.id + '&kind=eq.sheet&user_id=eq.' + uid + '&select=data');
+      if (r.ok) { const j = await r.json(); full = j[0] && j[0].data ? j[0].data : null; }
+    } catch (e) { /* tenta a cópia local */ }
+    if (!full) full = lsGet(skey(uid), null);
+    if (!full) return '';
+    full[s] = deepFill(full[s] || {}, sheetDefault(s));
+    const msg = fn(full[s]);
+    if (!msg) return '';
+    lsSet(skey(uid), full);
+    BS = full;
+    if (SH && shOwner === uid && !shRO) SH = full;
+    paintBag();
+    try {
+      const r = await api('/rest/v1/pdocs?on_conflict=campaign_id,user_id,kind', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, JSONH), body: JSON.stringify({ campaign_id: cur.id, kind: 'sheet', data: full }) });
+      if (!r.ok) throw new Error('x');
+    } catch (e) { return msg + ' (salvo só neste aparelho)'; }
+    return msg;
+  }
+  function applyEffect(x, to, n) {
+    const s = cur.system;
+    if (s === 'daggerheart') {
+      if (to === 'hope') { x.hope.v = Math.min(num(x.hope.max), num(x.hope.v) + n); return 'Esperança ' + x.hope.v + '/' + num(x.hope.max); }
+      const t = to === 'stress' ? x.stress : x.hp, b = num(t.v);
+      t.v = Math.max(0, b - n);
+      return (to === 'stress' ? 'Estresse marcado ' : 'PV marcados ') + b + ' → ' + t.v;
+    }
+    if (s === 'dnd5e') { x.hp.cur = Math.min(num(x.hp.max), num(x.hp.cur) + n); return 'PV ' + x.hp.cur + '/' + num(x.hp.max); }
+    if (to === 'fp') { const mx = num(x.at.ht) + num(x.sec.fp); x.fpCur = Math.min(mx, num(x.fpCur) + n); return 'PF ' + x.fpCur + '/' + mx; }
+    const mx = num(x.at.st) + num(x.sec.hp);
+    x.hpCur = Math.min(mx, num(x.hpCur) + n);
+    return 'PV ' + x.hpCur + '/' + mx;
+  }
+
+  /* ações de item */
+  function itRoll(it, what) {
+    const d = it.data || {}, s = cur.system, sd = bagSD(), nm = it.name;
+    if (s === 'daggerheart') {
+      if (what === 'atk') { const o = dice.mod; dice.mod = num(sd.tr[d.tr || 'agi']) + num(d.atk); const r = rollDuality(); dice.mod = o; doRoll(r, nm + ' (ataque)'); return; }
+      const ex = dhDmgExpr(sd, d);
+      doRoll(ex ? rollExpr(ex) : null, nm + ' (dano)');
+      return;
+    }
+    if (s === 'dnd5e') {
+      const am = atMod5(sd, d) + num(d.b);
+      if (what === 'atk') { const o = dice.mod, q = dice.qty; dice.mod = am + prof5o(sd); dice.qty = 1; const r = rollSimple(20); dice.mod = o; dice.qty = q; doRoll(r, nm + ' (ataque)'); return; }
+      const base = what === 'dmg2' && d.v2 ? d.v2 : d.dmg;
+      doRoll(base ? rollExpr(base + modStr(am)) : null, nm + (what === 'dmg2' ? ' (dano, duas mãos)' : ' (dano)'));
+      return;
+    }
+    if (what === 'atk') { const o = dice.nh; dice.nh = gWeapNH(sd, d); const r = rollGurps(); dice.nh = o; doRoll(r, nm + ' (ataque)'); return; }
+    const ex = gDmgExpr(sd, what === 'dmg2' ? d.dmg2 : d.dmg);
+    doRoll(ex ? rollExpr(ex) : null, nm + (what === 'dmg2' ? ' (' + gDmgTxt(d.dmg2) + ')' : ' (dano)'));
+  }
+  async function itUse(it) {
+    const d = it.data || {}, left = it.qty - 1;
+    const r = d.use ? rollExpr(d.use) : null;
+    if (d.use && !r) { msgToast('“' + d.use + '” não é uma rolagem válida. Edite o item.', 'bad'); return; }
+    if (left <= 0) itDel(it.id); else itPatch(it.id, { qty: left });
+    const rest = left > 0 ? 'Restam ' + left + '.' : 'Era o último.';
+    if (!r) { msgToast(it.name + ': usado. ' + rest); return; }
+    const msg = d.to ? await sheetEdit(function (x) { return applyEffect(x, d.to, r.total); }) : '';
+    rollToast({ total: r.total, text: r.text + (msg ? ' · ' + msg : '') + ' · ' + rest, lbl: it.name, tone: 'good' });
+    logItem('usou ' + it.name, { total: r.total, text: r.text, tag: msg, expr: d.use });
+  }
+  function itEquip(it) {
+    const on = !it.equipped, s = cur.system;
+    if (on && it.kind === 'armadura' && s !== 'gurps') {
+      const grp = function (x) { return s === 'dnd5e' && (x.data || {}).ct === 'escudo' ? 'escudo' : 'corpo'; };
+      ITEMS.filter(function (x) { return x.user_id === it.user_id && x.id !== it.id && x.kind === 'armadura' && x.equipped && grp(x) === grp(it); }).forEach(function (x) { itPatch(x.id, { equipped: false }); });
+    }
+    itPatch(it.id, { equipped: on });
+  }
+  function itAttune(it) {
+    const on = !(it.data || {}).attuned;
+    if (on && ITEMS.filter(function (x) { return x.user_id === it.user_id && x.data && x.data.attuned; }).length >= 3) { bagNote('Você já está em sintonia com 3 itens. Desfaça uma sintonia antes.'); return; }
+    const d = Object.assign({}, it.data);
+    if (on) d.attuned = true; else delete d.attuned;
+    itPatch(it.id, on ? { data: d, equipped: true } : { data: d });
+  }
+  async function takeAll(it) {
+    const e = await giveRpc(it, me().id, it.qty);
+    if (e) bagNote(e); else msgToast('Você pegou ' + (it.kind === 'moeda' ? coinWhat(it.name, it.qty) : (it.qty > 1 ? it.qty + '× ' : '') + it.name) + '.', 'good');
+  }
+  async function defApply() {
+    const list = (ITEMS || []).filter(function (x) { return x.user_id === me().id; });
+    const msg = await sheetEdit(function (x) { const info = defense(x, list); if (!info) return ''; info.set(x); return info.v; });
+    msgToast(msg ? 'Ficha atualizada: ' + msg + '.' : 'Não encontrei a sua ficha. Abra a aba Ficha uma vez.', msg ? 'good' : 'bad');
+  }
+
+  /* janelas */
+  function dlgShow(html) { const el = $('#dlg'); el.innerHTML = html; el.hidden = false; }
+  function dlgClose() { const el = $('#dlg'); el.hidden = true; el.innerHTML = ''; addLogFlush(); addSt = null; edId = ''; }
+  function msgToast(text, tone) {
+    let el = $('#rt');
+    if (!el) { el = document.createElement('div'); el.id = 'rt'; el.className = 'rtoast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
+    el.hidden = false;
+    el.innerHTML = '<span class="' + (tone || '') + '">' + esc(text) + '</span>';
+    clearTimeout(rtT); rtT = setTimeout(function () { el.hidden = true; }, 5000);
+  }
+
+  /* dar, guardar e pegar */
+  let gSt = null;
+  function giveOpen(id, mode) {
+    const it = (ITEMS || []).filter(function (x) { return x.id === id; })[0];
+    if (!it) return;
+    const u = me(), owner = isOwner();
+    let rec;
+    if (mode === 'take') rec = [[u.id, 'Para mim']];
+    else {
+      rec = (cur.members || []).filter(function (m) { return m.user_id !== it.user_id && (owner || m.user_id !== u.id); }).map(function (m) { return [m.user_id, m.name]; });
+      if (it.user_id !== null) rec.push(['bau', 'Baú do grupo']);
+    }
+    gSt = { id: id, mode: mode, rec: rec, to: rec.length === 1 ? rec[0][0] : '', n: it.qty, max: it.qty, busy: false };
+    dlgShow(giveHtml());
+  }
+  function giveHtml() {
+    const it = (ITEMS || []).filter(function (x) { return x.id === gSt.id; })[0];
+    if (!it) return '<div class="card"><p>Este item não está mais aqui.</p><button type="button" class="skip" data-b="close">Fechar</button></div>';
+    const coin = it.kind === 'moeda', nm = coin ? coinWhat(it.name, it.qty) : it.name;
+    const title = gSt.mode === 'take' ? 'Pegar do baú' : (gSt.mode === 'move' ? 'Mover' : 'Dar ou guardar no baú');
+    return '<div class="card"><h2>' + title + '</h2><p class="muted">' + esc(nm) + (!coin && it.qty > 1 ? ' · ' + fmtN(it.qty) + ' no total' : '') + '</p>' +
+      (gSt.mode === 'take' ? '' : '<div class="field"><label>Para quem</label><div class="chips wrap" role="group" aria-label="Para quem">' + (gSt.rec.length ? gSt.rec.map(function (r) { return '<button type="button" class="chip" data-b="gto" data-to="' + r[0] + '" aria-pressed="' + (gSt.to === r[0]) + '">' + (r[0] === 'bau' ? IK.bau : '') + esc(r[1]) + '</button>'; }).join('') : '<span class="muted">Não há para quem passar.</span>') + '</div></div>') +
+      (gSt.max > 1 ? '<div class="field"><label for="gn">Quantidade</label><div class="row" style="gap:8px;align-items:center"><div class="step"><button type="button" data-b="gstep" data-d="-1" aria-label="Menos">−</button><input id="gn" type="number" inputmode="numeric" min="1" max="' + gSt.max + '" value="' + esc(gSt.n) + '"><button type="button" data-b="gstep" data-d="1" aria-label="Mais">+</button></div><button type="button" class="chip" data-b="gall">Tudo (' + fmtN(gSt.max) + ')</button></div></div>' : '') +
+      '<p class="err" id="gerr" role="alert"></p><button type="button" class="btn" data-b="gdo"' + (gSt.to && !gSt.busy ? '' : ' disabled') + '>' + (gSt.busy ? 'Passando…' : (gSt.mode === 'take' ? 'Pegar' : (gSt.mode === 'move' ? 'Mover' : 'Passar'))) + '</button><button type="button" class="skip" data-b="close">Cancelar</button></div>';
+  }
+  async function giveDo() {
+    const it = (ITEMS || []).filter(function (x) { return x.id === gSt.id; })[0];
+    if (!it || !gSt.to || gSt.busy) return;
+    const n = Math.max(1, Math.min(gSt.max, parseInt(gSt.n, 10) || 1)), mode = gSt.mode, toKey = gSt.to;
+    gSt.busy = true; dlgShow(giveHtml());
+    const err = await giveRpc(it, toKey === 'bau' ? null : toKey, n);
+    if (err) { gSt.busy = false; dlgShow(giveHtml()); const e = $('#gerr'); if (e) e.textContent = err; return; }
+    dlgClose();
+    const what = it.kind === 'moeda' ? coinWhat(it.name, n) : (n > 1 ? n + '× ' : '') + it.name;
+    msgToast(mode === 'take' ? 'Você pegou ' + what + '.' : (toKey === 'bau' ? what + ': no baú do grupo.' : what + ': agora com ' + memberName(toKey) + '.'), 'good');
+  }
+  /* moedas */
+  let cSt = null;
+  function coinsOpen() {
+    const who = bagHolder(), owner = isOwner(), cs = COINS[cur.system], u = me();
+    const list = ITEMS.filter(function (x) { return x.kind === 'moeda' && (who === 'bau' ? x.user_id === null : x.user_id === who); });
+    const amt = coinSums(list);
+    const rec = (cur.members || []).filter(function (m) { return owner || m.user_id !== u.id; }).map(function (m) { return [m.user_id, m.name]; }).concat([['bau', 'Baú do grupo']]);
+    const first = cs.filter(function (c) { return owner || amt[c.k] > 0; })[0] || cs[0];
+    cSt = { k: first.k, n: owner ? 10 : 1, to: owner ? who : (rec.length === 1 ? rec[0][0] : ''), rec: rec, amt: amt, busy: false };
+    dlgShow(coinsHtml());
+  }
+  function coinsHtml() {
+    const owner = isOwner(), cs = COINS[cur.system], max = owner ? 9999999 : (cSt.amt[cSt.k] || 0);
+    return '<div class="card"><h2>' + (owner ? 'Dar ' + PURSE_T[cur.system].toLowerCase() : 'Dar ou guardar no baú') + '</h2>' +
+      (cs.length > 1 ? '<div class="field"><label>Moeda</label><div class="chips wrap" role="group" aria-label="Moeda">' + cs.map(function (c) { return '<button type="button" class="chip" data-b="ck" data-k="' + c.k + '" aria-pressed="' + (cSt.k === c.k) + '"' + (!owner && !cSt.amt[c.k] ? ' disabled' : '') + '>' + esc(c.s) + (owner ? '' : ' <span class="ct">' + fmtN(cSt.amt[c.k]) + '</span>') + '</button>'; }).join('') + '</div></div>' : '') +
+      '<div class="field"><label for="cn">Quantidade' + (owner ? '' : ' (você tem ' + fmtN(max) + ')') + '</label><input id="cn" type="number" inputmode="numeric" min="1" max="' + max + '" value="' + esc(cSt.n) + '"></div>' +
+      '<div class="field"><label>Para quem</label><div class="chips wrap" role="group" aria-label="Para quem">' + cSt.rec.map(function (r) { return '<button type="button" class="chip" data-b="cto" data-to="' + r[0] + '" aria-pressed="' + (cSt.to === r[0]) + '">' + (r[0] === 'bau' ? IK.bau : '') + esc(r[1]) + '</button>'; }).join('') + '</div></div>' +
+      '<p class="err" id="cerr" role="alert"></p><button type="button" class="btn" data-b="cdo"' + (cSt.to && !cSt.busy ? '' : ' disabled') + '>Passar</button><button type="button" class="skip" data-b="close">Cancelar</button></div>';
+  }
+  async function coinsDo() {
+    if (!cSt || !cSt.to || cSt.busy) return;
+    const owner = isOwner(), n = Math.floor(num(cSt.n));
+    const err = function (m) { const e = $('#cerr'); if (e) e.textContent = m; };
+    if (n < 1) { err('Escolha uma quantidade.'); return; }
+    const to = cSt.to === 'bau' ? null : cSt.to, what = coinWhat(cSt.k, n);
+    cSt.busy = true;
+    if (owner) {
+      const ex = ITEMS.filter(function (x) { return x.kind === 'moeda' && x.name === cSt.k && x.user_id === to; }).sort(function (a, b) { return b.qty - a.qty; })[0];
+      dlgClose();
+      if (ex) await itPatch(ex.id, { qty: ex.qty + n }); else await itNew({ user_id: to, name: cSt.k, qty: n, kind: 'moeda' });
+      logItem(to ? 'deu ' + what + ' para ' + memberName(to) : 'deixou ' + what + ' no baú do grupo', { to: to });
+      msgToast(what + (to ? ' para ' + memberName(to) : ' no baú do grupo') + '.', 'good');
+      return;
+    }
+    const mine = ITEMS.filter(function (x) { return x.kind === 'moeda' && x.name === cSt.k && x.user_id === me().id; }).sort(function (a, b) { return b.qty - a.qty; })[0];
+    if (!mine || mine.qty < n) { cSt.busy = false; err('Você não tem tudo isso.'); return; }
+    const e = await giveRpc(mine, to, n);
+    if (e) { cSt.busy = false; err(e); return; }
+    dlgClose();
+    msgToast(what + (to ? ' para ' + memberName(to) : ' no baú do grupo') + '.', 'good');
+  }
+  let pSt = null;
+  function purseOpen() {
+    const who = bagHolder();
+    const list = ITEMS.filter(function (x) { return x.kind === 'moeda' && (who === 'bau' ? x.user_id === null : x.user_id === who); });
+    pSt = { who: who, amt: coinSums(list) };
+    dlgShow('<div class="card"><h2>' + (who === 'bau' ? PURSE_T[cur.system] + ' do baú' : (isOwner() ? PURSE_T[cur.system] + ' de ' + esc(memberName(who)) : 'Ajustar ' + PURSE_T[cur.system].toLowerCase())) + '</h2>' +
+      '<div class="coin-in">' + COINS[cur.system].map(function (c) { return '<div class="field"><label for="pc-' + c.k + '">' + esc(c.s) + '</label><input id="pc-' + c.k + '" data-pk="' + c.k + '" type="number" inputmode="numeric" min="0" value="' + pSt.amt[c.k] + '"></div>'; }).join('') + '</div>' +
+      (cur.system === 'daggerheart' ? '<button type="button" class="btn q sm" data-b="pgroup">Agrupar: 10 punhados viram 1 bolsa</button>' : '') +
+      '<button type="button" class="btn" data-b="pdo">Salvar</button><button type="button" class="skip" data-b="close">Cancelar</button></div>');
+  }
+  function purseGroup() {
+    const g = function (k) { return document.querySelector('[data-pk="' + k + '"]'); }, h = g('punhado'), b = g('bolsa'), c = g('bau');
+    if (!h || !b || !c) return;
+    let H = Math.max(0, Math.floor(num(h.value))), B = Math.max(0, Math.floor(num(b.value))), C = Math.max(0, Math.floor(num(c.value)));
+    B += Math.floor(H / 10); H %= 10; C += Math.floor(B / 10); B %= 10;
+    h.value = H; b.value = B; c.value = C;
+  }
+  async function purseSave() {
+    const uid = pSt.who === 'bau' ? null : pSt.who, jobs = [];
+    COINS[cur.system].forEach(function (c) {
+      const el = document.querySelector('[data-pk="' + c.k + '"]');
+      if (!el) return;
+      const want = Math.max(0, Math.min(9999999, Math.floor(num(el.value))));
+      const rows = ITEMS.filter(function (x) { return x.kind === 'moeda' && x.name === c.k && x.user_id === uid; });
+      const have = rows.reduce(function (a, x) { return a + x.qty; }, 0);
+      if (want === have && rows.length <= 1) return;
+      if (!want) { rows.forEach(function (x) { jobs.push(itDel(x.id)); }); return; }
+      if (!rows.length) { jobs.push(itNew({ user_id: uid, name: c.k, qty: want, kind: 'moeda' })); return; }
+      jobs.push(itPatch(rows[0].id, { qty: want }));
+      rows.slice(1).forEach(function (x) { jobs.push(itDel(x.id)); });
+    });
+    dlgClose();
+    await Promise.all(jobs);
+  }
+
+  /* adicionar: catálogo ou item novo */
+  let addSt = null, addLog = null, catQ = Promise.resolve(), edId = '', fid = 0;
+  function addOpen() {
+    const who = bagHolder();
+    edId = '';
+    addSt = { mode: 'cat', q: '', k: '', to: who === 'bau' ? null : who, added: {} };
+    addLog = { to: addSt.to, map: {} };
+    dlgShow(addHtml());
+    const q = $('#catq');
+    if (q && window.matchMedia && matchMedia('(min-width: 760px)').matches) q.focus();
+  }
+  function addHtml() {
+    const owner = isOwner(), toKey = addSt.to === null ? 'bau' : addSt.to;
+    const rec = owner ? (cur.members || []).map(function (m) { return [m.user_id, m.name]; }).concat([['bau', 'Baú do grupo']]) : [];
+    return '<div class="card wide"><div class="row between"><h2>' + (owner ? 'Dar item' : 'Adicionar item') + '</h2><button type="button" class="ghost" data-b="close">Fechar</button></div>' +
+      (owner ? '<div class="field"><label>Para quem</label><div class="chips wrap" role="group" aria-label="Para quem">' + rec.map(function (r) { return '<button type="button" class="chip" data-b="addto" data-to="' + r[0] + '" aria-pressed="' + (toKey === r[0]) + '">' + (r[0] === 'bau' ? IK.bau : '') + esc(r[1]) + '</button>'; }).join('') + '</div></div>' : '') +
+      '<div class="seg full" role="group" aria-label="Como adicionar">' + [['cat', 'Do catálogo'], ['new', 'Criar item']].map(function (t) { return '<button type="button" data-b="addmode" data-m="' + t[0] + '" aria-pressed="' + (addSt.mode === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</div>' +
+      '<div id="addbody" style="display:grid;gap:12px">' + (addSt.mode === 'cat' ? catHtml() : itFormHtml(null)) + '</div></div>';
+  }
+  function catHtml() {
+    const C = catalog(), ks = KORD.filter(function (k) { return C.some(function (c) { return c.k === k; }); });
+    const note = { dnd5e: 'Itens do SRD 5.1, com pesos em kg. Dá para editar tudo depois.', daggerheart: 'Armas e armaduras de nível 1 do livro básico. Os limiares da armadura somam o seu nível.', gurps: 'Itens do Módulo Básico, com pesos em kg. O dano de GdP e GeB usa a ST da ficha.' }[cur.system] || '';
+    return '<input type="search" id="catq" placeholder="Buscar: espada, poção, corda…" value="' + esc(addSt.q) + '" autocomplete="off" aria-label="Buscar no catálogo">' +
+      '<div class="chips" role="group" aria-label="Tipo">' + [['', 'Tudo']].concat(ks.map(function (k) { return [k, KIND[k][0]]; })).map(function (f) { return '<button type="button" class="chip" data-b="catk" data-k="' + f[0] + '" aria-pressed="' + (addSt.k === f[0]) + '">' + f[1] + '</button>'; }).join('') + '</div>' +
+      '<ul class="cat" id="catl">' + catList() + '</ul><p class="hint-s">' + note + '</p>';
+  }
+  function catList() {
+    const q = fold(addSt.q);
+    const L = catalog().filter(function (c) { return (!addSt.k || c.k === addSt.k) && (!q || fold(c.n + ' ' + (c.d.dt || '') + ' ' + KIND[c.k][1]).indexOf(q) >= 0); });
+    if (!L.length) return '<li class="muted" style="padding:8px 4px">Nada com esse nome. Crie o item em “Criar item”.</li>';
+    return L.map(function (c) {
+      const n = addSt.added[c.n] || 0, sum = itSum({ kind: c.k, data: c.d, weight: c.w, qty: c.q, name: c.n });
+      return '<li' + (c.d.r ? ' class="r-' + c.d.r + '"' : '') + '><button type="button" data-b="catadd" data-c="' + esc(c.n) + '"><span class="it-ic">' + IK[c.k] + '</span><span class="it-tx"><span class="it-n">' + esc(c.n) + (c.q > 1 ? ' ×' + c.q : '') + '</span><span class="it-s">' + esc([sum, c.v].filter(Boolean).join(' · ')) + '</span></span><span class="plus' + (n ? ' done' : '') + '" aria-hidden="true">' + (n ? '✓ ' + n : '+') + '</span></button></li>';
+    }).join('');
+  }
+  function catAdd(name) {
+    const c = catalog().filter(function (x) { return x.n === name; })[0];
+    if (!c || !addSt) return;
+    addSt.added[c.n] = (addSt.added[c.n] || 0) + 1;
+    const el = $('#catl');
+    if (el) { const sc = el.scrollTop; el.innerHTML = catList(); el.scrollTop = sc; }
+    const to = addSt.to;
+    if (addLog) addLog.map[c.n] = (addLog.map[c.n] || 0) + c.q;
+    catQ = catQ.then(async function () {
+      const ex = (ITEMS || []).filter(function (x) { return x.user_id === to && x.kind === c.k && x.name === c.n && (x.data || {}).src === c.n; })[0];
+      if (ex) await itPatch(ex.id, { qty: ex.qty + c.q });
+      else await itNew({ user_id: to, name: c.n, qty: c.q, kind: c.k, weight: c.w, value: c.v, notes: c.t, data: c.d });
+    });
+  }
+  function addLogFlush() {
+    const L = addLog;
+    addLog = null;
+    if (!L || !cur) return;
+    const parts = Object.keys(L.map).map(function (n) { return (L.map[n] > 1 ? L.map[n] + '× ' : '') + n; });
+    if (!parts.length) return;
+    const txt = joinPt(parts);
+    logItem(L.to === null ? 'deixou ' + txt + ' no baú do grupo' : (isOwner() ? 'deu ' + txt + ' para ' + memberName(L.to) : 'adicionou ' + txt + ' à mochila'), { to: L.to });
+  }
+  function F(label, key, val, o) {
+    o = o || {};
+    fid++;
+    const id = 'f' + fid, attr = (o.data ? 'data-fd' : 'data-f') + '="' + key + '"' + (o.n ? ' data-t="n"' : '');
+    if (o.chk) return '<label class="chk" style="flex:1 1 100%"><input type="checkbox" id="' + id + '" ' + attr + (val ? ' checked' : '') + '> ' + label + '</label>';
+    let ctl;
+    if (o.opts) ctl = '<select id="' + id + '" ' + attr + '>' + o.opts.map(function (p) { const v = Array.isArray(p) ? p[0] : p, t = Array.isArray(p) ? p[1] : p; return '<option value="' + esc(v) + '"' + (String(val == null ? '' : val) === String(v) ? ' selected' : '') + '>' + esc(t) + '</option>'; }).join('') + '</select>';
+    else if (o.area) ctl = '<textarea id="' + id + '" ' + attr + ' rows="3" maxlength="4000">' + esc(val || '') + '</textarea>';
+    else ctl = '<input id="' + id + '" ' + attr + (o.n ? ' type="number" inputmode="decimal" step="any"' : '') + (o.min != null ? ' min="' + o.min + '"' : '') + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + (o.ml ? ' maxlength="' + o.ml + '"' : '') + ' value="' + esc(val == null ? '' : val) + '" autocomplete="off">';
+    return '<div class="field" style="flex:' + (o.g || 1) + ' 1 ' + (o.b || 120) + 'px"><label for="' + id + '">' + label + '</label>' + ctl + '</div>';
+  }
+  function sysFields(k, d) {
+    const s = cur.system, rows = [];
+    const R = function (h) { rows.push('<div class="row">' + h + '</div>'); };
+    const D = function (label, key, o) { o = Object.assign({ data: true }, o || {}); return F(label, key, o.val !== undefined ? o.val : d[key], o); };
+    if (k === 'arma') {
+      if (s === 'dnd5e') {
+        R(D('Dano', 'dmg', { ph: '1d8', g: 1, b: 90 }) + D('Tipo de dano', 'dt', { opts: DT5, val: d.dt || 'cortante', g: 1, b: 130 }) + D('Atributo do ataque', 'at', { opts: [['for', 'Força'], ['des', 'Destreza'], ['fin', 'Acuidade (o maior)']], val: d.at || 'for', g: 1, b: 150 }) + D('Bônus mágico', 'b', { n: true, g: 1, b: 90 }));
+        R(D('Dano com duas mãos (versátil)', 'v2', { ph: '1d10', g: 1, b: 150 }) + D('Propriedades', 'prop', { ph: 'leve, arremesso (6/18 m)', g: 2, b: 200 }));
+      } else if (s === 'daggerheart') {
+        R(D('Traço', 'tr', { opts: TR_DH.map(function (t) { return [t[0], t[1]]; }), val: d.tr || 'agi', g: 1, b: 130 }) + D('Alcance', 'rng', { opts: RNG_DH, val: d.rng || RNG_DH[0], g: 1, b: 130 }) + D('Dano', 'dmg', { ph: 'd8+1', g: 1, b: 90 }) + D('Tipo', 'dt', { opts: [['fis', 'Físico'], ['mag', 'Mágico']], val: d.dt || 'fis', g: 1, b: 110 }));
+        R(D('Empunhadura', 'hands', { opts: [['1', 'Uma mão'], ['2', 'Duas mãos']], val: String(d.hands || 1), g: 1, b: 120 }) + D('Bônus no ataque', 'atk', { n: true, g: 1, b: 100 }) + D('Bônus na Pontuação de Armadura', 'asc', { n: true, g: 1, b: 160 }));
+        R(D('Arma secundária', 'sec', { chk: true }) + D('Role um dado de dano extra e descarte o menor', 'xd', { chk: true }));
+      } else {
+        R(D('Dano', 'dmg', { ph: 'GeB+1 ou 2d+1', g: 1, b: 110 }) + D('Tipo', 'dt', { ph: 'cort', g: 1, b: 80 }) + D('Dano alternativo', 'dmg2', { ph: 'GdP+1', g: 1, b: 110 }) + D('Tipo', 'dt2', { ph: 'perf', g: 1, b: 80 }));
+        R(D('Alcance', 'alc', { ph: '1', g: 1, b: 80 }) + D('ST mínima', 'st', { n: true, g: 1, b: 90 }) + D('Perícia (nome na ficha)', 'sk', { ph: 'Espada Larga', g: 2, b: 160 }) + D('NH fixo, se não houver perícia', 'nh', { n: true, g: 1, b: 150 }));
+      }
+    } else if (k === 'armadura') {
+      if (s === 'dnd5e') R(D('Categoria', 'ct', { opts: [['leve', 'Leve'], ['media', 'Média'], ['pesada', 'Pesada'], ['escudo', 'Escudo']], val: d.ct || 'leve', g: 1, b: 120 }) + D('CA base (ou bônus do escudo)', 'ac', { n: true, g: 1, b: 160 }) + D('Bônus mágico', 'b', { n: true, g: 1, b: 90 }) + D('Força mínima', 'st', { n: true, g: 1, b: 100 }) + D('Desvantagem em Furtividade', 'fur', { chk: true }));
+      else if (s === 'daggerheart') R(D('Limiar Maior (base)', 'thr0', { n: true, val: d.thr ? d.thr[0] : '', g: 1, b: 130 }) + D('Limiar Grave (base)', 'thr1', { n: true, val: d.thr ? d.thr[1] : '', g: 1, b: 130 }) + D('Pontuação de Armadura', 'sc', { n: true, g: 1, b: 150 }));
+      else R(D('RD', 'rd', { n: true, g: 1, b: 80 }) + D('DB do escudo', 'db', { n: true, g: 1, b: 110 }));
+    } else if (k === 'consumivel') {
+      R(D('Rolagem ao usar (opcional)', 'use', { ph: s === 'daggerheart' ? '1d4' : '2d4+2', g: 1, b: 150 }) + D('Efeito na ficha', 'to', { opts: TOS[s], val: d.to || '', g: 1, b: 170 }));
+    }
+    if (s === 'dnd5e' && k !== 'consumivel') R((k !== 'armadura' ? D('Bônus na CA', 'acb', { n: true, g: 1, b: 110 }) : '') + D('Exige sintonização', 'att', { chk: true }));
+    return rows.join('');
+  }
+  function itFormHtml(it) {
+    const s = cur.system, d = it ? it.data || {} : {}, k = it ? it.kind : 'equipamento';
+    return '<form id="itf" class="itf" autocomplete="off" novalidate>' +
+      '<div class="row">' + F('Nome', 'name', it ? it.name : '', { g: 3, b: 200, ml: 80, ph: 'Ex.: Amuleto do avô' }) + F('Tipo', 'kind', k, { opts: KORD.map(function (x) { return [x, KIND[x][1]]; }), g: 2, b: 150 }) + '</div>' +
+      '<div class="row">' + F('Quantidade', 'qty', it ? it.qty : 1, { n: true, min: 1, g: 1, b: 90 }) + (s !== 'daggerheart' ? F('Peso de cada (kg)', 'weight', it ? it.weight : 0, { n: true, min: 0, g: 1, b: 110 }) : '') + F('Valor', 'value', it ? it.value : '', { g: 1, b: 100, ml: 40, ph: s === 'dnd5e' ? '15 po' : (s === 'gurps' ? '$100' : '') }) + F('Raridade', 'r', d.r || '', { opts: RARS[s], g: 1, b: 120 }) + '</div>' +
+      '<div id="itf-sys" style="display:grid;gap:12px">' + sysFields(k, d) + '</div>' +
+      '<div class="row">' + F('Descrição e regras', 'notes', it ? it.notes : '', { area: true, g: 1, b: 240 }) + '</div>' +
+      '<p class="err" id="itf-err" role="alert"></p><button class="btn" type="submit">' + (it ? 'Salvar' : (isOwner() ? 'Dar item' : 'Adicionar à mochila')) + '</button></form>';
+  }
+  function readForm() {
+    const f = $('#itf');
+    if (!f) return null;
+    const g = function (k) { const el = f.querySelector('[data-f="' + k + '"]'); return el ? el.value : ''; };
+    const out = { name: g('name').trim().slice(0, 80), kind: g('kind') || 'outro', qty: Math.max(1, Math.min(9999999, Math.floor(num(g('qty'))) || 1)), weight: Math.max(0, Math.min(100000, num(String(g('weight')).replace(',', '.')))), value: g('value').trim().slice(0, 40), notes: g('notes').trim().slice(0, 4000) };
+    const data = {}, keys = ['r', 'thr'];
+    f.querySelectorAll('[data-fd]').forEach(function (el) {
+      const k = el.dataset.fd;
+      keys.push(k);
+      let v = el.type === 'checkbox' ? el.checked : el.value;
+      if (el.dataset.t === 'n') v = num(String(v).replace(',', '.'));
+      else if (typeof v === 'string') v = v.trim();
+      data[k] = v;
+    });
+    if ('thr0' in data) { if (num(data.thr0) || num(data.thr1)) data.thr = [num(data.thr0), num(data.thr1)]; delete data.thr0; delete data.thr1; }
+    if (data.hands !== undefined) data.hands = num(data.hands) === 2 ? 2 : 1;
+    const r = g('r');
+    if (r) data.r = r;
+    Object.keys(data).forEach(function (k) { if (data[k] === '' || data[k] === false || data[k] === 0) delete data[k]; });
+    return { it: out, data: data, keys: keys };
+  }
+  async function itSave() {
+    const r = readForm();
+    if (!r) return;
+    const err = function (m) { const e = $('#itf-err'); if (e) e.textContent = m; };
+    if (!r.it.name) { err('Dê um nome ao item.'); const n = document.querySelector('#itf [data-f="name"]'); if (n) n.focus(); return; }
+    if (r.data.use && !rollExpr(r.data.use)) { err('A rolagem ao usar não é válida. Exemplos: 1d4, 2d4+2.'); return; }
+    if (edId) {
+      const old = (ITEMS || []).filter(function (x) { return x.id === edId; })[0], id = edId;
+      if (!old) { dlgClose(); return; }
+      const data = Object.assign({}, old.data);
+      r.keys.forEach(function (k) { delete data[k]; });
+      Object.assign(data, r.data);
+      const patch = Object.assign({}, r.it, { data: data });
+      if (r.it.kind === 'consumivel' || r.it.kind === 'tesouro') patch.equipped = false;
+      dlgClose(); itPatch(id, patch);
+      return;
+    }
+    const to = addSt ? addSt.to : me().id;
+    const row = await itNew(Object.assign({ user_id: to }, r.it, { data: r.data }));
+    if (!row) { err('Não consegui adicionar. Tente de novo.'); return; }
+    if (addLog) addLog.map[r.it.name] = (addLog.map[r.it.name] || 0) + r.it.qty;
+    dlgClose();
+    msgToast(r.it.name + (to === null ? ': no baú do grupo.' : (isOwner() ? ': agora com ' + memberName(to) + '.' : ': na mochila.')), 'good');
+  }
+  function editOpen(it) {
+    addSt = null; addLog = null; edId = it.id;
+    dlgShow('<div class="card wide"><div class="row between"><h2>Editar item</h2><button type="button" class="ghost" data-b="close">Fechar</button></div>' + itFormHtml(it) + '</div>');
+  }
+  function kindChange(sel) {
+    const box = $('#itf-sys');
+    if (!box) return;
+    const old = edId ? ((ITEMS || []).filter(function (x) { return x.id === edId; })[0] || {}).data || {} : {};
+    box.innerHTML = sysFields(sel.value, old);
+  }
+  function bagClick(el) {
+    const b = el.dataset.b, id = el.dataset.id || '';
+    const it = id ? (ITEMS || []).filter(function (x) { return x.id === id; })[0] : null;
+    const keepN = function (sel, st) { const i = $(sel); if (i && st) st.n = i.value; };
+    if (b === 'open') { itOpen = itOpen === id ? '' : id; delArm = ''; paintBag(); return; }
+    if (b === 'retry') { bagErr = ''; paintBag(); bagLoad(); return; }
+    if (b === 'flt') { bagFlt = el.dataset.k || ''; paintBag(); return; }
+    if (b === 'view') { bagView = el.dataset.v; itOpen = ''; bagFlt = ''; BS = null; paintBag(); bagLoadSheet(); return; }
+    if (b === 'add') { addOpen(); return; }
+    if (b === 'close') { dlgClose(); return; }
+    if (b === 'purse') { purseOpen(); return; }
+    if (b === 'pgroup') { purseGroup(); return; }
+    if (b === 'pdo') { purseSave(); return; }
+    if (b === 'coins') { coinsOpen(); return; }
+    if (b === 'ck' && cSt) { keepN('#cn', cSt); cSt.k = el.dataset.k; dlgShow(coinsHtml()); return; }
+    if (b === 'cto' && cSt) { keepN('#cn', cSt); cSt.to = el.dataset.to; dlgShow(coinsHtml()); return; }
+    if (b === 'cdo' && cSt) { keepN('#cn', cSt); coinsDo(); return; }
+    if (b === 'def') { defApply(); return; }
+    if (b === 'addmode' && addSt) { addSt.mode = el.dataset.m; dlgShow(addHtml()); return; }
+    if (b === 'addto' && addSt) { addLogFlush(); addSt.to = el.dataset.to === 'bau' ? null : el.dataset.to; addSt.added = {}; addLog = { to: addSt.to, map: {} }; dlgShow(addHtml()); return; }
+    if (b === 'catk' && addSt) {
+      addSt.k = el.dataset.k || '';
+      document.querySelectorAll('[data-b="catk"]').forEach(function (x) { x.setAttribute('aria-pressed', String((x.dataset.k || '') === addSt.k)); });
+      const l = $('#catl'); if (l) { l.innerHTML = catList(); l.scrollTop = 0; }
+      return;
+    }
+    if (b === 'catadd') { catAdd(el.dataset.c); return; }
+    if (b === 'gto' && gSt) { keepN('#gn', gSt); gSt.to = el.dataset.to; dlgShow(giveHtml()); return; }
+    if (b === 'gstep' && gSt) { keepN('#gn', gSt); gSt.n = Math.max(1, Math.min(gSt.max, (parseInt(gSt.n, 10) || 1) + parseInt(el.dataset.d, 10))); const i = $('#gn'); if (i) i.value = gSt.n; return; }
+    if (b === 'gall' && gSt) { gSt.n = gSt.max; const i = $('#gn'); if (i) i.value = gSt.n; return; }
+    if (b === 'gdo' && gSt) { keepN('#gn', gSt); giveDo(); return; }
+    if (!it) return;
+    if (b === 'atk' || b === 'dmg' || b === 'dmg2') itRoll(it, b);
+    else if (b === 'use') itUse(it);
+    else if (b === 'eq') itEquip(it);
+    else if (b === 'att') itAttune(it);
+    else if (b === 'give') giveOpen(id, isOwner() ? 'move' : 'give');
+    else if (b === 'take') { if (it.kind === 'moeda') giveOpen(id, 'take'); else takeAll(it); }
+    else if (b === 'takep') giveOpen(id, 'take');
+    else if (b === 'edit') editOpen(it);
+    else if (b === 'del') { if (delArm !== id) { delArm = id; paintBag(); } else { delArm = ''; itDel(id); } }
+  }
+
   /* ---------- perfil ---------- */
   function profile(msg, ok) {
     const el = $('#dlg'), u = me();
@@ -782,7 +1842,7 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
       if (EMBED) {
         cur = camps.filter(function (c) { return c.adv_id === EMBED_ADV && c.owner === me().id; })[0] || null;
         if (!cur) { app.innerHTML = '<div class="center"><p class="muted">Esta aventura ainda não tem mesa online. Crie em Preparar → Mesa online.</p></div>'; return; }
-        tab = 'fichas'; drawLobby(); return;
+        tab = embTab; drawLobby(); return;
       }
       if (camps.length === 1) { cur = camps[0]; drawLobby(); } else drawCamps();
     } catch (e) {
@@ -792,11 +1852,15 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
   }
 
   document.addEventListener('submit', function (e) {
+    if (e.target.id === 'itf') { e.preventDefault(); itSave(); return; }
     if (e.target.id === 'login') { e.preventDefault(); doLogin(); }
     if (e.target.id === 'pro') { e.preventDefault(); profileSubmit(); }
   });
   document.addEventListener('input', function (e) {
     const t = e.target;
+    if (t.id === 'catq' && addSt) { addSt.q = t.value; const l = $('#catl'); if (l) { l.innerHTML = catList(); l.scrollTop = 0; } return; }
+    if (t.id === 'gn' && gSt) { gSt.n = t.value; return; }
+    if (t.id === 'cn' && cSt) { cSt.n = t.value; return; }
     if (t.dataset && t.dataset.k && SH) { shInput(t); return; }
     if (t.id === 'lbl') dice.label = t.value;
     else if (t.id === 'expr') dice.expr = t.value;
@@ -805,15 +1869,17 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
   });
   document.addEventListener('change', function (e) {
     const t = e.target;
+    if (t.dataset && t.dataset.f === 'kind' && $('#itf')) { kindChange(t); return; }
     if (t.id === 'priv') dice.priv = t.checked;
     else if (t.dataset && t.dataset.chk && SH) { sysData()[t.dataset.chk] = t.checked; saveSheetSoon(); }
     else if (t.dataset && t.dataset.rr && SH) paintSheet();
     else if (t.id === 'photo' && t.files && t.files[0]) { uploadPhoto(t.files[0]).catch(function () { shSv = 'Não consegui usar esta imagem.'; paintSv(); }); t.value = ''; }
   });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'expr') { e.preventDefault(); doRoll(rollExpr(dice.expr)); } if (e.key === 'Escape' && !$('#dlg').hidden) $('#dlg').hidden = true; });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'expr') { e.preventDefault(); doRoll(rollExpr(dice.expr)); } if (e.key === 'Escape' && !$('#dlg').hidden) dlgClose(); });
   document.addEventListener('click', function (e) {
-    const el = e.target.closest('[data-a],[data-die],[data-st],[data-adv],[data-tab],[data-camp],[data-note],[data-pip],[data-tog],[data-cyc],[data-add],[data-del],[data-roll],[data-pv]');
-    if (!el) return;
+    const el = e.target.closest('[data-b],[data-a],[data-die],[data-st],[data-adv],[data-tab],[data-camp],[data-note],[data-pip],[data-tog],[data-cyc],[data-add],[data-del],[data-roll],[data-pv]');
+    if (!el || el.disabled) return;
+    if (el.dataset.b) { bagClick(el); return; }
     if (el.dataset.pv) { shView = el.dataset.pv; drawPane(); return; }
     if (SH && !el.disabled && shClick(el)) return;
     if (el.dataset.die) { doRoll(rollSimple(parseInt(el.dataset.die, 10))); return; }
@@ -824,7 +1890,7 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
       return;
     }
     if (el.dataset.adv != null) { dice.adv = parseInt(el.dataset.adv, 10); document.querySelectorAll('[data-adv]').forEach(function (b) { b.setAttribute('aria-pressed', String(parseInt(b.dataset.adv, 10) === dice.adv)); }); return; }
-    if (el.dataset.tab) { tab = el.dataset.tab; document.querySelectorAll('.nav button').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tab === tab)); }); drawPane(); return; }
+    if (el.dataset.tab) { tab = el.dataset.tab; document.querySelectorAll('[data-tab]').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tab === tab)); }); drawPane(); return; }
     if (el.dataset.camp) { cur = camps.filter(function (c) { return c.id === el.dataset.camp; })[0]; tab = 'dados'; last = null; drawLobby(); return; }
     if (el.dataset.note) { noteId = el.dataset.note; noteDelArm = false; paintNotes(); return; }
     const a = el.dataset.a;
@@ -834,8 +1900,8 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
     else if (a === 'lobby') { cur = null; drawCamps(); }
     else if (a === 'retry') start();
     else if (a === 'profile') profile();
-    else if (a === 'pclose') $('#dlg').hidden = true;
-    else if (a === 'out') { try { localStorage.removeItem('cdm-sb'); } catch (x) { /* ok */ } stopLog(); camps = null; cur = null; drawLogin(); }
+    else if (a === 'pclose') dlgClose();
+    else if (a === 'out') { try { localStorage.removeItem('cdm-sb'); } catch (x) { /* ok */ } stopLog(); stopBag(); camps = null; cur = null; drawLogin(); }
     else if (a === 'nnew') { const n = { id: Date.now().toString(36), title: 'Nova nota', text: '', at: Date.now() }; notes.notes.unshift(n); noteId = n.id; noteDelArm = false; paintNotes(); saveSoon(); const f = $('#nt'); if (f) { f.focus(); f.select(); } }
     else if (a === 'ndel') { if (!noteDelArm) { noteDelArm = true; paintNotes(); return; } notes.notes = notes.notes.filter(function (n) { return n.id !== noteId; }); noteId = notes.notes[0] ? notes.notes[0].id : null; noteDelArm = false; paintNotes(); saveSoon(); }
   });
