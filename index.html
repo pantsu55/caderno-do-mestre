@@ -296,6 +296,11 @@ input[type="range"] { width: 100%; height: 36px; accent-color: var(--active); ma
 .chk { display: flex; align-items: center; gap: 8px; min-height: 36px; font-size: 14px; }
 .chk small { color: var(--muted); }
 .combo-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+.room { display: grid; gap: 10px; border: 1px dashed var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 12px; justify-items: start; }
+.room .field { width: 100%; }
+.room-h { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; width: 100%; }
+.room-code { margin: 0; font-family: var(--font-mono); font-size: 28px; letter-spacing: 0.25em; color: var(--accent); }
+.room-link { word-break: break-all; margin: 0; }
 .lib-up { border-style: dashed; }
 .lib-up.drag { background: var(--accent-soft); }
 .lib-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
@@ -665,7 +670,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   <div class="top-in">
     <div class="brand">
       <svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>
-      <span>Hollow Table</span><span class="ver" id="ver">versão 0.32</span>
+      <span>Hollow Table</span><span class="ver" id="ver">versão 0.33</span>
     </div>
     <div class="top-r">
       <div class="seg" role="radiogroup" aria-label="Modo">
@@ -752,7 +757,6 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
 
   /* ---------- estado ---------- */
   const KEY = 'caderno-do-mestre-v2';
-  const PLAYERS = ['Ana', 'Bruno', 'Carla'];
   const defaults = function () {
     return {
       title: 'A Primeira Noite', place: 'Moinho dos Okk', when: 'Noite 1', kind: 'Combate', time: '45 min', budget: 'Orçamento 5 de 14 pontos',
@@ -945,7 +949,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       if (id === A.id) {
         const keepCur = A.cur;
         A = advFrom(data); A.cur = Math.min(keepCur, A.scenes.length - 1); S = A.scenes[A.cur];
-        revealed = null; if (tab === 'adv' && !S.adv) tab = 'notas';
+        unreveal(); if (tab === 'adv' && !S.adv) tab = 'notas';
         sbHydrate(S); renderScenes(); render();
       }
     }
@@ -1320,6 +1324,74 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       (sbUser() ? '<div class="field"><label for="lib-q">Buscar</label><input type="text" id="lib-q" value="' + esc(libQ) + '" placeholder="Nome do arquivo" autocomplete="off"></div><div class="pick-body">' + libRows(true) + '</div>' : '<p class="hint" style="text-align:center">Entre na Nuvem para usar a biblioteca.</p>') +
       '<button type="button" class="skip" data-action="libClose">Concluir</button></div>';
     libThumbs();
+  }
+  /* ---------- sala dos jogadores ---------- */
+  const ROOM_KEY = 'ht-room';
+  let ROOM = lsGet(ROOM_KEY, null), roomDelArm = false, roomBusy = false;
+  const roomSave = function () { lsSet(ROOM_KEY, ROOM); };
+  const roomLink = function () { return location.origin + location.pathname.replace(/[^/]*$/, '') + 'jogador.html?sala=' + (ROOM ? ROOM.code : ''); };
+  const playersList = function () { return ROOM ? ROOM.players : []; };
+  const rnd = function (n) { const a = 'abcdefghjkmnpqrstuvwxyz23456789'; let r = ''; for (let k = 0; k < n; k++) r += a[Math.floor(Math.random() * a.length)]; return r; };
+  async function roomPush() {
+    if (!ROOM) return;
+    const data = { title: A.name, players: ROOM.players, cur: ROOM.cur, shown: ROOM.shown.map(function (e) { return { id: e.id, url: e.url, cap: e.cap, to: e.to }; }) };
+    const r = await sbReq('/rest/v1/rooms?on_conflict=code', { method: 'POST', headers: { 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ code: ROOM.code, data: data }) });
+    if (!r.ok) throw new Error('sala');
+  }
+  async function roomOpen() {
+    if (!sbUser() || roomBusy) return;
+    roomBusy = true; render();
+    ROOM = { code: rnd(6).toUpperCase(), players: [], shown: [], cur: null };
+    try { await roomPush(); roomSave(); toast('Sala aberta. Passe o código ou o link aos jogadores.'); }
+    catch (e) { ROOM = null; toast('Não consegui abrir a sala. Verifique a conexão.'); }
+    roomBusy = false; render();
+  }
+  async function roomClose() {
+    if (!ROOM) return;
+    const room = ROOM; ROOM = null; roomSave(); roomDelArm = false; render();
+    try { await sbReq('/rest/v1/rooms?code=eq.' + encodeURIComponent(room.code), { method: 'DELETE' }); } catch (e) { /* ok */ }
+    room.shown.forEach(function (e) { sbReq('/storage/v1/object/room/' + e.p, { method: 'DELETE' }).catch(function () { /* ok */ }); });
+    toast('Sala encerrada.');
+  }
+  async function roomReveal(im) {
+    if (!ROOM || !im) return;
+    let e = ROOM.shown.filter(function (x) { return x.k === im.id; })[0];
+    if (!e) {
+      const blob = await (await fetch(im.src)).blob();
+      const ext = blob.type === 'image/svg+xml' ? 'svg' : (blob.type === 'image/png' ? 'png' : 'jpg');
+      const path = sbUser().id + '/' + ROOM.code + '/' + rnd(14) + '.' + ext;
+      const r = await sbReq('/storage/v1/object/room/' + path, { method: 'POST', headers: { 'Content-Type': blob.type || 'image/jpeg', 'x-upsert': 'true' }, body: blob });
+      if (!r.ok) throw new Error('envio');
+      e = { id: rnd(8), k: im.id, p: path, url: SBC.url + '/storage/v1/object/public/room/' + path, cap: im.caption, to: [] };
+      ROOM.shown.push(e);
+      while (ROOM.shown.length > 40) {
+        const old = ROOM.shown.filter(function (x) { return x.id !== ROOM.cur; })[0];
+        if (!old) break;
+        ROOM.shown.splice(ROOM.shown.indexOf(old), 1);
+        sbReq('/storage/v1/object/room/' + old.p, { method: 'DELETE' }).catch(function () { /* ok */ });
+      }
+    }
+    e.cap = im.caption; e.to = audience.slice();
+    ROOM.cur = e.id;
+    roomSave();
+    await roomPush();
+  }
+  function roomHide() { if (!ROOM || !ROOM.cur) return; ROOM.cur = null; roomSave(); roomPush().catch(function () { /* ok */ }); }
+  function unreveal() { revealed = null; roomHide(); }
+  function publish(im) {
+    if (!ROOM) return;
+    toast('Enviando para os jogadores…');
+    roomReveal(im).then(function () { toast('Os jogadores já estão vendo.'); }).catch(function () { toast('Não consegui enviar a imagem aos jogadores.'); });
+  }
+  function roomPanel() {
+    if (!ROOM) {
+      return '<div class="room"><p class="lbl-s">Sala dos jogadores</p><p class="hint">Os jogadores abrem um link no celular, sem conta, e veem as imagens que você revelar.</p>' +
+        '<button type="button" class="btn primary sm" data-action="roomOpen"' + (sbUser() && !roomBusy ? '' : ' disabled') + '>' + (roomBusy ? 'Abrindo…' : 'Abrir sala') + '</button>' + (sbUser() ? '' : '<p class="hint">Entre na Nuvem para abrir uma sala.</p>') + '</div>';
+    }
+    return '<div class="room"><div class="room-h"><div><p class="lbl-s">Sala dos jogadores</p><p class="room-code" aria-label="Código da sala">' + esc(ROOM.code) + '</p></div>' +
+      '<div class="row"><button type="button" class="btn quiet sm" data-action="roomCopy">Copiar link</button><button type="button" class="btn quiet sm" data-action="roomClose">' + (roomDelArm ? 'Confirmar encerrar' : 'Encerrar sala') + '</button></div></div>' +
+      '<p class="hint room-link">' + esc(roomLink()) + '</p>' +
+      '<div class="field"><label for="room-players">Jogadores (nomes separados por vírgula)</label><input type="text" id="room-players" value="' + esc(ROOM.players.join(', ')) + '" placeholder="Ana, Bruno, Carla" autocomplete="off"></div></div>';
   }
   function cloudPanel() {
     const u = sbUser();
@@ -1998,7 +2070,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       const stage = rev
         ? '<img src="' + rev.src + '" alt="' + esc(rev.caption) + '"><div class="cap">Para ' + esc(audText()) + ': ' + esc(rev.caption) + '</div><button type="button" class="btn sm hide" data-action="hide">Esconder</button>'
         : '<p class="empty">Nada revelado</p>';
-      const aud = ['todos'].concat(PLAYERS).map(function (p) {
+      const aud = ['todos'].concat(playersList()).map(function (p) {
         const on = audience.indexOf(p) >= 0;
         return '<button type="button" class="chip" data-action="aud" data-id="' + esc(p) + '" aria-pressed="' + on + '">' + (p === 'todos' ? 'Todos' : esc(p)) + '</button>';
       }).join('');
@@ -2007,8 +2079,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
         return '<figure class="shot' + (on ? ' on' : '') + '"><img src="' + im.src + '" alt="' + esc(im.caption) + '"><figcaption>' + esc(im.caption) + '</figcaption><button type="button" class="btn sm" data-action="reveal" data-id="' + im.id + '" aria-pressed="' + on + '">' + (on ? 'Revelada' : 'Revelar') + '</button></figure>';
       }).join('');
       body = '<div class="stage" aria-live="polite">' + stage + '</div>' +
-        '<div class="aud" role="group" aria-label="Para quem revelar"><span class="lbl">Revelar para</span>' + aud + '</div>' +
-        '<p class="hint">Tela dos jogadores simulada. Na versão final, a imagem aparece no celular de quem você escolher.</p>' +
+        roomPanel() + '<div class="aud" role="group" aria-label="Para quem revelar"><span class="lbl">Revelar para</span>' + aud + '</div>' +
+        '<p class="hint">' + (ROOM ? 'Os jogadores da sala veem a imagem revelada agora, no celular deles.' : 'Prévia da tela dos jogadores. Abra uma sala para enviar as imagens aos celulares.') + '</p>' +
         '<div class="gallery">' + gallery + '</div>';
     }
     const tabs = TABS_ALL.filter(function (t) { return t[0] !== 'adv' || S.adv; }).map(function (t) {
@@ -2154,7 +2226,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   const pathInUse = function (p) { return A.scenes.some(function (sc) { return sc.images.concat(sc.cues).some(function (x) { return x.path === p; }); }); };
   function carry(next) { next.fear = S.fear; next.vol = S.vol; }
   function afterSceneChange() {
-    revealed = null; if (tab === 'adv' && !S.adv) tab = 'notas';
+    unreveal(); if (tab === 'adv' && !S.adv) tab = 'notas';
     armDel = false;
     renderScenes(); sbHydrate(S); render(); window.scrollTo(0, 0);
   }
@@ -2333,7 +2405,18 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       toast(spent ? 'Reforço chegou. Medo gasto: 1.' : 'Reforço chegou. Você estava sem Medo para gastar.');
       return;
     }
-    if (a === 'reveal') { revealed = revealed === id ? null : id; render(); return; }
+    if (a === 'reveal') {
+      revealed = revealed === id ? null : id;
+      if (revealed) publish(S.images.filter(function (im) { return im.id === revealed; })[0]); else roomHide();
+      render(); return;
+    }
+    if (a === 'roomOpen') { roomOpen(); return; }
+    if (a === 'roomClose') { if (!roomDelArm) { roomDelArm = true; render(); return; } roomClose(); return; }
+    if (a === 'roomCopy') {
+      const l = roomLink();
+      (navigator.clipboard ? navigator.clipboard.writeText(l) : Promise.reject()).then(function () { toast('Link copiado.'); }).catch(function () { toast(l); });
+      return;
+    }
     if (a === 'spToggle') { spToggle(); return; }
     if (a === 'spDevices') { spLoadDevices(); return; }
     if (a === 'spDev') { const x = spList && spList[i]; if (x) { spDev.set({ id: x.id, name: x.name }); spList = null; spSay('Vai tocar em ' + x.name + '.'); } return; }
@@ -2341,7 +2424,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (a === 'spOut') { spStore.clear(); spPlaying = false; render(); return; }
     if (a === 'palette') { if (id) document.documentElement.setAttribute('data-palette', id); else document.documentElement.removeAttribute('data-palette'); try { localStorage.setItem('cdm-palette', id); } catch (e) { /* sem armazenamento */ } render(); return; }
     if (a === 'tab') { tab = id; render(); return; }
-    if (a === 'hide') { revealed = null; render(); return; }
+    if (a === 'hide') { unreveal(); render(); return; }
     if (a === 'aud') {
       if (id === 'todos') audience = ['todos'];
       else {
@@ -2350,6 +2433,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
         if (at >= 0) audience.splice(at, 1); else audience.push(id);
         if (!audience.length) audience = ['todos'];
       }
+      if (revealed) publish(S.images.filter(function (im) { return im.id === revealed; })[0]);
       render(); return;
     }
     if (a === 'noteAdd') { S.notes.push({ title: 'Nova nota', open: true, text: '' }); commit(); return; }
@@ -2457,6 +2541,13 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (t.getAttribute && t.getAttribute('data-cbx')) {
       const parts = t.getAttribute('data-cbx').split('|'), cb = S.combos[Number(parts[0])];
       if (cb) { cb.ids = cb.ids.filter(function (x) { return x !== parts[1]; }); if (t.checked) cb.ids.push(parts[1]); save(); }
+      return;
+    }
+    if (t.id === 'room-players' && ROOM) {
+      ROOM.players = t.value.split(',').map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 12);
+      audience = audience.filter(function (p) { return p === 'todos' || ROOM.players.indexOf(p) >= 0; });
+      if (!audience.length) audience = ['todos'];
+      roomSave(); roomPush().catch(function () { toast('Não consegui salvar os jogadores.'); }); render();
       return;
     }
     if (t.id === 'fs-len') { fsLen = t.value; return; }
