@@ -1,0 +1,420 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Hollow Table">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.png">
+<title>Hollow Table · Jogador</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@500;600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root { color-scheme: dark; --bg: #0A0912; --surface: #131122; --surface-2: #1B1830; --line: #2A2645; --fg: #E9E6F7; --muted: #9A95B8; --accent: #5EE1F5; --accent-ink: #031219; --accent-soft: #0E2B36; --ok: #6EE0A8; --bad: #FF8F8F; --hot: #FFB86B; --font: 'Atkinson Hyperlegible', system-ui, sans-serif; --serif: 'Cinzel', Georgia, serif; --mono: 'JetBrains Mono', ui-monospace, monospace; }
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.5 var(--font); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+[hidden] { display: none !important; }
+main { max-width: 860px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
+h1, h2 { font-family: var(--serif); margin: 0; letter-spacing: 0.03em; }
+h1 { font-size: 24px; }
+h2 { font-size: 17px; }
+p { margin: 0; }
+.muted { color: var(--muted); }
+.center { flex: 1; display: grid; place-content: center; justify-items: center; text-align: center; gap: 16px; padding: 32px 0; }
+.logo { width: 72px; height: 72px; border-radius: 16px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
+form.stack { display: grid; gap: 14px; width: min(340px, 100%); text-align: left; }
+.field { display: grid; gap: 6px; min-width: 0; }
+label { font-size: 14px; color: var(--muted); }
+input, select, textarea { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; color: var(--fg); font: inherit; padding: 10px 12px; min-height: 46px; width: 100%; min-width: 0; }
+textarea { resize: vertical; min-height: 220px; line-height: 1.55; }
+input:focus, select:focus, textarea:focus, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.btn { background: var(--accent); color: var(--accent-ink); border: 0; border-radius: 12px; font: inherit; font-weight: 700; min-height: 46px; padding: 0 18px; cursor: pointer; }
+.btn.q { background: var(--surface-2); color: var(--fg); border: 1px solid var(--line); font-weight: 400; }
+.btn.sm { min-height: 38px; padding: 0 12px; font-size: 15px; }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.err { color: var(--bad); min-height: 1.4em; font-size: 15px; }
+.err.ok { color: var(--ok); }
+.skip { background: none; border: 0; color: var(--muted); font: inherit; text-decoration: underline; cursor: pointer; min-height: 40px; }
+.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 0 8px; flex-wrap: wrap; }
+.top .who { display: flex; gap: 8px; }
+.sys { display: inline-block; font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); border: 1px solid var(--accent-soft); background: var(--accent-soft); border-radius: 999px; padding: 2px 10px; }
+.camps { display: grid; gap: 12px; width: min(460px, 100%); }
+.camp { text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 16px; color: var(--fg); font: inherit; cursor: pointer; display: grid; gap: 6px; }
+.camp:hover { border-color: var(--accent); }
+.camp strong { font-family: var(--serif); font-size: 19px; }
+.table { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 0 12px; }
+.pill { border: 1px solid var(--line); border-radius: 999px; padding: 4px 12px; font-size: 14px; background: var(--surface); }
+.pill.me { border-color: var(--accent); color: var(--accent); }
+.tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+.tab { background: none; border: 1px solid transparent; border-radius: 999px; color: var(--muted); font: inherit; padding: 8px 16px; min-height: 42px; cursor: pointer; white-space: nowrap; }
+.tab[aria-selected="true"] { background: var(--accent-soft); color: var(--accent); border-color: var(--accent-soft); }
+.pane { padding: 16px 0 40px; display: grid; gap: 16px; }
+.dice { display: grid; grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 8px; }
+.die { min-height: 56px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; color: var(--fg); font: 700 17px var(--mono); cursor: pointer; }
+.die:active { transform: scale(0.97); border-color: var(--accent); }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; }
+.step { display: inline-flex; align-items: center; gap: 6px; }
+.step output { min-width: 2.6em; text-align: center; font: 700 18px var(--mono); }
+.step button { width: 42px; min-height: 42px; background: var(--surface-2); border: 1px solid var(--line); color: var(--fg); border-radius: 10px; font-size: 20px; cursor: pointer; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.seg button { background: var(--surface); color: var(--muted); border: 0; font: inherit; padding: 0 14px; min-height: 42px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent); }
+.result { text-align: center; padding: 14px 8px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); min-height: 112px; display: grid; place-content: center; gap: 4px; }
+.result .n { font: 700 48px/1 var(--mono); }
+.result .t { color: var(--muted); font-family: var(--mono); font-size: 14px; }
+.result .g { font-family: var(--serif); font-size: 18px; }
+.good { color: var(--ok); } .bad { color: var(--bad); } .hot { color: var(--hot); }
+.log { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.log li { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; align-items: baseline; }
+.log .w { font-weight: 700; }
+.log .e { color: var(--muted); font-family: var(--mono); font-size: 13px; overflow-wrap: anywhere; }
+.log .r { font: 700 18px var(--mono); }
+.log .tm { color: var(--muted); font-size: 12px; }
+.sysbox { display: grid; gap: 10px; }
+.notes { display: grid; grid-template-columns: 200px 1fr; gap: 16px; }
+.nlist { display: grid; gap: 6px; align-content: start; }
+.nitem { text-align: left; background: var(--surface); border: 1px solid var(--line); color: var(--fg); border-radius: 10px; padding: 9px 12px; font: inherit; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-height: 42px; }
+.nitem[aria-current="true"] { border-color: var(--accent); color: var(--accent); }
+.edit { display: grid; gap: 10px; min-width: 0; align-content: start; }
+.sv { font-size: 14px; color: var(--muted); }
+.dlg { position: fixed; inset: 0; background: rgba(5,4,10,0.88); display: grid; place-items: center; padding: 16px; z-index: 10; overflow-y: auto; }
+.dlg .card { width: min(380px, 100%); }
+@media (max-width: 640px) { .notes { grid-template-columns: 1fr; } .nlist { grid-auto-flow: column; grid-auto-columns: minmax(120px, max-content); overflow-x: auto; } }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<main id="app"></main>
+<div class="dlg" id="dlg" hidden role="dialog" aria-modal="true"></div>
+<script>
+(function () {
+  'use strict';
+  const SB = 'https://ksucnjrmcagzepxahync.supabase.co', KEY = 'sb_publishable_zg_rPvJ15I_wbaFZ2qemeg_Xnsalgsh';
+  const SYS = { daggerheart: 'Daggerheart', dnd5e: 'D&D 5e', gurps: 'GURPS' };
+  const $ = function (s) { return document.querySelector(s); };
+  const esc = function (s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
+  const lsGet = function (k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
+  const lsSet = function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ok */ } };
+  const app = $('#app');
+
+  /* ---------- sessão ---------- */
+  function me() { const x = lsGet('cdm-sb', null); return x && x.user ? x.user : null; }
+  function store(j) {
+    const x = { access_token: j.access_token, refresh_token: j.refresh_token, expires_at: j.expires_at || Math.floor(Date.now() / 1000) + j.expires_in, user: { id: j.user.id, email: j.user.email } };
+    lsSet('cdm-sb', x); return x;
+  }
+  async function token() {
+    let x = lsGet('cdm-sb', null);
+    if (!x) throw new Error('sessão');
+    if (x.expires_at - 60 < Date.now() / 1000) {
+      const r = await fetch(SB + '/auth/v1/token?grant_type=refresh_token', { method: 'POST', headers: { apikey: KEY, 'Content-Type': 'application/json' }, body: JSON.stringify({ refresh_token: x.refresh_token }) });
+      if (!r.ok) { if (r.status === 400 || r.status === 401) { try { localStorage.removeItem('cdm-sb'); } catch (e) { /* ok */ } } throw new Error('sessão'); }
+      x = store(await r.json());
+    }
+    return x.access_token;
+  }
+  async function api(path, opt) {
+    const t = await token();
+    opt = opt || {};
+    opt.headers = Object.assign({ apikey: KEY, Authorization: 'Bearer ' + t }, opt.headers || {});
+    return fetch(SB + path, opt);
+  }
+  const JSONH = { 'Content-Type': 'application/json' };
+
+  /* ---------- estado ---------- */
+  let camps = null, cur = null, tab = 'dados', loadErr = '';
+  let dice = { qty: 1, mod: 0, adv: 0, label: '', priv: false, nh: 10, expr: '' };
+  let last = null, rolls = [], logT = null, notes = { notes: [] }, noteId = null, noteSv = '', noteT = null, noteDelArm = false, notesFor = null;
+
+  /* ---------- telas ---------- */
+  function drawLogin(msg) {
+    app.innerHTML = '<div class="center"><img class="logo" src="icon.svg" alt=""><h1>Hollow Table</h1><p class="muted">Entre para abrir a sua mesa.</p>' +
+      '<form class="stack" id="login" autocomplete="on"><div class="field"><label for="em">E-mail</label><input type="email" id="em" autocomplete="username" inputmode="email" autocapitalize="off" required></div>' +
+      '<div class="field"><label for="pw">Senha</label><input type="password" id="pw" autocomplete="current-password" required></div>' +
+      '<p class="err" role="alert">' + esc(msg || '') + '</p><button class="btn" type="submit" id="go">Entrar</button></form></div>';
+    setTimeout(function () { const f = $('#em'); if (f) f.focus(); }, 30);
+  }
+  async function doLogin() {
+    const go = $('#go'); go.disabled = true; go.textContent = 'Entrando…';
+    try {
+      const r = await fetch(SB + '/auth/v1/token?grant_type=password', { method: 'POST', headers: Object.assign({ apikey: KEY }, JSONH), body: JSON.stringify({ email: $('#em').value.trim(), password: $('#pw').value }) });
+      if (!r.ok) { drawLogin(r.status === 400 ? 'E-mail ou senha incorretos.' : 'Não consegui entrar agora.'); return; }
+      store(await r.json()); start();
+    } catch (e) { drawLogin('Sem conexão. Tente de novo.'); }
+  }
+  function topBar(title, sub) {
+    return '<div class="top"><div><h1>' + esc(title) + '</h1>' + (sub || '') + '</div><div class="who">' +
+      (camps && camps.length > 1 && cur ? '<button type="button" class="btn q sm" data-a="lobby">Trocar de mesa</button>' : '') +
+      '<button type="button" class="btn q sm" data-a="profile">Perfil</button><button type="button" class="btn q sm" data-a="out">Sair</button></div></div>';
+  }
+  function drawCamps() {
+    stopLog();
+    if (camps === null) { app.innerHTML = topBar('Hollow Table') + '<div class="center"><p class="muted" role="status">' + (loadErr ? esc(loadErr) : 'Carregando suas mesas…') + '</p>' + (loadErr ? '<button class="btn q" data-a="retry">Tentar de novo</button>' : '') + '</div>'; return; }
+    if (!camps.length) { app.innerHTML = topBar('Hollow Table') + '<div class="center"><h2>Nenhuma mesa ainda</h2><p class="muted">Peça ao Mestre para adicionar o seu e-mail (' + esc(me().email) + ') à mesa.</p></div>'; return; }
+    app.innerHTML = topBar('Suas mesas') + '<div class="center" style="place-content:start center"><div class="camps">' + camps.map(function (c) {
+      return '<button type="button" class="camp" data-camp="' + c.id + '"><strong>' + esc(c.name) + '</strong><span><span class="sys">' + esc(SYS[c.system] || c.system) + '</span> <span class="muted">' + (c.members || []).length + ' jogador(es)</span></span></button>';
+    }).join('') + '</div></div>';
+  }
+  function myName() {
+    const u = me(), m = cur && (cur.members || []).filter(function (x) { return x.user_id === u.id; })[0];
+    return m ? m.name : (cur && cur.owner === u.id ? 'Mestre' : u.email);
+  }
+  function drawLobby() {
+    const u = me();
+    const pills = '<span class="pill' + (cur.owner === u.id ? ' me' : '') + '">Mestre</span>' + (cur.members || []).map(function (m) { return '<span class="pill' + (m.user_id === u.id ? ' me' : '') + '">' + esc(m.name) + '</span>'; }).join('');
+    app.innerHTML = topBar(cur.name, '<span class="sys">' + esc(SYS[cur.system] || cur.system) + '</span>') +
+      '<div class="table" aria-label="Quem está na mesa">' + pills + '</div>' +
+      '<div class="tabs" role="tablist">' + [['dados', 'Dados'], ['notas', 'Anotações']].map(function (t) { return '<button type="button" role="tab" class="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</div>' +
+      '<div class="pane" id="pane"></div>';
+    drawPane();
+  }
+  function drawPane() {
+    stopLog();
+    const p = $('#pane');
+    if (!p) return;
+    if (tab === 'dados') { p.innerHTML = diceHtml(); startLog(); } else { p.innerHTML = notesHtml(); loadNotes(); }
+  }
+
+  /* ---------- dados ---------- */
+  function rnd(n) {
+    const lim = Math.floor(4294967296 / n) * n, a = new Uint32Array(1);
+    do { crypto.getRandomValues(a); } while (a[0] >= lim);
+    return (a[0] % n) + 1;
+  }
+  function rollExpr(txt) {
+    const s = txt.toLowerCase().replace(/\s+/g, '');
+    if (!s) return null;
+    const re = /([+-]?)(?:(\d*)d(\d+)(?:(kh|kl)(\d+))?|(\d+))/g;
+    let m, pos = 0, total = 0, parts = [], dcount = 0;
+    while ((m = re.exec(s)) !== null) {
+      if (m.index !== pos) return null;
+      pos = re.lastIndex;
+      const sign = m[1] === '-' ? -1 : 1;
+      if (m[3]) {
+        const n = m[2] === '' ? 1 : parseInt(m[2], 10), sides = parseInt(m[3], 10);
+        dcount += n;
+        if (n < 1 || n > 100 || sides < 2 || sides > 1000 || dcount > 200) return null;
+        const v = []; for (let k = 0; k < n; k++) v.push(rnd(sides));
+        let kept = v.slice();
+        if (m[4]) { const kn = Math.max(1, Math.min(n, parseInt(m[5], 10))); const sorted = v.slice().sort(function (a, b) { return m[4] === 'kh' ? b - a : a - b; }); kept = sorted.slice(0, kn); }
+        const sum = kept.reduce(function (a, b) { return a + b; }, 0);
+        total += sign * sum;
+        parts.push((sign < 0 ? '−' : (parts.length ? '+' : '')) + (n > 1 || m[4] ? '[' + v.join(', ') + ']' : v[0]) + (m[4] ? ' ' + m[4] + m[5] : ''));
+      } else {
+        total += sign * parseInt(m[6], 10);
+        parts.push((sign < 0 ? '−' : (parts.length ? '+' : '')) + m[6]);
+      }
+    }
+    if (pos !== s.length || !parts.length) return null;
+    return { total: total, text: parts.join(' '), expr: s };
+  }
+  function modStr(m) { return m ? (m > 0 ? '+' + m : String(m)) : ''; }
+  function rollSimple(sides) {
+    const q = dice.qty;
+    if (sides === 20 && q === 1 && dice.adv) {
+      const a = rnd(20), b = rnd(20), pick = dice.adv > 0 ? Math.max(a, b) : Math.min(a, b);
+      return { total: pick + dice.mod, text: '[' + a + ', ' + b + '] ' + (dice.adv > 0 ? 'vantagem' : 'desvantagem') + (dice.mod ? ' ' + modStr(dice.mod) : ''), expr: 'd20' + (dice.adv > 0 ? ' vant.' : ' desv.') + modStr(dice.mod), tag: pick === 20 ? 'Crítico!' : (pick === 1 ? 'Falha crítica' : ''), tone: pick === 20 ? 'good' : (pick === 1 ? 'bad' : '') };
+    }
+    const r = rollExpr(q + 'd' + sides + modStr(dice.mod));
+    if (!r) return null;
+    if (sides === 20 && q === 1) { const v = parseInt(r.text.replace(/[^0-9].*$/, ''), 10); if (v === 20) { r.tag = 'Crítico!'; r.tone = 'good'; } if (v === 1) { r.tag = 'Falha crítica'; r.tone = 'bad'; } }
+    return r;
+  }
+  function rollDuality() {
+    const h = rnd(12), f = rnd(12);
+    let extra = 0, ex = '';
+    if (dice.adv) { extra = rnd(6) * dice.adv; ex = (dice.adv > 0 ? ' + ' : ' − ') + 'd6(' + Math.abs(extra) + ')'; }
+    const total = h + f + extra + dice.mod;
+    const tag = h === f ? 'Crítico! Esperança e Medo' : (h > f ? 'com Esperança' : 'com Medo');
+    return { total: total, text: 'Esperança ' + h + ' · Medo ' + f + ex + (dice.mod ? ' ' + modStr(dice.mod) : ''), expr: '2d12 dualidade' + modStr(dice.mod), tag: tag, tone: h === f ? 'good' : (h > f ? 'good' : 'hot') };
+  }
+  function rollGurps() {
+    const nh = dice.nh, a = rnd(6), b = rnd(6), c = rnd(6), t = a + b + c;
+    let tag, tone;
+    const critOk = t <= 4 || (t === 5 && nh >= 15) || (t === 6 && nh >= 16);
+    const critBad = t === 18 || (t === 17 && nh <= 15) || t >= nh + 10;
+    if (critOk) { tag = 'Sucesso crítico (margem ' + (nh - t) + ')'; tone = 'good'; }
+    else if (critBad) { tag = 'Falha crítica'; tone = 'bad'; }
+    else if (t <= nh) { tag = 'Sucesso (margem ' + (nh - t) + ')'; tone = 'good'; }
+    else { tag = 'Falha (por ' + (t - nh) + ')'; tone = 'bad'; }
+    return { total: t, text: '[' + a + ', ' + b + ', ' + c + '] contra ' + nh, expr: '3d6 ≤ ' + nh, tag: tag, tone: tone };
+  }
+  async function doRoll(r) {
+    if (!r) { last = { error: 'Expressão inválida. Exemplos: d20+5, 2d6+3, 4d6kh3.' }; paintResult(); return; }
+    last = r; paintResult();
+    if (dice.priv) return;
+    try {
+      const res = await api('/rest/v1/rolls', { method: 'POST', headers: Object.assign({ Prefer: 'return=minimal' }, JSONH), body: JSON.stringify({ campaign_id: cur.id, who: myName(), label: dice.label.slice(0, 60), expr: r.expr, result: { total: r.total, text: r.text, tag: r.tag || '', tone: r.tone || '' } }) });
+      if (!res.ok) throw new Error('x');
+      pollLog();
+    } catch (e) { last.warn = 'Não consegui compartilhar esta rolagem.'; paintResult(); }
+  }
+  function paintResult() {
+    const el = $('#result');
+    if (!el) return;
+    if (!last) { el.innerHTML = '<p class="muted">Role um dado para ver o resultado.</p>'; return; }
+    if (last.error) { el.innerHTML = '<p class="bad">' + esc(last.error) + '</p>'; return; }
+    el.innerHTML = '<div class="n ' + (last.tone || '') + '">' + last.total + '</div>' + (last.tag ? '<div class="g ' + (last.tone || '') + '">' + esc(last.tag) + '</div>' : '') + '<div class="t">' + esc(last.text) + '</div>' + (last.warn ? '<div class="bad">' + esc(last.warn) + '</div>' : '') + (dice.priv ? '<div class="muted">Só você viu esta rolagem.</div>' : '');
+  }
+  function diceHtml() {
+    const sys = cur.system;
+    const advLbl = sys === 'daggerheart' ? ['Desvantagem', 'Normal', 'Vantagem'] : ['Desvantagem', 'Normal', 'Vantagem'];
+    return '<div class="card"><h2>Rolar dados</h2><div class="dice">' + [4, 6, 8, 10, 12, 20, 100].map(function (n) { return '<button type="button" class="die" data-die="' + n + '" aria-label="Rolar d' + n + '">d' + n + '</button>'; }).join('') + '</div>' +
+      '<div class="row"><div class="field"><label>Quantidade</label><div class="step"><button type="button" data-st="qty" data-d="-1" aria-label="Menos um dado">−</button><output id="o-qty">' + dice.qty + '</output><button type="button" data-st="qty" data-d="1" aria-label="Mais um dado">+</button></div></div>' +
+      '<div class="field"><label>Modificador</label><div class="step"><button type="button" data-st="mod" data-d="-1" aria-label="Diminuir modificador">−</button><output id="o-mod">' + (dice.mod > 0 ? '+' : '') + dice.mod + '</output><button type="button" data-st="mod" data-d="1" aria-label="Aumentar modificador">+</button></div></div>' +
+      '<div class="field"><label>' + (sys === 'daggerheart' ? 'Dado de vantagem (d6)' : 'Vantagem (d20)') + '</label><div class="seg" role="group">' + advLbl.map(function (t, k) { return '<button type="button" data-adv="' + (k - 1) + '" aria-pressed="' + (dice.adv === k - 1) + '">' + t + '</button>'; }).join('') + '</div></div></div>' +
+      '<div class="row"><div class="field" style="flex:1 1 200px"><label for="lbl">Motivo (opcional)</label><input id="lbl" maxlength="60" value="' + esc(dice.label) + '" placeholder="Ex.: Percepção, ataque com a espada" autocomplete="off"></div>' +
+      '<label class="seg" style="align-items:center;padding:0 12px;gap:8px;min-height:46px"><input type="checkbox" id="priv" style="width:auto;min-height:0"' + (dice.priv ? ' checked' : '') + '> <span style="color:var(--fg)">Só eu vejo</span></label></div>' +
+      (sys === 'daggerheart' ? '<div class="sysbox"><button type="button" class="btn" data-a="duality">Rolar Dualidade (2d12: Esperança e Medo)</button></div>' : '') +
+      (sys === 'gurps' ? '<div class="row"><div class="field"><label for="nh">Nível da perícia ou atributo (NH)</label><input id="nh" type="number" inputmode="numeric" min="1" max="40" value="' + dice.nh + '" style="width:120px"></div><button type="button" class="btn" data-a="gurps">Teste 3d6</button></div>' : '') +
+      '<div class="row"><div class="field" style="flex:1 1 200px"><label for="expr">Ou digite uma rolagem</label><input id="expr" value="' + esc(dice.expr) + '" placeholder="2d6+3, d20+5, 4d6kh3" autocomplete="off" autocapitalize="off" spellcheck="false"></div><button type="button" class="btn q" data-a="expr">Rolar</button></div></div>' +
+      '<div class="result" id="result" aria-live="polite"></div>' +
+      '<div class="card"><h2>Rolagens da mesa</h2><ul class="log" id="log"></ul></div>';
+  }
+  function logHtml() {
+    if (!rolls.length) return '<li><span class="muted" style="grid-column:1/-1">Nenhuma rolagem ainda.</span></li>';
+    return rolls.map(function (r) {
+      const res = r.result || {}, d = new Date(r.at);
+      return '<li><span class="w">' + esc(r.who) + '</span><span class="e">' + esc((r.label ? r.label + ' · ' : '') + r.expr + (res.text ? ' · ' + res.text : '')) + (res.tag ? ' · ' + esc(res.tag) : '') + '</span><span class="r ' + esc(res.tone || '') + '">' + esc(res.total) + '</span><span class="tm" style="grid-column:1/-1">' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '</span></li>';
+    }).join('');
+  }
+  async function pollLog() {
+    if (!cur || tab !== 'dados') return;
+    try {
+      const r = await api('/rest/v1/rolls?campaign_id=eq.' + cur.id + '&select=id,who,label,expr,result,at&order=id.desc&limit=30');
+      if (!r.ok) return;
+      const j = await r.json(), sig = JSON.stringify(j.map(function (x) { return x.id; }));
+      if (sig !== (pollLog.sig || '')) { pollLog.sig = sig; rolls = j; const el = $('#log'); if (el) el.innerHTML = logHtml(); }
+    } catch (e) { /* tenta depois */ }
+  }
+  function startLog() { stopLog(); pollLog.sig = ''; paintResult(); const el = $('#log'); if (el) el.innerHTML = logHtml(); pollLog(); logT = setInterval(function () { if (!document.hidden) pollLog(); }, 3000); }
+  function stopLog() { if (logT) { clearInterval(logT); logT = null; } }
+
+  /* ---------- anotações ---------- */
+  const nkey = function () { return 'ht-notes-' + cur.id + '-' + me().id; };
+  function curNote() { return notes.notes.filter(function (n) { return n.id === noteId; })[0]; }
+  function notesHtml() {
+    return '<div class="card"><div class="row" style="justify-content:space-between;align-items:center"><h2>Anotações</h2><span class="sv" id="sv" role="status"></span></div><div class="notes" id="nb"></div></div>';
+  }
+  function paintNotes() {
+    const nb = $('#nb');
+    if (!nb) return;
+    const n = curNote();
+    nb.innerHTML = '<div class="nlist">' + notes.notes.map(function (x) { return '<button type="button" class="nitem" data-note="' + x.id + '"' + (x.id === noteId ? ' aria-current="true"' : '') + '>' + esc(x.title || 'Sem título') + '</button>'; }).join('') + '<button type="button" class="btn q sm" data-a="nnew">+ Nova nota</button></div>' +
+      (n ? '<div class="edit"><div class="field"><label for="nt">Título</label><input id="nt" maxlength="80" value="' + esc(n.title) + '"></div><div class="field"><label for="nx">Texto</label><textarea id="nx">' + esc(n.text) + '</textarea></div><div class="row"><button type="button" class="btn q sm" data-a="ndel">' + (noteDelArm ? 'Confirmar excluir' : 'Excluir nota') + '</button></div></div>' : '<p class="muted">Crie a sua primeira nota. Só você vê as suas anotações.</p>');
+    const sv = $('#sv'); if (sv) sv.textContent = noteSv;
+  }
+  async function loadNotes() {
+    notes = lsGet(nkey(), { notes: [] }); notesFor = cur.id;
+    if (!noteId || !curNote()) noteId = notes.notes[0] ? notes.notes[0].id : null;
+    paintNotes();
+    try {
+      const r = await api('/rest/v1/pdocs?campaign_id=eq.' + cur.id + '&kind=eq.notes&user_id=eq.' + me().id + '&select=data');
+      if (!r.ok) throw new Error('x');
+      const j = await r.json();
+      if (notesFor !== cur.id || tab !== 'notas' || noteT) return;
+      if (j[0] && j[0].data && Array.isArray(j[0].data.notes)) { notes = j[0].data; lsSet(nkey(), notes); if (!curNote()) noteId = notes.notes[0] ? notes.notes[0].id : null; noteSv = 'Salvo na nuvem'; paintNotes(); }
+      else if (notes.notes.length) saveNotes();
+    } catch (e) { noteSv = 'Sem conexão. Mostrando o que está neste aparelho.'; paintNotes(); }
+  }
+  function saveSoon() { noteSv = 'Salvando…'; const sv = $('#sv'); if (sv) sv.textContent = noteSv; clearTimeout(noteT); noteT = setTimeout(saveNotes, 900); }
+  async function saveNotes() {
+    noteT = null; lsSet(nkey(), notes);
+    try {
+      const r = await api('/rest/v1/pdocs?on_conflict=campaign_id,user_id,kind', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, JSONH), body: JSON.stringify({ campaign_id: cur.id, kind: 'notes', data: notes }) });
+      if (!r.ok) throw new Error('x');
+      noteSv = 'Salvo na nuvem';
+    } catch (e) { noteSv = 'Sem conexão. Salvo neste aparelho.'; }
+    const sv = $('#sv'); if (sv) sv.textContent = noteSv;
+  }
+
+  /* ---------- perfil ---------- */
+  function profile(msg, ok) {
+    const el = $('#dlg'), u = me();
+    el.hidden = false;
+    el.innerHTML = '<div class="card"><h2>Perfil</h2><p class="muted">' + esc(u.email) + '</p><form class="stack" id="pro" style="width:100%" autocomplete="off">' +
+      '<div class="field"><label for="p0">Senha atual</label><input type="password" id="p0" autocomplete="current-password" required></div>' +
+      '<div class="field"><label for="p1">Nova senha (mínimo 8 caracteres)</label><input type="password" id="p1" autocomplete="new-password" minlength="8" required></div>' +
+      '<div class="field"><label for="p2">Repita a nova senha</label><input type="password" id="p2" autocomplete="new-password" minlength="8" required></div>' +
+      '<p class="err' + (ok ? ' ok' : '') + '" role="alert">' + esc(msg || '') + '</p><button class="btn" type="submit" id="pgo">Trocar senha</button></form><button type="button" class="skip" data-a="pclose">Fechar</button></div>';
+  }
+  async function profileSubmit() {
+    const c = $('#p0').value, n1 = $('#p1').value, n2 = $('#p2').value, u = me();
+    if (n1 !== n2) { profile('As senhas novas não são iguais.'); return; }
+    if (n1.length < 8) { profile('Use pelo menos 8 caracteres.'); return; }
+    $('#pgo').disabled = true;
+    try {
+      const r = await fetch(SB + '/auth/v1/token?grant_type=password', { method: 'POST', headers: Object.assign({ apikey: KEY }, JSONH), body: JSON.stringify({ email: u.email, password: c }) });
+      if (!r.ok) { profile('A senha atual não confere.'); return; }
+      const sess = store(await r.json());
+      const p = await fetch(SB + '/auth/v1/user', { method: 'PUT', headers: Object.assign({ apikey: KEY, Authorization: 'Bearer ' + sess.access_token }, JSONH), body: JSON.stringify({ password: n1 }) });
+      if (!p.ok) { const j = await p.json().catch(function () { return {}; }); profile(j.msg || j.message || 'Não consegui trocar a senha.'); return; }
+      profile('Senha trocada.', true);
+    } catch (e) { profile('Sem conexão. Tente de novo.'); }
+  }
+
+  /* ---------- início ---------- */
+  async function start() {
+    if (!me()) { drawLogin(); return; }
+    camps = null; cur = null; loadErr = ''; drawCamps();
+    try {
+      const r = await api('/rest/v1/campaigns?select=id,name,system,owner,members(user_id,name)&order=created_at.desc');
+      if (!r.ok) throw new Error('x');
+      camps = await r.json();
+      if (camps.length === 1) { cur = camps[0]; drawLobby(); } else drawCamps();
+    } catch (e) {
+      if (!me()) { drawLogin('Sua sessão expirou. Entre de novo.'); return; }
+      loadErr = 'Não consegui carregar as suas mesas.'; drawCamps();
+    }
+  }
+
+  document.addEventListener('submit', function (e) {
+    if (e.target.id === 'login') { e.preventDefault(); doLogin(); }
+    if (e.target.id === 'pro') { e.preventDefault(); profileSubmit(); }
+  });
+  document.addEventListener('input', function (e) {
+    const t = e.target;
+    if (t.id === 'lbl') dice.label = t.value;
+    else if (t.id === 'expr') dice.expr = t.value;
+    else if (t.id === 'nh') dice.nh = Math.max(1, Math.min(40, parseInt(t.value, 10) || 10));
+    else if (t.id === 'nt' || t.id === 'nx') { const n = curNote(); if (n) { if (t.id === 'nt') n.title = t.value; else n.text = t.value; n.at = Date.now(); saveSoon(); if (t.id === 'nt') { const b = document.querySelector('.nitem[aria-current="true"]'); if (b) b.textContent = t.value || 'Sem título'; } } }
+  });
+  document.addEventListener('change', function (e) { if (e.target.id === 'priv') dice.priv = e.target.checked; });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'expr') { e.preventDefault(); doRoll(rollExpr(dice.expr)); } if (e.key === 'Escape' && !$('#dlg').hidden) $('#dlg').hidden = true; });
+  document.addEventListener('click', function (e) {
+    const el = e.target.closest('[data-a],[data-die],[data-st],[data-adv],[data-tab],[data-camp],[data-note]');
+    if (!el) return;
+    if (el.dataset.die) { doRoll(rollSimple(parseInt(el.dataset.die, 10))); return; }
+    if (el.dataset.st) {
+      const k = el.dataset.st, d = parseInt(el.dataset.d, 10);
+      if (k === 'qty') dice.qty = Math.max(1, Math.min(20, dice.qty + d)); else dice.mod = Math.max(-30, Math.min(30, dice.mod + d));
+      $('#o-qty').textContent = dice.qty; $('#o-mod').textContent = (dice.mod > 0 ? '+' : '') + dice.mod;
+      return;
+    }
+    if (el.dataset.adv != null &&) { dice.adv = parseInt(el.dataset.adv, 10); document.querySelectorAll('[data-adv]').forEach(function (b) { b.setAttribute('aria-pressed', String(parseInt(b.dataset.adv, 10) === dice.adv)); }); return; }
+    if (el.dataset.tab) { tab = el.dataset.tab; document.querySelectorAll('.tab').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tab === tab)); }); drawPane(); return; }
+    if (el.dataset.camp) { cur = camps.filter(function (c) { return c.id === el.dataset.camp; })[0]; tab = 'dados'; last = null; drawLobby(); return; }
+    if (el.dataset.note) { noteId = el.dataset.note; noteDelArm = false; paintNotes(); return; }
+    const a = el.dataset.a;
+    if (a === 'duality') doRoll(rollDuality());
+    else if (a === 'gurps') doRoll(rollGurps());
+    else if (a === 'expr') doRoll(rollExpr(dice.expr));
+    else if (a === 'lobby') { cur = null; drawCamps(); }
+    else if (a === 'retry') start();
+    else if (a === 'profile') profile();
+    else if (a === 'pclose') $('#dlg').hidden = true;
+    else if (a === 'out') { try { localStorage.removeItem('cdm-sb'); } catch (x) { /* ok */ } stopLog(); camps = null; cur = null; drawLogin(); }
+    else if (a === 'nnew') { const n = { id: Date.now().toString(36), title: 'Nova nota', text: '', at: Date.now() }; notes.notes.unshift(n); noteId = n.id; noteDelArm = false; paintNotes(); saveSoon(); const f = $('#nt'); if (f) { f.focus(); f.select(); } }
+    else if (a === 'ndel') { if (!noteDelArm) { noteDelArm = true; paintNotes(); return; } notes.notes = notes.notes.filter(function (n) { return n.id !== noteId; }); noteId = notes.notes[0] ? notes.notes[0].id : null; noteDelArm = false; paintNotes(); saveSoon(); }
+  });
+  start();
+})();
+</script>
+</body>
+</html>

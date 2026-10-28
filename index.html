@@ -326,6 +326,9 @@ input[type="range"] { width: 100%; height: 36px; accent-color: var(--active); ma
 .prep-grid[data-ptab="imagens"] > [data-sec]:not([data-sec="imagens"]) { display: none; }
 .prep-grid[data-ptab="visual"] > [data-sec]:not([data-sec="visual"]) { display: none; }
 .prep-grid[data-ptab="nuvem"] > [data-sec]:not([data-sec="nuvem"]) { display: none; }
+.prep-grid[data-ptab="online"] > [data-sec]:not([data-sec="online"]) { display: none; }
+.gate-err.ok { color: var(--ok); }
+.h3 { font-size: 15px; margin: 6px 0 0; }
 .save-st { display: inline-flex; align-items: center; gap: 10px; min-width: 0; color: var(--muted); font-size: 15px; }
 .save-st i { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--muted); }
 .save-st[data-k="ok"] i { background: var(--ok); }
@@ -670,7 +673,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   <div class="top-in">
     <div class="brand">
       <svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>
-      <span>Hollow Table</span><span class="ver" id="ver">versão 0.33</span>
+      <span>Hollow Table</span><span class="ver" id="ver">versão 0.34</span>
     </div>
     <div class="top-r">
       <div class="seg" role="radiogroup" aria-label="Modo">
@@ -698,6 +701,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   </div>
 </div>
 <div class="gate dlg" id="advdlg" hidden role="dialog" aria-modal="true" aria-label="Aventuras"></div>
+<div class="gate dlg" id="prodlg" hidden role="dialog" aria-modal="true" aria-label="Perfil"></div>
 <div class="gate dlg" id="libdlg" hidden role="dialog" aria-modal="true" aria-label="Biblioteca"></div>
 <main class="wrap" id="main"></main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -840,7 +844,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   function saveIdx() { try { localStorage.setItem(IDX_KEY, JSON.stringify(IDX)); } catch (e) { /* sem armazenamento */ } }
   function saveLocal() { try { localStorage.setItem(ADV_KEY(A.id), JSON.stringify(advSnap(A))); } catch (e) { /* sem armazenamento */ } saveIdx(); }
   function save() { saveLocal(); sbDirty('adv:' + A.id); }
-  const PTABS = [['cena', 'Cena'], ['notas', 'Notas'], ['som', 'Música e sons'], ['imagens', 'Imagens'], ['visual', 'Aparência'], ['nuvem', 'Nuvem']];
+  const PTABS = [['cena', 'Cena'], ['notas', 'Notas'], ['som', 'Música e sons'], ['imagens', 'Imagens'], ['online', 'Mesa online'], ['visual', 'Aparência'], ['nuvem', 'Nuvem']];
   let ptab = 'cena';
   let mode = 'mesa', tab = 'notas', revealed = null, audience = ['todos'];
   const active = {}, levels = {}, fileBuffers = {};
@@ -1393,6 +1397,107 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       '<p class="hint room-link">' + esc(roomLink()) + '</p>' +
       '<div class="field"><label for="room-players">Jogadores (nomes separados por vírgula)</label><input type="text" id="room-players" value="' + esc(ROOM.players.join(', ')) + '" placeholder="Ana, Bruno, Carla" autocomplete="off"></div></div>';
   }
+  /* ---------- mesa online (jogadores com conta) e perfil ---------- */
+  const SYSTEMS = [['daggerheart', 'Daggerheart'], ['dnd5e', 'D&D 5e'], ['gurps', 'GURPS']];
+  let CAMP = undefined, campFor = null, campBusy = false, campMsg = '', campDelArm = false, campSys = 'daggerheart', campRm = null;
+  const playUrl = function () { return location.origin + location.pathname.replace(/[^/]*$/, '') + 'jogar.html'; };
+  const campOnline = function () { return mode === 'prep' && ptab === 'online'; };
+  async function campLoad() {
+    if (!sbUser()) { CAMP = null; return; }
+    campFor = A.id; campBusy = true; campMsg = '';
+    if (campOnline()) render();
+    try {
+      const r = await sbReq('/rest/v1/campaigns?adv_id=eq.' + encodeURIComponent(A.id) + '&select=id,name,system,members(user_id,name)');
+      if (!r.ok) throw new Error('x');
+      const j = await r.json();
+      CAMP = j[0] || null;
+      if (CAMP && CAMP.name !== A.name) { sbReq('/rest/v1/campaigns?id=eq.' + CAMP.id, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: A.name }) }).catch(function () { /* ok */ }); CAMP.name = A.name; }
+    } catch (e) { CAMP = null; campMsg = 'Não consegui consultar a nuvem agora.'; }
+    campBusy = false;
+    if (campOnline()) render();
+  }
+  async function campCreate() {
+    campBusy = true; campMsg = ''; render();
+    try {
+      const r = await sbReq('/rest/v1/campaigns', { method: 'POST', headers: { 'Content-Type': 'application/json', Prefer: 'return=representation' }, body: JSON.stringify({ adv_id: A.id, name: A.name, system: campSys }) });
+      if (!r.ok) throw new Error('x');
+      const j = (await r.json())[0]; j.members = []; CAMP = j; campFor = A.id;
+      toast('Mesa online criada.');
+    } catch (e) { campMsg = 'Não consegui criar a mesa agora.'; }
+    campBusy = false; render();
+  }
+  async function campSystemSet(v) {
+    if (!CAMP) { campSys = v; return; }
+    const old = CAMP.system; CAMP.system = v;
+    try { const r = await sbReq('/rest/v1/campaigns?id=eq.' + CAMP.id, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ system: v }) }); if (!r.ok) throw new Error('x'); toast('Sistema da ficha atualizado.'); }
+    catch (e) { CAMP.system = old; toast('Não consegui trocar o sistema.'); render(); }
+  }
+  async function campAdd(email, nm) {
+    if (!CAMP) return;
+    campMsg = '';
+    try {
+      const r = await sbReq('/rest/v1/rpc/add_member', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cid: CAMP.id, em: email, nm: nm }) });
+      if (!r.ok) { const j = await r.json().catch(function () { return {}; }); throw new Error(j.message || 'erro'); }
+      toast('Jogador adicionado.');
+      await campLoad();
+    } catch (e) { campMsg = e.message === 'erro' ? 'Não consegui adicionar agora.' : e.message; render(); }
+  }
+  async function campRemove(uidv) {
+    try { await sbReq('/rest/v1/members?campaign_id=eq.' + CAMP.id + '&user_id=eq.' + encodeURIComponent(uidv), { method: 'DELETE' }); CAMP.members = CAMP.members.filter(function (m) { return m.user_id !== uidv; }); } catch (e) { toast('Não consegui remover.'); }
+    campRm = null; render();
+  }
+  async function campDelete() {
+    try { await sbReq('/rest/v1/campaigns?id=eq.' + CAMP.id, { method: 'DELETE' }); CAMP = null; toast('Mesa online excluída.'); } catch (e) { toast('Não consegui excluir.'); }
+    campDelArm = false; render();
+  }
+  function onlinePanel() {
+    const head = '<section class="panel" data-sec="online"><h2>Mesa online</h2>';
+    if (!sbUser()) return head + '<p class="hint">Entre na Nuvem para criar a mesa online desta aventura.</p></section>';
+    if (campFor !== A.id) { CAMP = undefined; }
+    if (CAMP === undefined) { if (!campBusy) setTimeout(campLoad, 0); return head + '<p class="hint" role="status">Carregando…</p></section>'; }
+    const sysSel = function (cur) { return '<select id="camp-sys" aria-label="Sistema da ficha">' + SYSTEMS.map(function (x) { return '<option value="' + x[0] + '"' + (cur === x[0] ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select>'; };
+    if (!CAMP) {
+      return head + '<p class="hint">Crie a mesa online para os seus jogadores entrarem com a própria conta: dados, anotações e, em breve, ficha e mochila.</p>' +
+        '<div class="add-row"><div class="field"><label for="camp-sys">Sistema da ficha dos jogadores</label>' + sysSel(campSys) + '</div><button type="button" class="btn primary" data-action="campCreate"' + (campBusy ? ' disabled' : '') + '>Criar mesa online</button></div>' +
+        (campMsg ? '<p class="hint" role="status">' + esc(campMsg) + '</p>' : '') + '</section>';
+    }
+    const mem = (CAMP.members || []).map(function (m) {
+      return '<li class="lib-row"><span class="lib-n">' + esc(m.name) + '</span><button type="button" class="btn quiet sm" data-action="campRm" data-id="' + m.user_id + '">' + (campRm === m.user_id ? 'Confirmar remover' : 'Remover') + '</button></li>';
+    }).join('');
+    return head + '<p class="hint">Os jogadores entram em <strong>' + esc(playUrl()) + '</strong> com e-mail e senha.</p>' +
+      '<div class="row"><button type="button" class="btn quiet sm" data-action="campCopy">Copiar link</button></div>' +
+      '<div class="field"><label for="camp-sys">Sistema da ficha dos jogadores</label>' + sysSel(CAMP.system) + '</div>' +
+      '<h3 class="h3">Jogadores</h3>' + (mem ? '<ul class="lib-list">' + mem + '</ul>' : '<p class="hint">Nenhum jogador ainda.</p>') +
+      '<form id="camp-add" class="add-row"><div class="field"><label for="cm-email">E-mail da conta</label><input type="email" id="cm-email" autocomplete="off" inputmode="email" required></div><div class="field"><label for="cm-name">Nome na mesa</label><input type="text" id="cm-name" autocomplete="off" placeholder="Ex.: Ana" required></div><button type="submit" class="btn primary">Adicionar</button></form>' +
+      (campMsg ? '<p class="hint" role="status">' + esc(campMsg) + '</p>' : '') +
+      '<p class="hint">Cada jogador precisa de uma conta antes. No painel do Supabase: Authentication, Users, Add user, Create new user. Marque Auto Confirm User. Depois adicione o e-mail aqui. Cada um troca a própria senha no botão de perfil.</p>' +
+      '<div class="row"><button type="button" class="btn quiet sm" data-action="campDel">' + (campDelArm ? 'Confirmar excluir mesa online' : 'Excluir mesa online') + '</button></div></section>';
+  }
+  function profileOpen(msg, ok) {
+    const el = $('#prodlg'), u = sbUser();
+    if (!el || !u) return;
+    el.hidden = false;
+    el.innerHTML = '<div class="gate-card dlg-card"><h1>Perfil</h1><p class="sub">' + esc(u.email) + '</p>' +
+      '<form id="pro-form" autocomplete="off"><div class="field"><label for="pro-cur">Senha atual</label><input type="password" id="pro-cur" autocomplete="current-password" required></div>' +
+      '<div class="field"><label for="pro-new">Nova senha (mínimo 8 caracteres)</label><input type="password" id="pro-new" autocomplete="new-password" minlength="8" required></div>' +
+      '<div class="field"><label for="pro-new2">Repita a nova senha</label><input type="password" id="pro-new2" autocomplete="new-password" minlength="8" required></div>' +
+      '<p class="gate-err' + (ok ? ' ok' : '') + '" role="alert">' + esc(msg || '') + '</p><button type="submit" class="btn primary" id="pro-go">Trocar senha</button></form>' +
+      '<button type="button" class="skip" data-action="proClose">Fechar</button></div>';
+  }
+  async function profileSubmit() {
+    const cur = $('#pro-cur').value, n1 = $('#pro-new').value, n2 = $('#pro-new2').value, u = sbUser();
+    if (n1 !== n2) { profileOpen('As senhas novas não são iguais.'); return; }
+    if (n1.length < 8) { profileOpen('Use pelo menos 8 caracteres.'); return; }
+    $('#pro-go').disabled = true;
+    try {
+      const r = await fetch(SBC.url + '/auth/v1/token?grant_type=password', { method: 'POST', headers: { apikey: SBC.key, 'Content-Type': 'application/json' }, body: JSON.stringify({ email: u.email, password: cur }) });
+      if (!r.ok) { profileOpen('A senha atual não confere.'); return; }
+      const sess = sbStore(await r.json());
+      const p = await fetch(SBC.url + '/auth/v1/user', { method: 'PUT', headers: { apikey: SBC.key, Authorization: 'Bearer ' + sess.access_token, 'Content-Type': 'application/json' }, body: JSON.stringify({ password: n1 }) });
+      if (!p.ok) { const j = await p.json().catch(function () { return {}; }); profileOpen(j.msg || j.message || 'Não consegui trocar a senha.'); return; }
+      profileOpen('Senha trocada.', true);
+    } catch (e) { profileOpen('Sem conexão. Tente de novo.'); }
+  }
   function cloudPanel() {
     const u = sbUser();
     if (!u) {
@@ -1403,7 +1508,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       (sbState === 'conflict' ? '<div class="row"><button type="button" class="btn primary" data-action="sbCloud">Usar a versão da nuvem</button><button type="button" class="btn quiet" data-action="sbLocal">Manter a deste aparelho</button></div>' : '') +
       '<div class="row"><button type="button" class="btn quiet" data-action="sbSync">Sincronizar agora</button><button type="button" class="btn quiet" data-action="sbExport">Baixar backup</button>' +
       '<label class="btn quiet file-btn">Restaurar backup<input type="file" id="file-restore" accept="application/json,.json"></label>' +
-      '<button type="button" class="btn quiet" data-action="sbOut">Sair</button></div>' +
+      '<button type="button" class="btn quiet" data-action="profile">Perfil e senha</button><button type="button" class="btn quiet" data-action="sbOut">Sair</button></div>' +
       '<p class="hint">O backup guarda o texto e as configurações. Imagens e áudios ficam na nuvem.</p></section>';
   }
   function showLobby() {
@@ -2194,7 +2299,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       '<p class="hint">Os sons que você envia vão para a Biblioteca e podem ser usados em outras cenas. Aceita mp3, m4a, ogg e wav.</p></section>' +
       '<section class="panel" data-sec="imagens"><h2>Imagens</h2><div class="thumbs">' + imgs + '</div><div class="row"><button type="button" class="btn primary" data-action="libOpen" data-id="img">Adicionar da biblioteca</button><label class="btn quiet file-btn">Enviar nova imagem<input type="file" id="file-img" accept="image/*" multiple></label></div></section>' +
       cdPanel(maxOpts, cdCue) + scenePanel() +
-      cloudPanel() + '</div>';
+      onlinePanel() + cloudPanel() + '</div>';
   }
 
   function renderDock() {
@@ -2465,7 +2570,13 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       return;
     }
     if (a !== 'sceneDel') armDel = false;
-    if (a === 'ptab') { ptab = id; render(); return; }
+    if (a === 'ptab') { ptab = id; if (id === 'online' && (CAMP === undefined || campFor !== A.id) && !campBusy) campLoad(); render(); return; }
+    if (a === 'profile') { profileOpen(); return; }
+    if (a === 'proClose') { $('#prodlg').hidden = true; return; }
+    if (a === 'campCreate') { campCreate(); return; }
+    if (a === 'campCopy') { const l = playUrl(); (navigator.clipboard ? navigator.clipboard.writeText(l) : Promise.reject()).then(function () { toast('Link copiado.'); }).catch(function () { toast(l); }); return; }
+    if (a === 'campRm') { if (campRm !== id) { campRm = id; render(); return; } campRemove(id); return; }
+    if (a === 'campDel') { if (!campDelArm) { campDelArm = true; render(); return; } campDelete(); return; }
     if (a === 'scene') { setScene(i); return; }
     if (a === 'sceneAdd') { sceneAdd(); return; }
     if (a === 'sceneDup') { sceneDup(); toast('Cena duplicada.'); return; }
@@ -2503,6 +2614,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   let libNameT = null;
   document.addEventListener('submit', function (e) {
     const f = e.target;
+    if (f.id === 'pro-form') { e.preventDefault(); profileSubmit(); return; }
+    if (f.id === 'camp-add') { e.preventDefault(); campAdd($('#cm-email').value.trim(), $('#cm-name').value.trim()); return; }
     if (f.id === 'fs-keyform') { e.preventDefault(); const v = $('#fs-key').value.trim(); if (v) { fsKey = v; lsSet(FS_KEY, v); render(); } return; }
     if (f.id === 'fs-form') { e.preventDefault(); fsSearch(); }
   });
@@ -2550,6 +2663,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       roomSave(); roomPush().catch(function () { toast('Não consegui salvar os jogadores.'); }); render();
       return;
     }
+    if (t.id === 'camp-sys') { campSystemSet(t.value); return; }
     if (t.id === 'fs-len') { fsLen = t.value; return; }
     if (t.id === 'fade-sel') { lsSet('ht-fade', t.value); return; }
     if (t.getAttribute && t.getAttribute('data-libkind')) { const it = libFind(t.getAttribute('data-libkind')); if (it) { it.kind = t.value; libSave(); } return; }
