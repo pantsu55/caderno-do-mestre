@@ -287,6 +287,7 @@ input[type="range"] { width: 100%; height: 36px; accent-color: var(--active); ma
 .adv-row span { flex: 1 1 200px; min-width: 0; }
 .adv-row input { flex: 1 1 160px; min-width: 0; background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; min-height: 40px; color: var(--fg); font: inherit; }
 .adv-pick { flex: 1 1 140px; min-width: 0; text-align: left; border: 0; background: none; font: inherit; font-weight: 600; padding: 6px 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.adv-pick small { display: block; font-weight: 400; font-size: 13px; color: var(--muted); }
 .adv-pick[aria-current="true"]::before { content: "● "; color: var(--active); }
 .dlg-card form { display: grid; gap: 12px; margin-top: 4px; }
 .ptabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; -webkit-overflow-scrolling: touch; }
@@ -640,7 +641,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   <div class="top-in">
     <div class="brand">
       <svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>
-      <span>Hollow Table</span><span class="ver" id="ver">versão 0.26</span>
+      <span>Hollow Table</span><span class="ver" id="ver">versão 0.27</span>
     </div>
     <div class="top-r">
       <div class="seg" role="radiogroup" aria-label="Modo">
@@ -952,6 +953,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       else { sbLast = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); setSb('ok'); }
     } catch (e) { setSb(navigator.onLine ? 'err' : 'off'); }
     sbBusy = false;
+    if (dlg) renderDlg();
     if (mode === 'prep' && ptab === 'nuvem') render();
   }
   async function sbResolve(useCloud) {
@@ -1035,6 +1037,11 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       '<button type="button" class="btn quiet" data-action="sbOut">Sair</button></div>' +
       '<p class="hint">O backup guarda o texto e as configurações. Imagens e áudios ficam na nuvem.</p></section>';
   }
+  function showLobby() {
+    try { sessionStorage.setItem('cdm-lobby', '1'); } catch (e) { /* ok */ }
+    dlg = { mode: 'list', home: true };
+    renderDlg();
+  }
   function showGate(msg) {
     const g = $('#gate');
     if (!g) return;
@@ -1050,14 +1057,16 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     go.disabled = true; go.textContent = 'Entrando…';
     sbLogin($('#g-email').value.trim(), $('#g-pass').value).then(function () {
       $('#g-pass').value = '';
-      hideGate(); sbSync(); sbHydrate(S); render();
+      hideGate(); sbSync(); sbHydrate(S); render(); showLobby();
     }).catch(function (er) { err.textContent = er.message; }).then(function () { go.disabled = false; go.textContent = 'Entrar'; });
   }
   function sbInit() {
     $('#gate-form').addEventListener('submit', gateSubmit);
     let skipped = false;
     try { skipped = sessionStorage.getItem('cdm-skip') === '1'; } catch (e) { /* ok */ }
-    if (!sbUser() && !skipped) showGate();
+    let seen = false;
+    try { seen = sessionStorage.getItem('cdm-lobby') === '1'; } catch (e) { /* ok */ }
+    if (!sbUser() && !skipped) showGate(); else if (!seen) showLobby();
     setSb(sbUser() ? 'busy' : 'out');
     if (sbUser()) { sbHydrate(S); sbSync(); }
     document.addEventListener('visibilitychange', function () { if (!document.hidden) sbSync(); });
@@ -1848,15 +1857,17 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (!el) return;
     if (!dlg) { el.hidden = true; return; }
     el.hidden = false;
+    const home = !!dlg.home;
+    const countOf = function (e) { const raw = e.id === A.id ? A : lsRaw(ADV_KEY(e.id)); const n = raw && raw.scenes ? raw.scenes.length : 0; return n ? n + (n === 1 ? ' cena' : ' cenas') : ''; };
     const rows = IDX.advs.map(function (e) {
       if (dlg.mode === 'rename' && dlg.id === e.id) return '<li class="adv-row"><input type="text" id="adv-rn" value="' + esc(e.name) + '" aria-label="Novo nome da aventura"><button type="button" class="btn sm primary" data-action="advRenameOk" data-id="' + e.id + '">Salvar</button><button type="button" class="btn sm quiet" data-action="advCancel">Cancelar</button></li>';
       if (dlg.mode === 'del' && dlg.id === e.id) return '<li class="adv-row warn"><span>Excluir “' + esc(e.name) + '” e todas as cenas?</span><button type="button" class="btn sm" data-action="advDelOk" data-id="' + e.id + '">Excluir</button><button type="button" class="btn sm quiet" data-action="advCancel">Cancelar</button></li>';
-      return '<li class="adv-row"><button type="button" class="adv-pick" data-action="advPick" data-id="' + e.id + '"' + (e.id === A.id ? ' aria-current="true"' : '') + '>' + esc(e.name) + '</button>' +
+      return '<li class="adv-row"><button type="button" class="adv-pick" data-action="advPick" data-id="' + e.id + '"' + (e.id === A.id ? ' aria-current="true"' : '') + '>' + esc(e.name) + (countOf(e) ? '<small>' + countOf(e) + (e.id === A.id ? ' · última aberta' : '') + '</small>' : '') + '</button>' +
         '<button type="button" class="btn sm quiet" data-action="advRename" data-id="' + e.id + '">Renomear</button><button type="button" class="btn sm quiet" data-action="advDel" data-id="' + e.id + '"' + (IDX.advs.length < 2 ? ' disabled' : '') + '>Excluir</button></li>';
     }).join('');
-    el.innerHTML = '<div class="gate-card dlg-card"><h1>Aventuras</h1><ul class="adv-list">' + rows + '</ul>' +
+    el.innerHTML = '<div class="gate-card dlg-card">' + (home ? '<img class="gate-logo" src="icon.svg" alt="" style="justify-self:center"><h1>Suas aventuras</h1><p class="sub" style="text-align:center">Escolha onde a mesa continua.</p>' : '<h1>Aventuras</h1>') + '<ul class="adv-list">' + rows + '</ul>' +
       '<form id="adv-new"><div class="field"><label for="adv-nn">Nova aventura</label><input type="text" id="adv-nn" placeholder="Nome da aventura" autocomplete="off"></div><button type="submit" class="btn primary">Criar aventura</button></form>' +
-      '<button type="button" class="skip" data-action="advClose">Fechar</button></div>';
+      '<button type="button" class="skip" data-action="advClose">' + (home ? 'Continuar em ' + esc(A.name) : 'Fechar') + '</button></div>';
     if (dlg.mode === 'rename') setTimeout(function () { const f = $('#adv-rn'); if (f) { f.focus(); f.select(); } }, 20);
   }
   function renderScenes() {
@@ -1972,12 +1983,12 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (a === 'cdAdd') { S.countdown = { name: 'Contagem', max: 3, value: 0, cue: '', done: '' }; commit(); return; }
     if (a === 'cdDel') { S.countdown = null; commit(); return; }
     if (a === 'advOpen') { dlg = { mode: 'list' }; renderDlg(); return; }
-    if (a === 'advClose' || a === 'advCancel') { dlg = a === 'advCancel' ? { mode: 'list' } : null; renderDlg(); return; }
+    if (a === 'advClose' || a === 'advCancel') { dlg = a === 'advCancel' ? { mode: 'list', home: dlg && dlg.home } : null; renderDlg(); return; }
     if (a === 'advPick') { dlg = null; renderDlg(); if (id !== A.id) advLoad(id); return; }
-    if (a === 'advRename') { dlg = { mode: 'rename', id: id }; renderDlg(); return; }
-    if (a === 'advRenameOk') { const f = $('#adv-rn'); if (f) advRename(id, f.value); dlg = { mode: 'list' }; renderDlg(); return; }
-    if (a === 'advDel') { dlg = { mode: 'del', id: id }; renderDlg(); return; }
-    if (a === 'advDelOk') { dlg = { mode: 'list' }; advDelete(id); renderDlg(); return; }
+    if (a === 'advRename') { dlg = { mode: 'rename', id: id, home: dlg && dlg.home }; renderDlg(); return; }
+    if (a === 'advRenameOk') { const f = $('#adv-rn'); if (f) advRename(id, f.value); dlg = { mode: 'list', home: dlg && dlg.home }; renderDlg(); return; }
+    if (a === 'advDel') { dlg = { mode: 'del', id: id, home: dlg && dlg.home }; renderDlg(); return; }
+    if (a === 'advDelOk') { const hm = dlg && dlg.home; dlg = { mode: 'list', home: hm }; advDelete(id); renderDlg(); return; }
     if (a === 'saveNow') {
       saveLocal();
       if (!sbUser()) { toast('Salvo neste aparelho. Entre na Nuvem para abrir no iPad.'); return; }
@@ -1987,7 +1998,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     }
     if (a === 'cloud') { if (!sbUser()) { showGate(); return; } if (sbState !== 'conflict') sbSync(); mode = 'prep'; ptab = 'nuvem'; render(); window.scrollTo(0, 0); return; }
     if (a === 'gateOpen') { showGate(); return; }
-    if (a === 'gateSkip') { try { sessionStorage.setItem('cdm-skip', '1'); } catch (e) { /* ok */ } hideGate(); return; }
+    if (a === 'gateSkip') { try { sessionStorage.setItem('cdm-skip', '1'); } catch (e) { /* ok */ } hideGate(); showLobby(); return; }
     if (a === 'sbOut') { try { localStorage.removeItem('cdm-sb'); localStorage.removeItem('cdm-sbmeta'); } catch (e) { /* ok */ } sbConflict = null; setSb('out'); render(); return; }
     if (a === 'sbSync') { sbSync(); return; }
     if (a === 'sbExport') { sbExport(); return; }
