@@ -301,6 +301,24 @@ input[type="range"] { width: 100%; height: 36px; accent-color: var(--active); ma
 .room-h { display: flex; justify-content: space-between; align-items: flex-end; gap: 12px; flex-wrap: wrap; width: 100%; }
 .room-code { margin: 0; font-family: var(--font-mono); font-size: 28px; letter-spacing: 0.25em; color: var(--accent); }
 .room-link { word-break: break-all; margin: 0; }
+.feed { display: grid; gap: 10px; }
+.feed-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+.feed-h h2 { margin: 0; }
+.feed-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.feed-list li { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0 12px; padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.feed-list li.fresh { border-color: var(--accent); }
+.feed-list .fw { font-weight: 700; }
+.feed-list .fw small { color: var(--muted); font-weight: 400; }
+.feed-list .fe { color: var(--muted); font-size: 14px; overflow-wrap: anywhere; }
+.feed-list .fr { grid-column: 2; grid-row: 1 / span 2; align-self: center; font-family: var(--font-mono); font-size: 20px; }
+.feed-list .fr.good { color: var(--ok); } .feed-list .fr.bad { color: #ff8f8f; } .feed-list .fr.hot { color: #ffb86b; }
+.feed-empty { color: var(--muted); border-style: dashed !important; }
+.drawer { position: fixed; top: 0; right: 0; bottom: 0; width: min(620px, 100%); z-index: 40; background: #0A0912; border-left: 1px solid var(--line); box-shadow: -20px 0 60px rgba(0, 0, 0, 0.45); display: flex; flex-direction: column; padding-top: env(safe-area-inset-top, 0px); }
+.drawer-h { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px max(16px, env(safe-area-inset-right, 0px)) 12px 16px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.drawer-h h2 { margin: 0; color: #E9E6F7; }
+.drawer-h { background: #131122 !important; border-bottom-color: #2A2645 !important; }
+.drawer-h .btn { background: #1B1830; color: #E9E6F7; border-color: #2A2645; }
+.drawer iframe { flex: 1; width: 100%; border: 0; background: #0A0912; }
 .lib-up { border-style: dashed; }
 .lib-up.drag { background: var(--accent-soft); }
 .lib-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
@@ -673,7 +691,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   <div class="top-in">
     <div class="brand">
       <svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>
-      <span>Hollow Table</span><span class="ver" id="ver">versão 0.34</span>
+      <span>Hollow Table</span><span class="ver" id="ver">versão 0.35</span>
     </div>
     <div class="top-r">
       <div class="seg" role="radiogroup" aria-label="Modo">
@@ -701,6 +719,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
   </div>
 </div>
 <div class="gate dlg" id="advdlg" hidden role="dialog" aria-modal="true" aria-label="Aventuras"></div>
+<aside class="drawer" id="jogdrawer" hidden aria-label="Fichas dos jogadores"><div class="drawer-h"><h2>Fichas dos jogadores</h2><button type="button" class="btn quiet sm" data-action="jogClose">Fechar</button></div><iframe title="Fichas dos jogadores"></iframe></aside>
 <div class="gate dlg" id="prodlg" hidden role="dialog" aria-modal="true" aria-label="Perfil"></div>
 <div class="gate dlg" id="libdlg" hidden role="dialog" aria-modal="true" aria-label="Biblioteca"></div>
 <main class="wrap" id="main"></main>
@@ -1498,6 +1517,43 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
       profileOpen('Senha trocada.', true);
     } catch (e) { profileOpen('Sem conexão. Tente de novo.'); }
   }
+  /* ---------- mesa online dentro da Mesa: rolagens e fichas ---------- */
+  let feedHtml = '', feedSig = '', feedT = null, feedNew = 0;
+  function feedRows(list) {
+    if (!list.length) return '<li class="feed-empty">Nenhuma rolagem ainda.</li>';
+    return list.slice(0, 8).map(function (r, k) {
+      const res = r.result || {}, d = new Date(r.at);
+      return '<li class="' + (k < feedNew ? 'fresh' : '') + '"><span class="fw">' + esc(r.who) + ' <small>' + d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '</small></span><span class="fe">' + esc((r.label ? r.label + ' · ' : '') + (res.text || r.expr)) + (res.tag ? ' · ' + esc(res.tag) : '') + '</span><b class="fr ' + esc(res.tone || '') + '">' + esc(res.total) + '</b></li>';
+    }).join('');
+  }
+  function tableFeedHtml() {
+    if (!sbUser() || !CAMP || campFor !== A.id) return '';
+    return '<section class="panel feed"><div class="feed-h"><h2>Mesa online · Rolagens</h2><button type="button" class="btn quiet sm" data-action="jogOpen">Fichas dos jogadores</button></div><ul class="feed-list" id="rollfeed">' + (feedHtml || '<li class="feed-empty">Carregando…</li>') + '</ul></section>';
+  }
+  async function feedPoll() {
+    if (mode !== 'mesa' || !sbUser() || document.hidden) return;
+    if (campFor !== A.id) { if (!campBusy) { await campLoad(); render(); } return; }
+    if (!CAMP) return;
+    try {
+      const r = await sbReq('/rest/v1/rolls?campaign_id=eq.' + CAMP.id + '&select=id,who,label,expr,result,at&order=id.desc&limit=8');
+      if (!r.ok) return;
+      const j = await r.json(), sig = j.map(function (x) { return x.id; }).join(',');
+      if (sig === feedSig) return;
+      const old = feedSig ? feedSig.split(',') : null;
+      feedNew = old ? j.filter(function (x) { return old.indexOf(String(x.id)) < 0; }).length : 0;
+      feedSig = sig; feedHtml = feedRows(j);
+      const el = $('#rollfeed'); if (el) el.innerHTML = feedHtml; else render();
+      if (feedNew && j[0]) { const r0 = j[0], res = r0.result || {}; toast(r0.who + ' rolou ' + (r0.label ? r0.label + ': ' : '') + res.total + (res.tag ? ' (' + res.tag + ')' : '')); }
+    } catch (e) { /* tenta depois */ }
+  }
+  function jogOpen() {
+    const d = $('#jogdrawer');
+    if (!d) return;
+    const src = 'jogar.html?embed=fichas&adv=' + encodeURIComponent(A.id);
+    const f = d.querySelector('iframe');
+    if (f.getAttribute('src') !== src) f.setAttribute('src', src);
+    d.hidden = false;
+  }
   function cloudPanel() {
     const u = sbUser();
     if (!u) {
@@ -1535,6 +1591,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     }).catch(function (er) { err.textContent = er.message; }).then(function () { go.disabled = false; go.textContent = 'Entrar'; });
   }
   function sbInit() {
+    feedT = setInterval(feedPoll, 3000); setTimeout(feedPoll, 800);
     $('#gate-form').addEventListener('submit', gateSubmit);
     let skipped = false;
     try { skipped = sessionStorage.getItem('cdm-skip') === '1'; } catch (e) { /* ok */ }
@@ -2202,7 +2259,7 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     return '<section class="head"><p class="eyebrow">' + esc(['Cena ' + (A.cur + 1) + ' de ' + A.scenes.length, S.when, S.place].filter(Boolean).join(' · ')) + '</p><h1>' + esc(S.title) + '</h1>' +
       '<div class="tags">' + [[S.kind, ' tag-hot'], [S.time, ''], [S.budget, '']].filter(function (t) { return t[0]; }).map(function (t) { return '<span class="tag' + t[1] + '">' + esc(t[0]) + '</span>'; }).join('') + '</div></section>' +
       '<div class="cols"><div class="col">' + renderCountdown() +
-      '<section class="panel"><div class="tabs" role="tablist" aria-label="Seções da cena">' + tabs + '</div><div class="tab-body">' + body + '</div></section></div>' +
+      '<section class="panel"><div class="tabs" role="tablist" aria-label="Seções da cena">' + tabs + '</div><div class="tab-body">' + body + '</div></section>' + tableFeedHtml() + '</div>' +
       '<aside class="console" aria-label="Som">' +
       musicHtml() +
       combosHtml() +
@@ -2572,6 +2629,8 @@ h2 { font-size: 19px; font-weight: 600; letter-spacing: 0.1em; text-transform: u
     if (a !== 'sceneDel') armDel = false;
     if (a === 'ptab') { ptab = id; if (id === 'online' && (CAMP === undefined || campFor !== A.id) && !campBusy) campLoad(); render(); return; }
     if (a === 'profile') { profileOpen(); return; }
+    if (a === 'jogOpen') { jogOpen(); return; }
+    if (a === 'jogClose') { $('#jogdrawer').hidden = true; return; }
     if (a === 'proClose') { $('#prodlg').hidden = true; return; }
     if (a === 'campCreate') { campCreate(); return; }
     if (a === 'campCopy') { const l = playUrl(); (navigator.clipboard ? navigator.clipboard.writeText(l) : Promise.reject()).then(function () { toast('Link copiado.'); }).catch(function () { toast(l); }); return; }

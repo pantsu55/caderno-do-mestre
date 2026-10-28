@@ -190,6 +190,9 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
 .rtoast .n { font: 700 34px/1 var(--mono); }
 @media (min-width: 760px) { .rtoast { bottom: 24px; } }
 @media (max-width: 520px) { .idc { grid-template-columns: 1fr; justify-items: center; } .idc .idf { width: 100%; } .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.embed main { padding-bottom: 24px; max-width: none; }
+.embed body { padding-top: 8px; }
+.embed .rtoast { bottom: 16px; }
 </style>
 </head>
 <body>
@@ -205,6 +208,8 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
   const lsGet = function (k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
   const lsSet = function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ok */ } };
   const app = $('#app');
+  const QS = new URLSearchParams(location.search), EMBED = QS.get('embed') === 'fichas', EMBED_ADV = QS.get('adv') || '';
+  if (EMBED) document.documentElement.classList.add('embed');
 
   /* ---------- sessão ---------- */
   function me() { const x = lsGet('cdm-sb', null); return x && x.user ? x.user : null; }
@@ -276,6 +281,7 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
   function drawLobby() {
     const u = me();
     const who = [cur.owner === u.id ? '<b>Mestre (você)</b>' : 'Mestre'].concat((cur.members || []).map(function (m) { return m.user_id === u.id ? '<b>' + esc(m.name) + ' (você)</b>' : esc(m.name); }));
+    if (EMBED) { app.innerHTML = '<div class="pane one" id="pane"></div>'; drawPane(); return; }
     app.innerHTML = topBar(cur.name, '<span class="sys">' + esc(SYS[cur.system] || cur.system) + '</span>') +
       '<div class="roster" aria-label="Quem está na mesa">' + who.map(function (w) { return '<span>' + w + '</span>'; }).join('') + '</div>' +
       '<nav class="nav" role="tablist" aria-label="Ferramentas">' + [['dados', 'Dados'], cur.owner === u.id ? ['fichas', 'Fichas'] : ['ficha', 'Ficha'], ['notas', 'Anotações']].map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + ICO[t[0] === 'fichas' ? 'ficha' : t[0]] + '<span>' + t[1] + '</span></button>'; }).join('') + '</nav>' +
@@ -767,12 +773,17 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
 
   /* ---------- início ---------- */
   async function start() {
-    if (!me()) { drawLogin(); return; }
+    if (!me()) { if (EMBED) { app.innerHTML = '<div class="center"><p class="muted">Entre na Nuvem do Hollow Table para ver as fichas.</p></div>'; return; } drawLogin(); return; }
     camps = null; cur = null; loadErr = ''; drawCamps();
     try {
-      const r = await api('/rest/v1/campaigns?select=id,name,system,owner,members(user_id,name)&order=created_at.desc');
+      const r = await api('/rest/v1/campaigns?select=id,name,system,owner,adv_id,members(user_id,name)&order=created_at.desc');
       if (!r.ok) throw new Error('x');
       camps = await r.json();
+      if (EMBED) {
+        cur = camps.filter(function (c) { return c.adv_id === EMBED_ADV && c.owner === me().id; })[0] || null;
+        if (!cur) { app.innerHTML = '<div class="center"><p class="muted">Esta aventura ainda não tem mesa online. Crie em Preparar → Mesa online.</p></div>'; return; }
+        tab = 'fichas'; drawLobby(); return;
+      }
       if (camps.length === 1) { cur = camps[0]; drawLobby(); } else drawCamps();
     } catch (e) {
       if (!me()) { drawLogin('Sua sessão expirou. Entre de novo.'); return; }
