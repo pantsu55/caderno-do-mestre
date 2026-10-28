@@ -273,6 +273,45 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
 .itf textarea { min-height: 96px; }
 .step input { width: 96px; text-align: center; font: 700 18px var(--mono); min-height: 42px; padding: 4px; }
 .coin-in { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+
+/* ---- memória ---- */
+.rtoast { z-index: 12; }
+.stage { position: fixed; inset: 0; z-index: 9; background: rgba(4, 3, 10, 0.93); display: grid; place-items: start center; overflow-y: auto; padding: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-right, 0px)) max(16px, env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); animation: stage-in 0.35s ease; }
+.stage-in { width: min(920px, 100%); margin-block: auto; display: grid; gap: 14px; justify-items: center; text-align: center; padding: 8px 0; }
+.stage-in > img { max-width: 100%; min-width: min(100%, 520px); max-height: calc(100dvh - 240px); min-height: 120px; border-radius: 14px; border: 1px solid var(--line); box-shadow: 0 0 70px rgba(139, 123, 255, 0.28); object-fit: contain; background: var(--surface); }
+.stage-l { display: inline-flex; align-items: center; gap: 8px; font: 700 12px var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent); }
+.stage-l svg { width: 16px; height: 16px; }
+.stage-c { font-family: var(--serif); font-size: 21px; font-weight: 600; text-wrap: balance; }
+.stage-b { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.stage-b .btn { min-width: 140px; }
+.stage-note { width: min(520px, 100%); text-align: left; }
+.stage-note textarea { min-height: 0; }
+@keyframes stage-in { from { opacity: 0; } to { opacity: 1; } }
+.pill { position: fixed; left: max(12px, env(safe-area-inset-left, 0px)); bottom: calc(80px + env(safe-area-inset-bottom, 0px)); z-index: 7; display: inline-flex; align-items: center; gap: 8px; background: var(--surface-2); border: 1px solid var(--accent); color: var(--accent); border-radius: 999px; padding: 5px 14px 5px 5px; font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 18px rgba(94, 225, 245, 0.25); }
+.pill img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
+.pill svg { width: 16px; height: 16px; }
+@media (min-width: 760px) { .pill { bottom: 20px; left: 20px; } }
+.mem { display: grid; gap: 14px; }
+.mem-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+.mem-c { display: grid; gap: 6px; align-content: start; text-align: left; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 8px; color: var(--fg); font: inherit; min-width: 0; }
+button.mem-c { cursor: pointer; }
+button.mem-c:hover, .mem-c .mem-i:hover { border-color: var(--accent); }
+.mem-i { display: block; width: 100%; aspect-ratio: 4 / 3; border-radius: 10px; overflow: hidden; background: var(--surface-2); border: 1px solid var(--line); padding: 0; cursor: pointer; }
+.mem-i img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mem-i.off { display: grid; place-items: center; color: var(--muted); font-size: 13px; }
+.mem-t { font-weight: 700; padding: 0 4px; overflow-wrap: anywhere; }
+.mem-n { color: var(--muted); font-size: 13px; padding: 0 4px 4px; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.mem-c .rb { justify-self: start; }
+.mem-big { display: grid; place-items: center; border-radius: 12px; overflow: hidden; background: var(--bg); border: 1px solid var(--line); min-height: 160px; }
+.mem-big img { max-width: 100%; max-height: 60vh; object-fit: contain; display: block; }
+.live-c { display: grid; grid-template-columns: 132px minmax(0, 1fr); gap: 14px; align-items: center; border-color: var(--accent); box-shadow: 0 0 24px rgba(94, 225, 245, 0.15); }
+.live-t { padding: 0; border: 0; background: none; cursor: pointer; border-radius: 10px; overflow: hidden; aspect-ratio: 4 / 3; }
+.live-t img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.live-x { display: grid; gap: 6px; justify-items: start; min-width: 0; }
+.live-cap { font-family: var(--serif); font-size: 18px; overflow-wrap: anywhere; }
+.file-btn { position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: 6px; }
+.file-btn svg { width: 18px; height: 18px; }
+.file-btn input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; min-height: 0; padding: 0; }
 </style>
 </head>
 <body>
@@ -348,7 +387,7 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
       '<button type="button" class="ghost" data-a="profile">Perfil</button><button type="button" class="ghost" data-a="out">Sair</button></div></div>';
   }
   function drawCamps() {
-    stopLog(); stopBag();
+    stopLog(); stopBag(); stopStage();
     if (camps === null) { app.innerHTML = topBar('Hollow Table') + '<div class="center"><p class="muted" role="status">' + (loadErr ? esc(loadErr) : 'Carregando suas mesas…') + '</p>' + (loadErr ? '<button class="btn q" data-a="retry">Tentar de novo</button>' : '') + '</div>'; return; }
     if (!camps.length) { app.innerHTML = topBar('Hollow Table') + '<div class="center"><h2>Nenhuma mesa ainda</h2><p class="muted">Peça ao Mestre para adicionar o seu e-mail (' + esc(me().email) + ') à mesa.</p></div>'; return; }
     app.innerHTML = topBar('Suas mesas') + '<div class="center" style="place-content:start center"><div class="camps">' + camps.map(function (c) {
@@ -363,7 +402,8 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
     dados: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M12 2.5l8.5 4.9v9.2L12 21.5l-8.5-4.9V7.4z"/><path d="M12 2.5v19M3.5 7.4l8.5 4.9 8.5-4.9"/></svg>',
     ficha: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9.5" r="2.6"/><path d="M7.5 17c.8-2.3 2.5-3.4 4.5-3.4s3.7 1.1 4.5 3.4"/></svg>',
     notas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7"/></svg>',
-    mochila: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/><path d="M9.5 4.6V4a2.5 2.5 0 0 1 5 0v.6"/><path d="M9 14h6v4H9zM6 13h3M15 13h3"/></svg>'
+    mochila: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M6 10a6 6 0 0 1 12 0v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/><path d="M9.5 4.6V4a2.5 2.5 0 0 1 5 0v.6"/><path d="M9 14h6v4H9zM6 13h3M15 13h3"/></svg>',
+    memoria: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="3.5" y="5" width="17" height="14" rx="2.2"/><circle cx="9" cy="10" r="1.7"/><path d="m20.5 15.5-4.8-4.8L7 19"/></svg>'
   };
   function isOwner() { return !!(cur && me() && cur.owner === me().id); }
   function drawLobby() {
@@ -376,9 +416,10 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
     const own = cur.owner === u.id;
     app.innerHTML = topBar(cur.name, '<span class="sys">' + esc(SYS[cur.system] || cur.system) + '</span>') +
       '<div class="roster" aria-label="Quem está na mesa">' + who.map(function (w) { return '<span>' + w + '</span>'; }).join('') + '</div>' +
-      '<nav class="nav" role="tablist" aria-label="Ferramentas">' + [['dados', 'Dados', 'dados'], own ? ['fichas', 'Fichas', 'ficha'] : ['ficha', 'Ficha', 'ficha'], own ? ['mochilas', 'Mochilas', 'mochila'] : ['mochila', 'Mochila', 'mochila'], ['notas', 'Anotações', 'notas']].map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + ICO[t[2]] + '<span>' + t[1] + '</span>' + (t[2] === 'mochila' ? '<span class="nb" id="nb-m" hidden></span>' : '') + '</button>'; }).join('') + '</nav>' +
+      '<nav class="nav" role="tablist" aria-label="Ferramentas">' + [['dados', 'Dados', 'dados'], own ? ['fichas', 'Fichas', 'ficha'] : ['ficha', 'Ficha', 'ficha'], own ? ['mochilas', 'Mochilas', 'mochila'] : ['mochila', 'Mochila', 'mochila'], own ? null : ['memoria', 'Memória', 'memoria'], ['notas', 'Anotações', 'notas']].filter(Boolean).map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + ICO[t[2]] + '<span>' + t[1] + '</span>' + (t[2] === 'mochila' ? '<span class="nb" id="nb-m" hidden></span>' : '') + '</button>'; }).join('') + '</nav>' +
       '<div class="pane" id="pane"></div>';
     drawPane();
+    startStage();
   }
   function drawPane() {
     stopLog(); stopBag();
@@ -389,6 +430,7 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
     else if (tab === 'ficha') { p.innerHTML = sheetPaneHtml(); loadSheet(me().id, false); }
     else if (tab === 'fichas') { p.innerHTML = fichasHtml(); loadSheet(shView, true); }
     else if (tab === 'mochila' || tab === 'mochilas') { p.innerHTML = '<div id="bag"></div>'; bagStart(); }
+    else if (tab === 'memoria') { p.innerHTML = '<div id="mem" class="mem"></div>'; loadMem(); }
     else { p.innerHTML = notesHtml(); loadNotes(); }
   }
 
@@ -1483,7 +1525,7 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
 
   /* janelas */
   function dlgShow(html) { const el = $('#dlg'); el.innerHTML = html; el.hidden = false; }
-  function dlgClose() { const el = $('#dlg'); el.hidden = true; el.innerHTML = ''; addLogFlush(); addSt = null; edId = ''; }
+  function dlgClose() { const el = $('#dlg'); el.hidden = true; el.innerHTML = ''; addLogFlush(); addSt = null; edId = ''; memOpenId = ''; }
   function msgToast(text, tone) {
     let el = $('#rt');
     if (!el) { el = document.createElement('div'); el.id = 'rt'; el.className = 'rtoast'; el.setAttribute('role', 'status'); document.body.appendChild(el); }
@@ -1806,6 +1848,245 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
     else if (b === 'del') { if (delArm !== id) { delArm = id; paintBag(); } else { delArm = ''; itDel(id); } }
   }
 
+  /* ---------- memória de imagens ---------- */
+  const EYE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></svg>';
+  let LIVE = null, liveSeen = '', stageT = null, MEM = null, memFor = null, memOk = false, memSv = '', memT = null, SHOWS = null, memDelArm = '', memBusy = false, memOpenId = '';
+  const imgUrls = {};
+  const mkey = function () { return 'ht-mem-' + cur.id + '-' + me().id; };
+  async function imgUrl(bucket, path) {
+    const k = bucket + '/' + path;
+    if (imgUrls[k]) return imgUrls[k];
+    const r = await api('/storage/v1/object/authenticated/' + bucket + '/' + path);
+    if (!r.ok) throw new Error('imagem');
+    imgUrls[k] = URL.createObjectURL(await r.blob());
+    return imgUrls[k];
+  }
+  /* imagens com data-p só carregam quando aparecem na tela */
+  function hydrate(root) {
+    (root || document).querySelectorAll('img[data-p]').forEach(function (im) {
+      const b = im.dataset.bk, p = im.dataset.p;
+      im.removeAttribute('data-p');
+      imgUrl(b, p).then(function (u) { im.src = u; }).catch(function () { im.alt = 'Imagem indisponível'; im.closest('.mem-i') && im.closest('.mem-i').classList.add('off'); });
+    });
+  }
+  function imgTag(bucket, path, alt) {
+    const u = imgUrls[bucket + '/' + path];
+    return u ? '<img src="' + u + '" alt="' + esc(alt || '') + '">' : '<img data-bk="' + bucket + '" data-p="' + esc(path) + '" alt="' + esc(alt || '') + '">';
+  }
+  async function toJpeg(blob, max) {
+    const url = URL.createObjectURL(blob);
+    try {
+      const img = await new Promise(function (res, rej) { const i = new Image(); i.onload = function () { res(i); }; i.onerror = rej; i.src = url; });
+      const w = img.naturalWidth || img.width || 800, h = img.naturalHeight || img.height || 600, k = Math.min(1, max / Math.max(w, h));
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(h * k));
+      const g = c.getContext('2d');
+      g.fillStyle = '#0A0912'; g.fillRect(0, 0, c.width, c.height);
+      g.drawImage(img, 0, 0, c.width, c.height);
+      return await new Promise(function (res, rej) { c.toBlob(function (b) { if (b) res(b); else rej(new Error('jpeg')); }, 'image/jpeg', 0.86); });
+    } finally { URL.revokeObjectURL(url); }
+  }
+
+  /* o que o Mestre está mostrando agora */
+  function startStage() { stopStage(); if (EMBED || isOwner()) return; stagePoll(); stageT = setInterval(function () { if (!document.hidden) stagePoll(); }, 4000); }
+  function stopStage() { if (stageT) { clearInterval(stageT); stageT = null; } LIVE = null; stageHide(); paintPill(); }
+  async function stagePoll() {
+    if (!cur) return;
+    const cid = cur.id;
+    try {
+      const r = await api('/rest/v1/shows?campaign_id=eq.' + cid + '&live=is.true&select=id,path,caption,shown_at&limit=1');
+      if (!r.ok) return;
+      const x = (await r.json())[0] || null;
+      if (!cur || cur.id !== cid || !stageT) return;
+      const key = x ? x.id + '|' + x.shown_at : '';
+      if (key === (LIVE ? LIVE.key : '')) return;
+      if (x) { x.key = key; try { await imgUrl('mesa', x.path); } catch (e) { return; } }
+      LIVE = x;
+      if (LIVE && liveSeen !== key) stageShow(); else if (!LIVE) stageHide();
+      paintPill();
+      if (tab === 'memoria') { paintMem(); loadShows(); }
+    } catch (e) { /* tenta de novo no próximo ciclo */ }
+  }
+  function memHasShow(id) { return !!(MEM && MEM.items.some(function (m) { return m.show === id; })); }
+  function stageShow() {
+    if (!LIVE) return;
+    let el = $('#stage');
+    if (!el) { el = document.createElement('div'); el.id = 'stage'; el.className = 'stage'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', 'Imagem que o Mestre está mostrando'); document.body.appendChild(el); }
+    const m = MEM && MEM.items.filter(function (x) { return x.show === LIVE.id; })[0];
+    el.innerHTML = '<div class="stage-in"><p class="stage-l">' + EYE + 'O Mestre está mostrando</p>' +
+      '<img src="' + imgUrls['mesa/' + LIVE.path] + '" alt="' + esc(LIVE.caption || 'Imagem da mesa') + '">' + (LIVE.caption ? '<p class="stage-c">' + esc(LIVE.caption) + '</p>' : '') +
+      (m ? '<div class="field stage-note"><label for="snote">Na sua memória. Quer anotar algo?</label><textarea id="snote" data-mnote="' + m.id + '" rows="2" maxlength="2000" placeholder="O que isso lembra, onde foi, quem mostrou…">' + esc(m.note || '') + '</textarea></div>' : '') +
+      '<div class="stage-b">' + (m ? '' : '<button type="button" class="btn" data-m="memlive"' + (memBusy ? ' disabled' : '') + '>' + (memBusy ? 'Guardando…' : 'Memorizar') + '</button>') + '<button type="button" class="btn q" data-m="stageclose">' + (m ? 'Pronto' : 'Fechar') + '</button></div></div>';
+    el.hidden = false;
+    paintPill();
+  }
+  function stageHide() { const el = $('#stage'); if (el) el.hidden = true; }
+  function stageClose() { if (LIVE) liveSeen = LIVE.key; stageHide(); paintPill(); }
+  function paintPill() {
+    let el = $('#pill');
+    const st = $('#stage'), on = !!(LIVE && (!st || st.hidden) && !EMBED);
+    if (!on) { if (el) el.hidden = true; return; }
+    if (!el) { el = document.createElement('button'); el.type = 'button'; el.id = 'pill'; el.className = 'pill'; document.body.appendChild(el); }
+    el.dataset.m = 'stageopen';
+    el.innerHTML = '<img src="' + imgUrls['mesa/' + LIVE.path] + '" alt="">' + EYE + '<span>Na mesa agora</span>';
+    el.hidden = false;
+  }
+
+  /* memória: imagens guardadas pelo jogador, com anotação */
+  async function ensureMem() {
+    if (MEM && memFor === cur.id && memOk) return;
+    if (!MEM || memFor !== cur.id) MEM = lsGet(mkey(), { items: [] });
+    memFor = cur.id;
+    try {
+      const r = await api('/rest/v1/pdocs?campaign_id=eq.' + cur.id + '&kind=eq.memory&user_id=eq.' + me().id + '&select=data');
+      if (!r.ok) throw new Error('x');
+      const j = await r.json();
+      if (memFor !== cur.id) return;
+      if (j[0] && j[0].data && Array.isArray(j[0].data.items)) { MEM = j[0].data; lsSet(mkey(), MEM); }
+      memOk = true;
+    } catch (e) { memSv = 'Sem conexão. Mostrando o que está neste aparelho.'; }
+  }
+  async function loadMem() {
+    if (memFor !== cur.id) { MEM = null; memOk = false; SHOWS = null; }
+    paintMem();
+    await ensureMem();
+    paintMem();
+    loadShows();
+  }
+  async function loadShows() {
+    if (!cur) return;
+    const cid = cur.id;
+    try {
+      const r = await api('/rest/v1/shows?campaign_id=eq.' + cid + '&select=id,path,caption,shown_at&order=shown_at.desc&limit=24');
+      if (!r.ok) throw new Error('x');
+      const j = await r.json();
+      if (!cur || cur.id !== cid) return;
+      const sig = JSON.stringify(j.map(function (x) { return x.id + x.shown_at; }));
+      if (sig === loadShows.sig && SHOWS) return;
+      loadShows.sig = sig; SHOWS = j;
+      if (tab === 'memoria') paintMem();
+    } catch (e) { if (!SHOWS) { SHOWS = []; if (tab === 'memoria') paintMem(); } }
+  }
+  function memSaveSoon() { memSv = 'Salvando…'; paintMemSv(); clearTimeout(memT); memT = setTimeout(memSave, 800); }
+  async function memSave() {
+    clearTimeout(memT); memT = null;
+    lsSet(mkey(), MEM);
+    try {
+      const r = await api('/rest/v1/pdocs?on_conflict=campaign_id,user_id,kind', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, JSONH), body: JSON.stringify({ campaign_id: cur.id, kind: 'memory', data: MEM }) });
+      if (!r.ok) throw new Error('x');
+      memSv = 'Salvo na nuvem';
+    } catch (e) { memSv = 'Sem conexão. Salvo neste aparelho.'; }
+    paintMemSv();
+  }
+  function paintMemSv() { const el = $('#memsv'); if (el) el.textContent = memSv; }
+  async function memAdd(blob, cap, showId) {
+    await ensureMem();
+    if (showId && memHasShow(showId)) return MEM.items.filter(function (x) { return x.show === showId; })[0];
+    const jpg = await toJpeg(blob, 1600);
+    const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    const path = cur.id + '/' + me().id + '/mem-' + id + '.jpg';
+    const r = await api('/storage/v1/object/players/' + path, { method: 'POST', headers: { 'Content-Type': 'image/jpeg', 'x-upsert': 'true' }, body: jpg });
+    if (!r.ok) throw new Error('envio');
+    imgUrls['players/' + path] = URL.createObjectURL(jpg);
+    const m = { id: id, path: path, cap: String(cap || '').slice(0, 80), note: '', at: Date.now(), show: showId || null };
+    MEM.items.unshift(m);
+    await memSave();
+    return m;
+  }
+  async function memorizeShow(sh) {
+    if (!sh || memBusy) return;
+    memBusy = true; refreshMemViews();
+    try {
+      const u = await imgUrl('mesa', sh.path);
+      const blob = await (await fetch(u)).blob();
+      await memAdd(blob, sh.caption || 'Imagem da mesa', sh.id);
+      msgToast('Guardada na sua memória.', 'good');
+    } catch (e) { msgToast('Não consegui guardar esta imagem. Tente de novo.', 'bad'); }
+    memBusy = false; refreshMemViews();
+  }
+  function refreshMemViews() {
+    const st = $('#stage');
+    if (st && !st.hidden) stageShow();
+    if (tab === 'memoria') paintMem();
+    if (memOpenId) memView(memOpenId);
+  }
+  async function memUpload(file) {
+    if (memBusy) return;
+    memBusy = true; memSv = 'Guardando a imagem…'; paintMem();
+    try { await memAdd(file, String(file.name || 'Imagem').replace(/\.[a-z0-9]+$/i, '')); memSv = 'Salvo na nuvem'; }
+    catch (e) { memSv = 'Não consegui usar esta imagem.'; }
+    memBusy = false; paintMem();
+  }
+  async function memDelete(id) {
+    const m = MEM.items.filter(function (x) { return x.id === id; })[0];
+    if (!m) return;
+    MEM.items = MEM.items.filter(function (x) { return x.id !== id; });
+    memDelArm = ''; memOpenId = ''; dlgClose();
+    paintMem(); await memSave();
+    api('/storage/v1/object/players/' + m.path, { method: 'DELETE' }).catch(function () { /* ok */ });
+  }
+  function memView(id) {
+    const m = MEM && MEM.items.filter(function (x) { return x.id === id; })[0];
+    if (!m) { memOpenId = ''; return; }
+    memOpenId = id;
+    const u = imgUrls['players/' + m.path];
+    dlgShow('<div class="card wide"><div class="row between"><h2>' + esc(m.cap || 'Memória') + '</h2><button type="button" class="ghost" data-m="close">Fechar</button></div>' +
+      '<div class="mem-big">' + imgTag('players', m.path, m.cap) + '</div>' +
+      (u ? '<a class="ghost" href="' + u + '" target="_blank" rel="noopener">Abrir a imagem inteira</a>' : '') +
+      '<div class="field"><label for="mcap">Título</label><input id="mcap" data-mcap="' + m.id + '" maxlength="80" value="' + esc(m.cap) + '"></div>' +
+      '<div class="field"><label for="mnote">Anotação</label><textarea id="mnote" data-mnote="' + m.id + '" rows="4" maxlength="2000" style="min-height:0" placeholder="O que isso lembra, onde foi, quem mostrou…">' + esc(m.note || '') + '</textarea></div>' +
+      '<p class="hint-s">Guardada em ' + new Date(m.at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + (m.show ? ', quando o Mestre mostrou' : '') + '. Só você vê a sua memória.</p>' +
+      '<div class="row"><button type="button" class="rb' + (memDelArm === m.id ? ' danger' : '') + '" data-m="del" data-id="' + m.id + '">' + (memDelArm === m.id ? 'Confirmar: apagar da memória' : 'Apagar da memória') + '</button></div></div>');
+    hydrate($('#dlg'));
+  }
+  function showView(id) {
+    const sh = (SHOWS || []).filter(function (x) { return x.id === id; })[0] || (LIVE && LIVE.id === id ? LIVE : null);
+    if (!sh) return;
+    memOpenId = '';
+    const has = memHasShow(sh.id);
+    dlgShow('<div class="card wide"><div class="row between"><h2>' + esc(sh.caption || 'Imagem da mesa') + '</h2><button type="button" class="ghost" data-m="close">Fechar</button></div>' +
+      '<div class="mem-big">' + imgTag('mesa', sh.path, sh.caption) + '</div>' +
+      '<p class="hint-s">O Mestre mostrou em ' + new Date(sh.shown_at).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) + '.</p>' +
+      (has ? '<p class="sv good">Já está na sua memória.</p>' : '<button type="button" class="btn" data-m="memshow" data-id="' + sh.id + '">Memorizar</button>') + '</div>');
+    hydrate($('#dlg'));
+  }
+  function paintMem() {
+    const box = $('#mem');
+    if (!box || !cur) return;
+    if (!MEM) { box.innerHTML = '<p class="muted" role="status">Abrindo a memória…</p>'; return; }
+    const items = MEM.items;
+    const live = LIVE ? '<div class="card live-c"><button type="button" class="live-t" data-m="stageopen" aria-label="Ver a imagem que o Mestre está mostrando">' + imgTag('mesa', LIVE.path, '') + '</button><div class="live-x"><p class="stage-l">' + EYE + 'Na mesa agora</p><p class="live-cap">' + esc(LIVE.caption || 'Imagem da mesa') + '</p>' +
+      (memHasShow(LIVE.id) ? '<p class="sv good">Já está na sua memória.</p>' : '<button type="button" class="btn sm" data-m="memlive"' + (memBusy ? ' disabled' : '') + '>' + (memBusy ? 'Guardando…' : 'Memorizar') + '</button>') + '</div></div>' : '';
+    const grid = items.length ? '<div class="mem-grid">' + items.map(function (m) {
+      return '<button type="button" class="mem-c" data-m="open" data-id="' + m.id + '"><span class="mem-i">' + imgTag('players', m.path, '') + '</span><span class="mem-t">' + esc(m.cap || 'Sem título') + '</span>' + (m.note ? '<span class="mem-n">' + esc(m.note) + '</span>' : '') + '</button>';
+    }).join('') + '</div>' : '<div class="card"><p class="muted">Quando o Mestre mostrar uma imagem, toque em Memorizar e ela fica guardada aqui, com espaço para anotar. Dá para guardar fotos suas também.</p></div>';
+    const past = (SHOWS || []).filter(function (s) { return !memHasShow(s.id); });
+    const hist = SHOWS === null ? '' : '<section class="grp"><h3 class="grp-h">Mostradas nesta mesa <span class="ct">' + past.length + '</span></h3>' +
+      (!(SHOWS || []).length ? '<p class="hint-s">O Mestre ainda não mostrou imagens para você nesta mesa.</p>' : (!past.length ? '<p class="hint-s">Todas as imagens mostradas já estão na sua memória.</p>' : '<div class="mem-grid">' + past.map(function (s) {
+        return '<div class="mem-c"><button type="button" class="mem-i" data-m="viewshow" data-id="' + s.id + '" aria-label="Ver ' + esc(s.caption || 'imagem') + '">' + imgTag('mesa', s.path, '') + '</button><span class="mem-t">' + esc(s.caption || 'Imagem da mesa') + '</span><button type="button" class="rb" data-m="memshow" data-id="' + s.id + '"' + (memBusy ? ' disabled' : '') + '>Memorizar</button></div>';
+      }).join('') + '</div>')) + '</section>';
+    box.innerHTML = '<div class="row between"><h2>Memória</h2><label class="btn q sm file-btn">' + IK.plus + 'Guardar uma imagem<input type="file" id="memfile" accept="image/*"></label></div>' +
+      '<p class="sv" id="memsv" role="status">' + esc(memSv) + '</p>' + live + grid + hist;
+    hydrate(box);
+  }
+  function memClick(el) {
+    const m = el.dataset.m, id = el.dataset.id || '';
+    if (m === 'stageclose') { stageClose(); return; }
+    if (m === 'stageopen') { if (LIVE) { liveSeen = ''; stageShow(); } return; }
+    if (m === 'memlive') { memorizeShow(LIVE); return; }
+    if (m === 'memshow') { memorizeShow((SHOWS || []).filter(function (x) { return x.id === id; })[0] || (LIVE && LIVE.id === id ? LIVE : null)); return; }
+    if (m === 'viewshow') { showView(id); return; }
+    if (m === 'open') { memDelArm = ''; memView(id); return; }
+    if (m === 'close') { memOpenId = ''; dlgClose(); return; }
+    if (m === 'del') { if (memDelArm !== id) { memDelArm = id; memView(id); return; } memDelete(id); }
+  }
+  function memInput(t) {
+    const id = t.dataset.mnote || t.dataset.mcap, m = MEM && MEM.items.filter(function (x) { return x.id === id; })[0];
+    if (!m) return;
+    if (t.dataset.mnote) m.note = t.value.slice(0, 2000); else m.cap = t.value.slice(0, 80);
+    memSaveSoon();
+  }
+
   /* ---------- perfil ---------- */
   function profile(msg, ok) {
     const el = $('#dlg'), u = me();
@@ -1861,6 +2142,7 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
     if (t.id === 'catq' && addSt) { addSt.q = t.value; const l = $('#catl'); if (l) { l.innerHTML = catList(); l.scrollTop = 0; } return; }
     if (t.id === 'gn' && gSt) { gSt.n = t.value; return; }
     if (t.id === 'cn' && cSt) { cSt.n = t.value; return; }
+    if (t.dataset && (t.dataset.mnote || t.dataset.mcap)) { memInput(t); return; }
     if (t.dataset && t.dataset.k && SH) { shInput(t); return; }
     if (t.id === 'lbl') dice.label = t.value;
     else if (t.id === 'expr') dice.expr = t.value;
@@ -1870,16 +2152,18 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
   document.addEventListener('change', function (e) {
     const t = e.target;
     if (t.dataset && t.dataset.f === 'kind' && $('#itf')) { kindChange(t); return; }
+    if (t.id === 'memfile' && t.files && t.files[0]) { memUpload(t.files[0]); t.value = ''; return; }
     if (t.id === 'priv') dice.priv = t.checked;
     else if (t.dataset && t.dataset.chk && SH) { sysData()[t.dataset.chk] = t.checked; saveSheetSoon(); }
     else if (t.dataset && t.dataset.rr && SH) paintSheet();
     else if (t.id === 'photo' && t.files && t.files[0]) { uploadPhoto(t.files[0]).catch(function () { shSv = 'Não consegui usar esta imagem.'; paintSv(); }); t.value = ''; }
   });
-  document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'expr') { e.preventDefault(); doRoll(rollExpr(dice.expr)); } if (e.key === 'Escape' && !$('#dlg').hidden) dlgClose(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'expr') { e.preventDefault(); doRoll(rollExpr(dice.expr)); } if (e.key === 'Escape') { if (!$('#dlg').hidden) dlgClose(); else if ($('#stage') && !$('#stage').hidden) stageClose(); } });
   document.addEventListener('click', function (e) {
-    const el = e.target.closest('[data-b],[data-a],[data-die],[data-st],[data-adv],[data-tab],[data-camp],[data-note],[data-pip],[data-tog],[data-cyc],[data-add],[data-del],[data-roll],[data-pv]');
+    const el = e.target.closest('[data-b],[data-m],[data-a],[data-die],[data-st],[data-adv],[data-tab],[data-camp],[data-note],[data-pip],[data-tog],[data-cyc],[data-add],[data-del],[data-roll],[data-pv]');
     if (!el || el.disabled) return;
     if (el.dataset.b) { bagClick(el); return; }
+    if (el.dataset.m) { memClick(el); return; }
     if (el.dataset.pv) { shView = el.dataset.pv; drawPane(); return; }
     if (SH && !el.disabled && shClick(el)) return;
     if (el.dataset.die) { doRoll(rollSimple(parseInt(el.dataset.die, 10))); return; }
@@ -1901,7 +2185,7 @@ input:disabled, textarea:disabled, select:disabled { opacity: 1; color: var(--fg
     else if (a === 'retry') start();
     else if (a === 'profile') profile();
     else if (a === 'pclose') dlgClose();
-    else if (a === 'out') { try { localStorage.removeItem('cdm-sb'); } catch (x) { /* ok */ } stopLog(); stopBag(); camps = null; cur = null; drawLogin(); }
+    else if (a === 'out') { try { localStorage.removeItem('cdm-sb'); } catch (x) { /* ok */ } stopLog(); stopBag(); stopStage(); camps = null; cur = null; drawLogin(); }
     else if (a === 'nnew') { const n = { id: Date.now().toString(36), title: 'Nova nota', text: '', at: Date.now() }; notes.notes.unshift(n); noteId = n.id; noteDelArm = false; paintNotes(); saveSoon(); const f = $('#nt'); if (f) { f.focus(); f.select(); } }
     else if (a === 'ndel') { if (!noteDelArm) { noteDelArm = true; paintNotes(); return; } notes.notes = notes.notes.filter(function (n) { return n.id !== noteId; }); noteId = notes.notes[0] ? notes.notes[0].id : null; noteDelArm = false; paintNotes(); saveSoon(); }
   });

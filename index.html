@@ -913,7 +913,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     }).join('');
   }
   /* ---------- ícones (traço simples, herdam a cor do texto) ---------- */
-  const APP_VER = '0.40';
+  const APP_VER = '0.41';
   const RAVEN = '<svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>';
   const SV = function (p, extra) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '>' + p + '</svg>'; };
   const ICO = {
@@ -1607,11 +1607,105 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     await roomPush();
   }
   function roomHide() { if (!ROOM || !ROOM.cur) return; ROOM.cur = null; roomSave(); roomPush().catch(function () { /* ok */ }); }
-  function unreveal() { revealed = null; roomHide(); }
+  function unreveal() { revealed = null; roomHide(); campHide(); }
+  /* mesa online: a imagem revelada aparece na tela dos jogadores com conta, que podem guardá-la na Memória */
+  let campLive = null;
+  const SHOWK = function (cid) { return 'ht-shows-' + cid; };
+  function campCanShow() { return !!(sbUser() && CAMP && campFor === A.id); }
+  function audNames() {
+    const L = [];
+    if (CAMP && campFor === A.id) (CAMP.members || []).forEach(function (m) { if (L.indexOf(m.name) < 0) L.push(m.name); });
+    playersList().forEach(function (n) { if (L.indexOf(n) < 0) L.push(n); });
+    return L;
+  }
+  function campAudience() {
+    if (audience.indexOf('todos') >= 0) return null;
+    return (CAMP.members || []).filter(function (m) { return audience.indexOf(m.name) >= 0; }).map(function (m) { return m.user_id; });
+  }
+  const JSON_MIN = { 'Content-Type': 'application/json', Prefer: 'return=minimal' }, JSON_REP = { 'Content-Type': 'application/json', Prefer: 'return=representation' };
+  /* imagens vetoriais (como as de exemplo) viram 1600 px; as outras só diminuem */
+  function rasterize(src, max) {
+    return new Promise(function (res) {
+      const im = new Image();
+      im.onload = function () {
+        const w = im.naturalWidth || im.width || 800, h = im.naturalHeight || im.height || 600;
+        const k = /^data:image\/svg/i.test(src) ? max / Math.max(w, h) : Math.min(1, max / Math.max(w, h));
+        const c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(w * k)); c.height = Math.max(1, Math.round(h * k));
+        const g = c.getContext('2d');
+        g.fillStyle = '#0A0912'; g.fillRect(0, 0, c.width, c.height);
+        g.drawImage(im, 0, 0, c.width, c.height);
+        try { res(c.toDataURL('image/jpeg', 0.86)); } catch (e) { res(null); }
+      };
+      im.onerror = function () { res(null); };
+      im.src = src;
+    });
+  }
+  async function showBlob(src) {
+    const url = await rasterize(src, 1600);
+    const b = await (await fetch(url || src)).blob();
+    if (['image/jpeg', 'image/png', 'image/webp'].indexOf(b.type) < 0) throw new Error('formato');
+    return b;
+  }
+  async function campReveal(im) {
+    if (!campCanShow() || !im) return;
+    const cid = CAMP.id, cache = lsGet(SHOWK(cid), {}), key = im.path || im.id;
+    const body = { live: true, caption: String(im.caption || '').slice(0, 200), audience: campAudience(), shown_at: new Date().toISOString() };
+    let sh = cache[key];
+    const off = await sbReq('/rest/v1/shows?campaign_id=eq.' + cid + '&live=is.true', { method: 'PATCH', headers: JSON_MIN, body: JSON.stringify({ live: false }) });
+    if (!off.ok) throw new Error('mostrar');
+    if (sh) {
+      const r = await sbReq('/rest/v1/shows?id=eq.' + sh.id, { method: 'PATCH', headers: JSON_REP, body: JSON.stringify(body) });
+      const j = r.ok ? await r.json() : [];
+      if (j.length) { campLive = { id: sh.id, cid: cid, caption: body.caption }; return; }
+      sh = null;
+    }
+    const blob = await showBlob(im.src);
+    const path = cid + '/' + rnd(16) + (blob.type === 'image/png' ? '.png' : (blob.type === 'image/webp' ? '.webp' : '.jpg'));
+    const up = await sbReq('/storage/v1/object/mesa/' + path, { method: 'POST', headers: { 'Content-Type': blob.type, 'x-upsert': 'true' }, body: blob });
+    if (!up.ok) throw new Error('envio');
+    const r = await sbReq('/rest/v1/shows', { method: 'POST', headers: JSON_REP, body: JSON.stringify(Object.assign({ campaign_id: cid, path: path }, body)) });
+    if (!r.ok) throw new Error('mostrar');
+    const row = (await r.json())[0];
+    cache[key] = { id: row.id, path: path };
+    lsSet(SHOWK(cid), cache);
+    campLive = { id: row.id, cid: cid, caption: body.caption };
+  }
+  function campHide() {
+    const cid = campLive ? campLive.cid : (campCanShow() ? CAMP.id : null);
+    campLive = null;
+    if (!cid || !sbUser()) return;
+    sbReq('/rest/v1/shows?campaign_id=eq.' + cid + '&live=is.true', { method: 'PATCH', headers: JSON_MIN, body: JSON.stringify({ live: false }) }).catch(function () { /* ok */ });
+  }
+  /* ao abrir a aventura: se algo ficou na tela da mesa online, mostra aqui também */
+  async function campLiveLoad() {
+    if (!campCanShow()) return;
+    const cid = CAMP.id;
+    try {
+      const r = await sbReq('/rest/v1/shows?campaign_id=eq.' + cid + '&live=is.true&select=id,caption');
+      if (!r.ok) return;
+      const x = (await r.json())[0];
+      if (!x || !campCanShow() || CAMP.id !== cid) return;
+      campLive = { id: x.id, cid: cid, caption: x.caption };
+      if (!revealed) {
+        const cache = lsGet(SHOWK(cid), {}), key = Object.keys(cache).filter(function (k) { return cache[k].id === x.id; })[0];
+        const im = key && S.images.filter(function (i) { return (i.path || i.id) === key; })[0];
+        if (im) revealed = im.id;
+      }
+      if (mode === 'mesa' && tab === 'img') render();
+    } catch (e) { /* ok */ }
+  }
   function publish(im) {
-    if (!ROOM) return;
+    const jobs = [];
+    if (ROOM) jobs.push(roomReveal(im).then(function () { return ''; }, function () { return 'a sala por link'; }));
+    if (campCanShow()) jobs.push(campReveal(im).then(function () { return ''; }, function () { return 'a mesa online'; }));
+    if (!jobs.length) return;
     toast('Enviando para os jogadores…');
-    roomReveal(im).then(function () { toast('Os jogadores já estão vendo.'); }).catch(function () { toast('Não consegui enviar a imagem aos jogadores.'); });
+    Promise.all(jobs).then(function (bad) {
+      bad = bad.filter(Boolean);
+      toast(bad.length ? 'Não consegui enviar a imagem para ' + bad.join(' e ') + '.' : 'Os jogadores já estão vendo.');
+      if (mode === 'mesa' && tab === 'img') render();
+    });
   }
   function roomPanel() {
     if (!ROOM) {
@@ -1637,6 +1731,8 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       if (!r.ok) throw new Error('x');
       const j = await r.json();
       CAMP = j[0] || null;
+      campLive = null;
+      if (CAMP) setTimeout(campLiveLoad, 0);
       if (CAMP && CAMP.name !== A.name) { sbReq('/rest/v1/campaigns?id=eq.' + CAMP.id, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ name: A.name }) }).catch(function () { /* ok */ }); CAMP.name = A.name; }
     } catch (e) { CAMP = null; campMsg = 'Não consegui consultar a nuvem agora.'; }
     campBusy = false;
@@ -1672,8 +1768,19 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     try { await sbReq('/rest/v1/members?campaign_id=eq.' + CAMP.id + '&user_id=eq.' + encodeURIComponent(uidv), { method: 'DELETE' }); CAMP.members = CAMP.members.filter(function (m) { return m.user_id !== uidv; }); } catch (e) { toast('Não consegui remover.'); }
     campRm = null; render();
   }
+  async function campShowsClear(cid) {
+    try {
+      const r = await sbReq('/storage/v1/object/list/mesa', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prefix: cid + '/', limit: 1000 }) });
+      if (!r.ok) return;
+      const names = (await r.json()).map(function (o) { return cid + '/' + o.name; });
+      if (names.length) await sbReq('/storage/v1/object/mesa', { method: 'DELETE', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prefixes: names }) });
+    } catch (e) { /* fica para a próxima */ }
+    try { localStorage.removeItem(SHOWK(cid)); } catch (e) { /* ok */ }
+  }
   async function campDelete() {
-    try { await sbReq('/rest/v1/campaigns?id=eq.' + CAMP.id, { method: 'DELETE' }); CAMP = null; toast('Mesa online excluída.'); } catch (e) { toast('Não consegui excluir.'); }
+    const cid = CAMP.id;
+    await campShowsClear(cid);
+    try { const r = await sbReq('/rest/v1/campaigns?id=eq.' + cid, { method: 'DELETE' }); if (!r.ok) throw new Error('x'); CAMP = null; campLive = null; toast('Mesa online excluída.'); } catch (e) { toast('Não consegui excluir.'); }
     campDelArm = false; render();
   }
   function onlinePanel() {
@@ -1700,7 +1807,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       '<section class="sec"><div class="sec-h"><h2>Excluir</h2><p class="hint">Apaga a mesa online, as rolagens e o acesso dos jogadores a esta aventura. A aventura continua.</p></div><button type="button" class="btn add' + (campDelArm ? ' danger-fill' : ' danger') + '" data-action="campDel">' + (campDelArm ? 'Confirmar exclusão da mesa online' : 'Excluir mesa online') + '</button></section>';
   }
   function pageOnline() {
-    return '<div class="page" data-keep="page"><div class="page-in"><header class="page-h"><p class="eyebrow">Mesa online</p><h1>Jogadores</h1><p class="lede">A mesa online de ' + esc(A.name) + '. Cada jogador entra com a própria conta para rolar dados, anotar, preencher a ficha e cuidar da mochila; você acompanha tudo e dá saque pela Mesa, na aba Jogadores.</p></header>' + onlinePanel() + '</div></div>';
+    return '<div class="page" data-keep="page"><div class="page-in"><header class="page-h"><p class="eyebrow">Mesa online</p><h1>Jogadores</h1><p class="lede">A mesa online de ' + esc(A.name) + '. Cada jogador entra com a própria conta para rolar dados, anotar, preencher a ficha e cuidar da mochila. As imagens que você revelar na Mesa aparecem na tela deles, que podem guardá-las na Memória. Você acompanha tudo e dá saque pela Mesa, na aba Jogadores.</p></header>' + onlinePanel() + '</div></div>';
   }
   function profileOpen(msg, ok) {
     const el = $('#prodlg'), u = sbUser();
@@ -2445,10 +2552,11 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   }
   function imagesHtml() {
     const rev = S.images.filter(function (im) { return im.id === revealed; })[0];
+    const dest = [campCanShow() ? 'mesa online' : '', ROOM ? 'sala por link' : ''].filter(Boolean).join(' e ');
     const now = rev
-      ? '<div class="now"><img src="' + rev.src + '" alt=""><div><p class="now-l">' + ICO.eye + 'Na tela dos jogadores</p><p class="now-c">' + esc(rev.caption) + '</p><p class="now-a">Para ' + esc(audText()) + (ROOM ? '' : '. Abra a sala por link, abaixo, para enviar aos celulares') + '</p></div><button type="button" class="btn sm quiet hide" data-action="hide">Esconder</button></div>'
-      : '<p class="now-none">Nada na tela dos jogadores. Toque numa imagem para revelar.</p>';
-    const aud = '<div class="aud" role="group" aria-label="Para quem revelar"><span class="aud-l">Revelar para</span>' + ['todos'].concat(playersList()).map(function (p) {
+      ? '<div class="now"><img src="' + rev.src + '" alt=""><div><p class="now-l">' + ICO.eye + 'Na tela dos jogadores</p><p class="now-c">' + esc(rev.caption) + '</p><p class="now-a">Para ' + esc(audText()) + (dest ? ', na ' + dest : '. Crie a mesa online ou abra a sala por link, abaixo, para enviar aos jogadores') + '</p></div><button type="button" class="btn sm quiet hide" data-action="hide">Esconder</button></div>'
+      : (campLive && campCanShow() ? '<div class="now"><div><p class="now-l">' + ICO.eye + 'Ainda na tela da mesa online</p><p class="now-c">' + esc(campLive.caption || 'Imagem de outra cena') + '</p></div><button type="button" class="btn sm quiet hide" data-action="hide">Esconder</button></div>' : '<p class="now-none">Nada na tela dos jogadores. Toque numa imagem para revelar.</p>');
+    const aud = '<div class="aud" role="group" aria-label="Para quem revelar"><span class="aud-l">Revelar para</span>' + ['todos'].concat(audNames()).map(function (p) {
       return '<button type="button" class="chip" data-action="aud" data-id="' + esc(p) + '" aria-pressed="' + (audience.indexOf(p) >= 0) + '">' + (p === 'todos' ? 'Todos' : esc(p)) + '</button>';
     }).join('') + '</div>';
     const gallery = S.images.length ? '<div class="gallery">' + S.images.map(function (im) {
@@ -2891,7 +2999,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     }
     if (a === 'reveal') {
       revealed = revealed === id ? null : id;
-      if (revealed) publish(S.images.filter(function (im) { return im.id === revealed; })[0]); else roomHide();
+      if (revealed) publish(S.images.filter(function (im) { return im.id === revealed; })[0]); else { roomHide(); campHide(); }
       render(); return;
     }
     if (a === 'roomOpen') { roomOpen(); return; }
@@ -3041,7 +3149,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     }
     if (t.id === 'room-players' && ROOM) {
       ROOM.players = t.value.split(',').map(function (x) { return x.trim(); }).filter(Boolean).slice(0, 12);
-      audience = audience.filter(function (p) { return p === 'todos' || ROOM.players.indexOf(p) >= 0; });
+      audience = audience.filter(function (p) { return p === 'todos' || audNames().indexOf(p) >= 0; });
       if (!audience.length) audience = ['todos'];
       roomSave(); roomPush().catch(function () { toast('Não consegui salvar os jogadores.'); }); render();
       return;
