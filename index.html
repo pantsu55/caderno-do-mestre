@@ -568,6 +568,26 @@ details.room-box[open] summary .caret { transform: rotate(180deg); }
 .pip.stress.on { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 16px -3px var(--accent); }
 .feat { display: grid; gap: 6px; padding-left: 1.2em; font-size: 15px; color: var(--muted); }
 .feat strong { color: var(--fg); }
+.adv.down { opacity: 0.55; }
+.adv.down:hover, .adv.down:focus-within { opacity: 0.85; }
+.foe-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
+.foe-bar .btn svg { width: 16px; height: 16px; }
+.atks { display: grid; gap: 8px; }
+.atk { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 12px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); }
+.atk-t { display: grid; gap: 2px; min-width: 0; }
+.atk-t span { font-size: 14px; color: var(--muted); overflow-wrap: anywhere; }
+.atk-b { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.atk-r { grid-column: 1 / -1; font-family: var(--font-mono); font-size: 13px; color: var(--muted); }
+.atk-r b { font-size: 19px; color: var(--fg); margin-right: 8px; }
+.atk-r.good b { color: var(--ok); } .atk-r.bad b { color: var(--hp); }
+@media (max-width: 560px) { .atk { grid-template-columns: 1fr; } .atk-b { justify-content: flex-start; } }
+.hpn { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.hpn output { font-family: var(--font-mono); font-size: 22px; min-width: 4.6ch; text-align: center; font-variant-numeric: tabular-nums; }
+.hpn small { color: var(--muted); font-size: 14px; }
+.feats { font-size: 15px; color: var(--muted); display: grid; gap: 6px; }
+.feats ul { padding-left: 1.2em; display: grid; gap: 6px; }
+.feats strong { color: var(--fg); }
+.feats li::marker { color: var(--active); }
 
 /* jogadores na Mesa */
 .jog-h { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
@@ -710,6 +730,22 @@ details.room-box[open] summary .caret { transform: rotate(180deg); }
 .note-ed textarea { background: var(--bg); }
 .mini-tools { display: flex; gap: 0; }
 .trk-ed, .combo-ed { display: grid; gap: 10px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: var(--card-shadow); }
+.foe-ed { display: grid; gap: 12px; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: var(--card-shadow); }
+.foe-ed input, .foe-ed textarea { background: var(--bg); }
+.foe-nums { grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)); }
+.icon-btn.armed { color: var(--hp); background: var(--hp-soft); }
+.warn-t { color: var(--hp); }
+.atk-h, .atk-ed { display: grid; grid-template-columns: minmax(120px, 1.3fr) 78px minmax(90px, 0.8fr) minmax(140px, 1.6fr) 34px; gap: 8px; align-items: center; }
+.atk-h span { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+@media (max-width: 760px) {
+  .atk-h { display: none; }
+  .atk-ed { grid-template-columns: minmax(0, 1fr) 72px 34px; padding-bottom: 10px; border-bottom: 1px solid var(--line); }
+  .atk-ed .atk-n { grid-column: 1; grid-row: 1; }
+  .atk-ed .atk-bi { grid-column: 2; grid-row: 1; }
+  .atk-ed .icon-btn { grid-column: 3; grid-row: 1; }
+  .atk-ed .atk-di { grid-column: 1 / 3; grid-row: 2; }
+  .atk-ed .atk-ni { grid-column: 1 / -1; grid-row: 3; }
+}
 .trk-ed-h, .combo-ed-h { display: flex; align-items: center; gap: 10px; }
 .trk-ed-h .num { font-family: var(--font-mono); color: var(--muted); font-size: 13px; width: 18px; text-align: right; }
 .trk-ed input, .combo-ed input[type="text"] { background: var(--bg); }
@@ -913,7 +949,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     }).join('');
   }
   /* ---------- ícones (traço simples, herdam a cor do texto) ---------- */
-  const APP_VER = '0.41';
+  const APP_VER = '0.42';
   const RAVEN = '<svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>';
   const SV = function (p, extra) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '>' + p + '</svg>'; };
   const ICO = {
@@ -1009,7 +1045,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       ],
       countdown: { name: 'Toques do sino', max: 3, value: 0, cue: 'sino', done: 'No terceiro toque, os Afogados restantes recuam para o canal.' },
       fear: 0, vol: 0.92, sample: true,
-      adv: { afogados: [0, 0, 0, 0], rolfHp: 0, rolfStress: 0 }
+      foes: sampleFoes()
     };
   };
   /* ---------- aventuras e cenas ---------- */
@@ -1021,7 +1057,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   function blankScene(title) {
     return { title: title || 'Nova cena', place: '', when: '', kind: 'Exploração', time: '', budget: '', summary: '',
       notes: [{ title: 'A cena', open: true, text: '' }], tracks: [], mi: 0, combos: [], cues: [], images: [],
-      countdown: null, adv: null, fear: 0, vol: 0.92 };
+      countdown: null, foes: [], fear: 0, vol: 0.92 };
   }
   function normTracks(sc) {
     if (!Array.isArray(sc.tracks)) sc.tracks = (sc.music && (sc.music.url || sc.music.name)) ? [sc.music] : [];
@@ -1034,6 +1070,8 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     const ups = (saved.upImages || []).map(function (i) { return { id: i.id, caption: i.caption, path: i.path, lib: i.lib, src: libUrl[i.path] || '' }; });
     const out = Object.assign(blankScene(), saved, { images: (saved.sample ? defaults().images : []).concat(ups) });
     delete out.upImages;
+    if (!Array.isArray(saved.foes)) out.foes = saved.adv ? sampleFoes(saved.adv) : [];
+    delete out.adv;
     normTracks(out);
     if (!(out.vol >= 0 && out.vol <= 1)) out.vol = 0.92;
     return out;
@@ -1179,7 +1217,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       if (id === A.id) {
         const keepCur = A.cur;
         A = advFrom(data); A.cur = Math.min(keepCur, A.scenes.length - 1); S = A.scenes[A.cur];
-        unreveal(); if (tab === 'adv' && !S.adv) tab = 'notas';
+        unreveal(); if (tab === 'adv' && !S.foes.length) tab = 'notas';
         sbHydrate(S); renderScenes(); render();
       }
     }
@@ -2507,28 +2545,158 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   }
 
   /* ---------- telas ---------- */
-  function pipRow(key, n, count, extra) {
-    let h = '';
-    for (let i = 0; i < n; i++) {
-      h += '<button type="button" class="pip ' + (extra || '') + (i < count ? ' on' : '') + '" data-action="pip" data-key="' + key + '" data-i="' + i + '" aria-pressed="' + (i < count) + '" aria-label="' + (i + 1) + ' de ' + n + '"></button>';
+  /* ---------- adversários ---------- */
+  const FOE_TAGS = ['Lacaio', 'Padrão', 'Líder', 'Chefe', 'Solo', 'Horda', 'Suporte', 'Atirador', 'Furtivo', 'Social'];
+  function clampI(v, a, b) { v = Math.round(Number(v) || 0); return Math.max(a, Math.min(b, v)); }
+  function foeNew() { return { id: uid(), name: 'Novo adversário', tag: 'Padrão', stats: '', hp: 6, stress: 3, mins: 0, ren: 0, ref: 0, atks: [{ n: 'Ataque', b: 1, dmg: '1d8+2', note: '' }], feats: '', hpv: 0, stv: 0, toks: [] }; }
+  /* os adversários da aventura de exemplo (e a conversão do formato antigo) */
+  function sampleFoes(st) {
+    st = st || {};
+    const tk = Array.isArray(st.afogados) ? st.afogados.map(function (x) { return x ? 1 : 0; }) : [0, 0, 0, 0];
+    return [
+      { id: 'afogados', name: 'Afogados', tag: 'Lacaio', stats: 'Dif. 10 · Atq +0 · 2 de dano físico, em grupo', hp: 0, stress: 0, mins: 4, ren: 4, ref: 1,
+        atks: [{ n: 'Ataque em grupo', b: 0, dmg: '2', note: 'Uma jogada para o grupo; cada acerto causa 2 físico, somados.' }],
+        feats: '- **Lacaio (4).** Cai com qualquer dano. A cada 4 de dano, derrote mais um.\n- **Ataque em Grupo.** Uma jogada compartilhada; cada acerto causa 2 físico, somados.\n- **Afogamento a seco.** Reação de Força (Dif. 12) ou 1 Estresse.', hpv: 0, stv: 0, toks: tk },
+      { id: 'rolf', name: 'Rolf, o Caçador Afogado', tag: 'Líder', stats: 'Dif. 12 · Limiares 7/13 · Atq +2', hp: 6, stress: 3, mins: 0, ren: 0, ref: 0,
+        atks: [{ n: 'Balestra enferrujada', b: 2, dmg: '1d8+2', note: 'Longe, físico.' }, { n: 'Arrastar', b: 2, dmg: '1d6+2', note: 'Corpo a corpo. Em sucesso, o alvo fica Preso (Dif. 12).' }],
+        feats: '- **Convocar os Afogados** (1 Medo). Um grupo sobe do canal.\n- **Cai em lama.** Se Rolf cai, os demais Afogados se desfazem.', hpv: clampI(st.rolfHp, 0, 6), stv: clampI(st.rolfStress, 0, 3), toks: [] }
+    ];
+  }
+  function foeSync(f) {
+    f.name = String(f.name == null ? '' : f.name); f.tag = String(f.tag || ''); f.stats = String(f.stats || ''); f.feats = String(f.feats || '');
+    f.hp = clampI(f.hp, 0, 999); f.stress = clampI(f.stress, 0, 30); f.mins = clampI(f.mins, 0, 30); f.ren = clampI(f.ren, 0, 30); f.ref = clampI(f.ref, 0, 12);
+    if (!Array.isArray(f.atks)) f.atks = [];
+    if (!Array.isArray(f.toks)) f.toks = [];
+    while (f.toks.length < f.mins) f.toks.push(0);
+    f.hpv = clampI(f.hpv, 0, f.hp); f.stv = clampI(f.stv, 0, f.stress);
+    return f;
+  }
+  /* rolagens do Mestre */
+  function dieN(n) { const lim = Math.floor(4294967296 / n) * n, a = new Uint32Array(1); do { crypto.getRandomValues(a); } while (a[0] >= lim); return (a[0] % n) + 1; }
+  function rollX(txt) {
+    const s = String(txt || '').toLowerCase().replace(/\s+/g, '');
+    if (!s) return null;
+    const re = /([+-]?)(?:(\d*)d(\d+)(?:(kh|kl)(\d+))?|(\d+))/g;
+    let m, pos = 0, total = 0, count = 0;
+    const parts = [];
+    while ((m = re.exec(s)) !== null) {
+      if (m.index !== pos) return null;
+      pos = re.lastIndex;
+      const sign = m[1] === '-' ? -1 : 1;
+      if (m[3]) {
+        const n = m[2] === '' ? 1 : parseInt(m[2], 10), sides = parseInt(m[3], 10);
+        count += n;
+        if (n < 1 || n > 100 || sides < 2 || sides > 1000 || count > 200) return null;
+        const v = [];
+        for (let k = 0; k < n; k++) v.push(dieN(sides));
+        let kept = v;
+        if (m[4]) { const kn = Math.max(1, Math.min(n, parseInt(m[5], 10))); kept = v.slice().sort(function (x, y) { return m[4] === 'kh' ? y - x : x - y; }).slice(0, kn); }
+        total += sign * kept.reduce(function (x, y) { return x + y; }, 0);
+        parts.push((sign < 0 ? '−' : (parts.length ? '+' : '')) + (n > 1 || m[4] ? '[' + v.join(', ') + ']' : v[0]));
+      } else { total += sign * parseInt(m[6], 10); parts.push((sign < 0 ? '−' : (parts.length ? '+' : '')) + m[6]); }
     }
+    if (pos !== s.length || !parts.length) return null;
+    return { total: total, text: parts.join(' '), expr: s };
+  }
+  function rollSys() { return CAMP && campFor === A.id && CAMP.system ? CAMP.system : 'daggerheart'; }
+  function fearOn() { return !(CAMP && campFor === A.id && CAMP.system && CAMP.system !== 'daggerheart'); }
+  let foeVis = false, foeDelArm = -1;
+  const foeLast = {};
+  function foeRoll(i, k, what) {
+    const f = S.foes[i], a = f && f.atks[k];
+    if (!a) return;
+    const sys = rollSys();
+    let r;
+    if (what === 'atk') {
+      if (sys === 'gurps') {
+        const nh = clampI(a.b, 1, 40), d = [dieN(6), dieN(6), dieN(6)], t = d[0] + d[1] + d[2];
+        const critOk = t <= 4 || (t === 5 && nh >= 15) || (t === 6 && nh >= 16), critBad = t === 18 || (t === 17 && nh <= 15) || t >= nh + 10;
+        r = { total: t, text: '[' + d.join(', ') + '] contra ' + nh, expr: '3d6 ≤ ' + nh, tag: critOk ? 'Sucesso crítico' : (critBad ? 'Falha crítica' : (t <= nh ? 'Acertou (margem ' + (nh - t) + ')' : 'Errou (por ' + (t - nh) + ')')), tone: critOk || t <= nh ? 'good' : 'bad' };
+      } else {
+        const d = dieN(20), b = Math.round(Number(a.b) || 0);
+        r = { total: d + b, text: d + (b ? (b > 0 ? ' +' + b : ' −' + Math.abs(b)) : ''), expr: 'd20' + (b ? (b > 0 ? '+' + b : String(b)) : ''), tag: d === 20 ? 'Crítico!' : (d === 1 ? 'Falha crítica' : ''), tone: d === 20 ? 'good' : (d === 1 ? 'bad' : '') };
+      }
+    } else {
+      r = rollX(sys === 'gurps' ? String(a.dmg || '').replace(/(\d+)d(?!\d)/gi, '$1d6') : a.dmg);
+      if (!r) { toast('O dano “' + a.dmg + '” não é uma rolagem válida. Exemplos: 1d8+2, 2d6, 3.'); return; }
+    }
+    const lbl = (a.n || 'Ataque') + (what === 'atk' ? ' (ataque)' : ' (dano)'), vis = foeVis && campCanShow();
+    foeLast[f.id + ':' + k] = { w: what, r: r, vis: vis };
+    toast((f.name || 'Adversário') + ', ' + lbl + ': ' + r.total + (r.tag ? ' · ' + r.tag : '') + (vis ? ' · a mesa viu' : ''));
+    if (vis) {
+      sbReq('/rest/v1/rolls', { method: 'POST', headers: JSON_MIN, body: JSON.stringify({ campaign_id: CAMP.id, who: String(f.name || 'Adversário').slice(0, 60), label: lbl.slice(0, 60), expr: r.expr, result: { total: r.total, text: r.text, tag: r.tag || '', tone: r.tone || '' } }) })
+        .then(function (x) { if (!x.ok) throw new Error('x'); }).catch(function () { toast('Não consegui mostrar a rolagem para a mesa.'); });
+    }
+    render();
+  }
+  function foePips(i, w, n, count, extra) {
+    let h = '';
+    for (let k = 0; k < n; k++) h += '<button type="button" class="pip ' + (extra || '') + (k < count ? ' on' : '') + '" data-action="foePip" data-i="' + i + '" data-w="' + w + '" data-k="' + k + '" aria-pressed="' + (k < count) + '" aria-label="' + (w === 'hp' ? 'PV' : 'Estresse') + ' ' + (k + 1) + ' de ' + n + '"></button>';
     return '<div class="pips">' + h + '</div>';
   }
-  function renderAdv() {
-    const a = S.adv;
-    const toks = a.afogados.map(function (d, i) {
-      return '<button type="button" class="tok' + (d ? ' down' : '') + '" data-action="tok" data-i="' + i + '" aria-pressed="' + (!!d) + '" aria-label="Afogado ' + (i + 1) + (d ? ', derrotado' : '') + '">' + (d ? '×' : (i + 1)) + '</button>';
+  function foeCard(f, i) {
+    foeSync(f);
+    const sys = rollSys();
+    const toksDown = f.toks.length > 0 && f.toks.every(Boolean), down = (f.hp > 0 && f.hpv >= f.hp) || (!f.hp && toksDown);
+    const toks = f.toks.length ? '<div class="toks">' + f.toks.map(function (d, k) {
+      return '<button type="button" class="tok' + (d ? ' down' : '') + '" data-action="foeTok" data-i="' + i + '" data-k="' + k + '" aria-pressed="' + (!!d) + '" aria-label="' + esc(f.name) + ' ' + (k + 1) + (d ? ', derrotado' : '') + '">' + (d ? '×' : (k + 1)) + '</button>';
+    }).join('') + '</div>' : '';
+    const re = f.ren ? '<div class="row"><button type="button" class="btn quiet sm" data-action="foeRe" data-i="' + i + '"' + (f.toks.length + f.ren > 30 ? ' disabled' : '') + '>Reforço: mais ' + f.ren + (fearOn() && f.ref ? ' (' + f.ref + ' Medo)' : '') + '</button></div>' : '';
+    const hp = !f.hp ? '' : (f.hp <= 12 ? '<div class="gauge"><span>PV</span>' + foePips(i, 'hp', f.hp, f.hpv) + '</div>' :
+      '<div class="gauge"><span>PV</span><div class="hpn"><button type="button" class="rnd" data-action="foeHp" data-i="' + i + '" data-d="5" aria-label="Marcar 5 de dano">−5</button><button type="button" class="rnd" data-action="foeHp" data-i="' + i + '" data-d="1" aria-label="Marcar 1 de dano">−1</button>' +
+      '<output aria-label="Pontos de vida restantes">' + (f.hp - f.hpv) + '<small>/' + f.hp + '</small></output><button type="button" class="rnd" data-action="foeHp" data-i="' + i + '" data-d="-1" aria-label="Curar 1">+1</button><button type="button" class="rnd" data-action="foeHp" data-i="' + i + '" data-d="-5" aria-label="Curar 5">+5</button></div></div>');
+    const st = f.stress ? '<div class="gauge"><span>Estresse</span>' + foePips(i, 'st', f.stress, f.stv, 'stress') + '</div>' : '';
+    const atks = f.atks.map(function (a, k) {
+      const L = foeLast[f.id + ':' + k], b = Math.round(Number(a.b) || 0);
+      const atkTxt = sys === 'gurps' ? 'Atacar · NH ' + clampI(a.b, 1, 40) : 'Atacar ' + (b < 0 ? '−' + Math.abs(b) : '+' + b);
+      return '<div class="atk"><div class="atk-t"><b>' + esc(a.n || 'Ataque') + '</b>' + (a.note ? '<span>' + esc(a.note) + '</span>' : '') + '</div>' +
+        '<div class="atk-b"><button type="button" class="btn quiet sm" data-action="foeAtk" data-i="' + i + '" data-k="' + k + '">' + atkTxt + '</button>' + (String(a.dmg || '').trim() ? '<button type="button" class="btn quiet sm" data-action="foeDmg" data-i="' + i + '" data-k="' + k + '">Dano ' + esc(a.dmg) + '</button>' : '') + '</div>' +
+        (L ? '<p class="atk-r ' + esc(L.r.tone || '') + '" role="status"><b>' + esc(L.r.total) + '</b>' + (L.w === 'atk' ? 'no ataque' : 'de dano') + ' · ' + esc(L.r.text) + (L.r.tag ? ' · ' + esc(L.r.tag) : '') + ' · ' + (L.vis ? 'a mesa viu' : 'só você viu') + '</p>' : '') + '</div>';
     }).join('');
-    return '<article class="adv"><header><h3>Afogados</h3><span class="tag">Lacaio</span></header>' +
-      '<p class="stats">Dif. 10 · Atq +0 · 2 de dano físico, em grupo</p>' +
-      '<div class="toks">' + toks + '</div>' +
-      '<div class="row"><button type="button" class="btn quiet sm" data-action="reinforce"' + (a.afogados.length >= 8 ? ' disabled' : '') + '>Reforço: mais 4 Afogados (1 Medo)</button></div>' +
-      '<ul class="feat"><li><strong>Lacaio (4).</strong> Cai com qualquer dano. A cada 4 de dano, derrote mais um.</li><li><strong>Ataque em Grupo.</strong> Uma jogada compartilhada; cada acerto causa 2 físico, somados.</li><li><strong>Afogamento a seco.</strong> Reação de Força (Dif. 12) ou 1 Estresse.</li></ul></article>' +
-      '<article class="adv"><header><h3>Rolf, o Caçador Afogado</h3><span class="tag">Líder</span></header>' +
-      '<p class="stats">Dif. 12 · Limiares 7/13 · Atq +2 · 1d8+2 físico</p>' +
-      '<div class="gauge"><span>PV</span>' + pipRow('rolfHp', 6, a.rolfHp) + '</div>' +
-      '<div class="gauge"><span>Estresse</span>' + pipRow('rolfStress', 3, a.rolfStress, 'stress') + '</div>' +
-      '<ul class="feat"><li><strong>Convocar os Afogados</strong> (1 Medo). Um grupo sobe do canal.</li><li><strong>Balestra enferrujada.</strong> Longe, 1d8+2 físico.</li><li><strong>Arrastar.</strong> Corpo a corpo, 1d6+2. Em sucesso, o alvo fica Preso (Dif. 12).</li><li><strong>Cai em lama.</strong> Se Rolf cai, os demais Afogados se desfazem.</li></ul></article>';
+    return '<article class="adv' + (down ? ' down' : '') + '"><header><h3>' + esc(f.name || 'Sem nome') + '</h3><div class="row">' + (down ? '<span class="tag">Derrotado</span>' : '') + (f.tag ? '<span class="tag">' + esc(f.tag) + '</span>' : '') + '</div></header>' +
+      (f.stats ? '<p class="stats">' + esc(f.stats) + '</p>' : '') + toks + re + hp + st + (atks ? '<div class="atks">' + atks + '</div>' : '') + (f.feats.trim() ? '<div class="feats">' + rich(f.feats) + '</div>' : '') + '</article>';
+  }
+  function renderAdv() {
+    const can = campCanShow(), on = foeVis && can;
+    return '<div class="foe-bar"><div class="aud" role="group" aria-label="Rolagens do Mestre"><span class="aud-l">Rolagens</span><button type="button" class="chip" data-action="foeVis" data-id="0" aria-pressed="' + !on + '">Secretas</button>' +
+      '<button type="button" class="chip" data-action="foeVis" data-id="1" aria-pressed="' + on + '"' + (can ? '' : ' disabled') + '>Visíveis para a mesa</button></div>' +
+      '<button type="button" class="btn quiet sm" data-action="foeReset">' + ICO.reset + '<span>Recomeçar</span></button></div>' +
+      (can ? '' : '<p class="hint">Com a mesa online desta aventura, dá para mostrar as rolagens aos jogadores.</p>') +
+      S.foes.map(foeCard).join('') +
+      '<button type="button" class="btn quiet sm add" data-action="goPrep" data-id="sec-adv">' + ICO.plus + '<span>Editar adversários</span></button>';
+  }
+  /* editor no Preparar */
+  function foeEd(f, i) {
+    foeSync(f);
+    const n = S.foes.length, P = 'foes.' + i + '.';
+    const num = function (label, key) { return '<div class="field"><label for="f-' + P + key + '">' + label + '</label><input type="number" inputmode="numeric" min="0" id="f-' + P + key + '" data-bindn="' + P + key + '" value="' + f[key] + '"></div>'; };
+    const atks = f.atks.map(function (a, k) {
+      const Q = P + 'atks.' + k + '.';
+      return '<div class="atk-ed"><input type="text" class="atk-n" id="f-' + Q + 'n" data-bind="' + Q + 'n" value="' + esc(a.n) + '" placeholder="Nome do ataque" aria-label="Nome do ataque ' + (k + 1) + '">' +
+        '<input type="number" inputmode="numeric" class="atk-bi" data-bindn="' + Q + 'b" value="' + Math.round(Number(a.b) || 0) + '" aria-label="Bônus do ataque ' + (k + 1) + '" title="Bônus no d20 (no GURPS, o NH)">' +
+        '<input type="text" class="atk-di" data-bind="' + Q + 'dmg" value="' + esc(a.dmg) + '" placeholder="1d8+2" aria-label="Dano do ataque ' + (k + 1) + '">' +
+        '<input type="text" class="atk-ni" data-bind="' + Q + 'note" value="' + esc(a.note) + '" placeholder="Alcance, tipo, efeito" aria-label="Observação do ataque ' + (k + 1) + '">' +
+        '<button type="button" class="icon-btn sm danger" data-action="atkDel" data-i="' + i + '" data-k="' + k + '" aria-label="Remover ataque ' + (k + 1) + '" title="Remover">' + ICO.x + '</button></div>';
+    }).join('');
+    return '<div class="foe-ed"><div class="note-ed-h"><input type="text" class="note-title" id="f-' + P + 'name" data-bind="' + P + 'name" value="' + esc(f.name) + '" placeholder="Nome do adversário" aria-label="Nome do adversário ' + (i + 1) + '">' +
+      '<div class="mini-tools"><button type="button" class="icon-btn sm" data-action="foeUp" data-i="' + i + '" aria-label="Subir" title="Subir"' + (i === 0 ? ' disabled' : '') + '>' + ICO.up + '</button>' +
+      '<button type="button" class="icon-btn sm" data-action="foeDown" data-i="' + i + '" aria-label="Descer" title="Descer"' + (i === n - 1 ? ' disabled' : '') + '>' + ICO.down + '</button>' +
+      '<button type="button" class="icon-btn sm" data-action="foeDup" data-i="' + i + '" aria-label="Duplicar" title="Duplicar">' + ICO.dup + '</button>' +
+      '<button type="button" class="icon-btn sm danger' + (foeDelArm === i ? ' armed' : '') + '" data-action="foeDel" data-i="' + i + '" aria-label="' + (foeDelArm === i ? 'Confirmar: remover ' : 'Remover ') + esc(f.name) + '" title="' + (foeDelArm === i ? 'Toque de novo para remover' : 'Remover') + '">' + ICO.trash + '</button></div></div>' +
+      (foeDelArm === i ? '<p class="hint warn-t">Toque de novo na lixeira para remover este adversário.</p>' : '') +
+      '<div class="facts-grid"><div class="field"><label for="f-' + P + 'tag">Tipo</label><input type="text" id="f-' + P + 'tag" data-bind="' + P + 'tag" value="' + esc(f.tag) + '" list="foe-tags" placeholder="Lacaio, Líder, Chefe…"></div>' +
+      inp('Estatísticas', P + 'stats', f.stats, 'Dif. 12 · Limiares 7/13 · CA 15…') + '</div>' +
+      '<div class="facts-grid foe-nums">' + num('PV', 'hp') + num('Estresse', 'stress') + num('Lacaios', 'mins') + num('Reforço', 'ren') + num('Custo em Medo', 'ref') + '</div>' +
+      '<p class="hint">Lacaios: quantos começam na cena. Reforço: quantos chegam de cada vez (0 desliga o botão). Zero em PV ou Estresse esconde a trilha.</p>' +
+      '<div class="sub-sec"><h3>Ataques</h3>' + (atks ? '<div class="atk-h" aria-hidden="true"><span>Nome</span><span>Bônus</span><span>Dano</span><span>Observação</span></div>' + atks : '') +
+      '<button type="button" class="btn quiet sm add" data-action="atkAdd" data-i="' + i + '">' + ICO.plus + '<span>Ataque</span></button></div>' +
+      area('Habilidades e notas', P + 'feats', f.feats, 3, '- **Nome.** O que faz. Comece a linha com "- " para fazer listas.') + '</div>';
+  }
+  function foesSecHtml() {
+    return '<section class="sec" id="sec-adv"><div class="sec-h"><h2>Adversários</h2><p class="hint">Na Mesa, cada adversário vira um cartão com PV, Estresse, lacaios e botões para rolar ataque e dano. PV até 12 aparecem como marcadores; acima disso, como número. O bônus soma no d20 (no GURPS, é o NH do teste).</p></div>' +
+      '<datalist id="foe-tags">' + FOE_TAGS.map(function (t) { return '<option value="' + t + '"></option>'; }).join('') + '</datalist>' +
+      (S.foes.length ? S.foes.map(foeEd).join('') : '<p class="empty-hint">Nenhum adversário nesta cena.</p>') +
+      '<button type="button" class="btn quiet add" data-action="foeAdd">' + ICO.plus + '<span>Adicionar adversário</span></button></section>';
   }
   function audText() { return audience.indexOf('todos') >= 0 ? 'todos' : audience.join(', '); }
   const TABS_ALL = [['notas', 'Notas'], ['adv', 'Adversários'], ['img', 'Imagens']];
@@ -2592,12 +2760,12 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   }
   function renderMesa() {
     const hasJog = !!sbUser();
-    if (tab === 'adv' && !S.adv) tab = 'notas';
+    if (tab === 'adv' && !S.foes.length) tab = 'notas';
     if (tab === 'jog' && !hasJog) tab = 'notas';
     const fx = S.cues.filter(function (c) { return c.kind === 'fx'; });
     const amb = S.cues.filter(function (c) { return c.kind === 'amb'; });
     const body = tab === 'adv' ? renderAdv() : (tab === 'img' ? imagesHtml() : (tab === 'jog' ? jogHtml() : notesHtml()));
-    const tabsDef = [['notas', 'Notas'], ['img', 'Imagens', S.images.length || ''], S.adv ? ['adv', 'Adversários'] : null, hasJog ? ['jog', 'Jogadores'] : null].filter(Boolean);
+    const tabsDef = [['notas', 'Notas'], ['img', 'Imagens', S.images.length || ''], S.foes.length ? ['adv', 'Adversários', S.foes.length] : null, hasJog ? ['jog', 'Jogadores'] : null].filter(Boolean);
     const tabs = tabsDef.map(function (t) {
       return '<button type="button" role="tab" class="tab" aria-selected="' + (tab === t[0]) + '" data-action="tab" data-id="' + t[0] + '">' + t[1] + (t[2] ? ' <span class="n">' + t[2] + '</span>' : '') + (t[0] === 'jog' ? '<span class="dot" id="jog-badge"' + (feedUnseen && tab !== 'jog' ? '' : ' hidden') + '></span>' : '') + '</button>';
     }).join('');
@@ -2656,7 +2824,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     const kindOpts = KINDS.map(function (k) { return '<option' + (S.kind === k ? ' selected' : '') + '>' + k + '</option>'; }).join('');
     const side = '<nav class="side" data-keep="side" aria-label="Cenas da aventura"><h2 class="side-h">Cenas</h2><ol class="scene-list" id="scene-list">' + sceneListHtml() + '</ol>' +
       '<button type="button" class="btn quiet add-scene" data-action="sceneAdd">' + ICO.plus + '<span>Nova cena</span></button></nav>';
-    const secs = [['sec-cena', 'Cena'], ['sec-notas', 'Notas'], ['sec-musica', 'Música'], ['sec-sons', 'Sons'], ['sec-imagens', 'Imagens'], ['sec-contagem', 'Contagem']];
+    const secs = [['sec-cena', 'Cena'], ['sec-notas', 'Notas'], ['sec-musica', 'Música'], ['sec-sons', 'Sons'], ['sec-imagens', 'Imagens'], ['sec-adv', 'Adversários'], ['sec-contagem', 'Contagem']];
     const secNav = '<nav class="sec-nav" aria-label="Partes da cena"><div class="sec-nav-in">' + secs.map(function (s) { return '<button type="button" class="sec-a" data-action="jump" data-id="' + s[0] + '">' + s[1] + '</button>'; }).join('') + '</div></nav>';
     const cena = '<section class="sec sec-plain" id="sec-cena" aria-label="Cena"><div class="doc-head"><p class="eyebrow">' + esc('Preparar · ' + A.name + ' · Cena ' + (A.cur + 1) + ' de ' + A.scenes.length) + '</p><input type="text" class="title-input" id="f-title" data-bind="title" value="' + esc(S.title) + '" placeholder="Título da cena" aria-label="Título da cena"></div>' +
       '<div class="facts-grid">' + inp('Local', 'place', S.place, 'Onde acontece') + inp('Momento', 'when', S.when, 'Ex.: Noite 1') +
@@ -2716,7 +2884,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
         '<button type="button" class="btn ghost danger add" data-action="cdDel">' + ICO.trash + '<span>Remover contagem</span></button>';
     } else contagem += '<button type="button" class="btn quiet add" data-action="cdAdd">' + ICO.plus + '<span>Adicionar contagem</span></button>';
     contagem += '</section>';
-    return '<div class="prep">' + side + '<div class="editor" data-keep="editor">' + secNav + '<article class="doc">' + cena + notas + musica + sons + imagens + contagem + '</article></div></div>';
+    return '<div class="prep">' + side + '<div class="editor" data-keep="editor">' + secNav + '<article class="doc">' + cena + notas + musica + sons + imagens + foesSecHtml() + contagem + '</article></div></div>';
   }
 
   function renderDock() {
@@ -2763,7 +2931,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   const pathInUse = function (p) { return A.scenes.some(function (sc) { return sc.images.concat(sc.cues).some(function (x) { return x.path === p; }); }); };
   function carry(next) { next.fear = S.fear; next.vol = S.vol; }
   function afterSceneChange() {
-    unreveal(); if (tab === 'adv' && !S.adv) tab = 'notas';
+    unreveal(); if (tab === 'adv' && !S.foes.length) tab = 'notas';
     armDel = false;
     resetScroll = true; sbHydrate(S); render();
   }
@@ -2982,21 +3150,42 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
         const cd = S.countdown, before = cd.value;
         cd.value = (cd.value === i + 1) ? i : i + 1;
         if (cd.value > before && cd.cue && findCue(cd.cue)) playFx(findCue(cd.cue));
-      } else {
-        S.adv[key] = (S.adv[key] === i + 1) ? i : i + 1;
       }
       commit(); return;
     }
     if (a === 'cdReset') { S.countdown.value = 0; commit(); return; }
-    if (a === 'tok') { S.adv.afogados[i] = S.adv.afogados[i] ? 0 : 1; commit(); return; }
-    if (a === 'reinforce') {
-      for (let k = 0; k < 4; k++) S.adv.afogados.push(0);
-      const spent = S.fear > 0;
-      if (spent) S.fear -= 1;
-      commit();
-      toast(spent ? 'Reforço chegou. Medo gasto: 1.' : 'Reforço chegou. Você estava sem Medo para gastar.');
-      return;
+    if (a !== 'foeDel' && foeDelArm >= 0) { foeDelArm = -1; if (mode === 'prep' && a !== 'jump') render(); }
+    if (a === 'foePip' || a === 'foeTok' || a === 'foeRe' || a === 'foeHp') {
+      const f = S.foes[i], k = Number(el.getAttribute('data-k'));
+      if (!f) return;
+      foeSync(f);
+      if (a === 'foePip') { const key = el.getAttribute('data-w') === 'hp' ? 'hpv' : 'stv'; f[key] = f[key] === k + 1 ? k : k + 1; }
+      if (a === 'foeTok') f.toks[k] = f.toks[k] ? 0 : 1;
+      if (a === 'foeHp') f.hpv = clampI(f.hpv + Number(el.getAttribute('data-d')), 0, f.hp);
+      if (a === 'foeRe') {
+        for (let n = 0; n < f.ren; n++) f.toks.push(0);
+        if (fearOn() && f.ref) {
+          const spent = Math.min(S.fear, f.ref);
+          S.fear -= spent;
+          toast(spent === f.ref ? 'Reforço chegou. Medo gasto: ' + spent + '.' : 'Reforço chegou. Faltou Medo: você tinha ' + spent + ' de ' + f.ref + '.');
+        } else toast('Reforço chegou: mais ' + f.ren + '.');
+      }
+      commit(); return;
     }
+    if (a === 'foeAtk' || a === 'foeDmg') { foeRoll(i, Number(el.getAttribute('data-k')), a === 'foeAtk' ? 'atk' : 'dmg'); return; }
+    if (a === 'foeVis') { foeVis = id === '1'; render(); return; }
+    if (a === 'foeReset') {
+      S.foes.forEach(function (f) { foeSync(f); f.hpv = 0; f.stv = 0; f.toks = new Array(f.mins).fill(0); });
+      Object.keys(foeLast).forEach(function (k) { delete foeLast[k]; });
+      commit(); toast('Adversários de volta ao começo da cena.'); return;
+    }
+    if (a === 'foeAdd') { S.foes.push(foeNew()); commit(); const t = document.getElementById('f-foes.' + (S.foes.length - 1) + '.name'); if (t) { t.focus(); t.select(); } return; }
+    if (a === 'foeDel') { if (foeDelArm !== i) { foeDelArm = i; render(); return; } foeDelArm = -1; S.foes.splice(i, 1); commit(); return; }
+    if (a === 'foeUp' && i > 0) { const f = S.foes.splice(i, 1)[0]; S.foes.splice(i - 1, 0, f); commit(); return; }
+    if (a === 'foeDown' && i < S.foes.length - 1) { const f = S.foes.splice(i, 1)[0]; S.foes.splice(i + 1, 0, f); commit(); return; }
+    if (a === 'foeDup') { const c = JSON.parse(JSON.stringify(S.foes[i])); c.id = uid(); c.name = (c.name || 'Adversário') + ' (cópia)'; S.foes.splice(i + 1, 0, c); commit(); return; }
+    if (a === 'atkAdd') { S.foes[i].atks.push({ n: '', b: 0, dmg: '', note: '' }); commit(); return; }
+    if (a === 'atkDel') { S.foes[i].atks.splice(Number(el.getAttribute('data-k')), 1); commit(); return; }
     if (a === 'reveal') {
       revealed = revealed === id ? null : id;
       if (revealed) publish(S.images.filter(function (im) { return im.id === revealed; })[0]); else { roomHide(); campHide(); }
@@ -3121,6 +3310,14 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     }
     if (t.tagName === 'SELECT') return;
     if (t.id === 'sp-vol') { spVol = Number(t.value); return; }
+    if (t.getAttribute('data-bindn')) {
+      const p = t.getAttribute('data-bindn');
+      setPath(S, p, Math.round(Number(t.value) || 0));
+      const mm = p.match(/^foes\.(\d+)\.mins$/);
+      if (mm && S.foes[+mm[1]]) S.foes[+mm[1]].toks = new Array(clampI(S.foes[+mm[1]].mins, 0, 30)).fill(0);
+      save();
+      return;
+    }
     if (t.getAttribute('data-bind')) {
       setPath(S, t.getAttribute('data-bind'), t.value);
       if (t.getAttribute('data-bind') === 'title') renderScenes();
