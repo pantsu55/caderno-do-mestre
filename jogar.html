@@ -140,6 +140,10 @@ details.more .in { display: grid; gap: 14px; padding: 4px 0 16px; }
 /* ---- ficha ---- */
 .pane.one { grid-template-columns: 1fr !important; }
 .sheet-wrap { display: grid; gap: 12px; }
+.sh-head { display: grid; gap: 2px; }
+/* campo que outra pessoa (o Mestre ou o jogador) acabou de mudar */
+.chg { border-color: var(--hot) !important; box-shadow: 0 0 0 3px color-mix(in srgb, var(--hot) 30%, transparent), 0 0 18px -4px var(--hot); transition: box-shadow 0.6s ease, border-color 0.6s ease; }
+.track.chg { border-radius: 10px; }
 .sheet { display: grid; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); align-items: start; }
 .sheet .card { min-width: 0; }
 .sheet .idc, .sheet .card:last-child { grid-column: 1 / -1; }
@@ -542,13 +546,13 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
   }
   function setTab(t) { tab = t; document.querySelectorAll('[data-tab]').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tab === tab)); }); drawPane(); }
   function drawPane() {
-    stopBag();
+    stopBag(); shPollStop();
     const p = $('#pane');
     if (!p) return;
     p.classList.add('one');
     if (tab === 'dados') { p.innerHTML = diceHtml(); paintResult(); }
     else if (tab === 'ficha') { p.innerHTML = sheetPaneHtml(); loadSheet(me().id, false); }
-    else if (tab === 'fichas') { p.innerHTML = fichasHtml(); loadSheet(shView, true); }
+    else if (tab === 'fichas') { p.innerHTML = fichasHtml(); loadSheet(shView, false); }
     else if (tab === 'mochila' || tab === 'mochilas') { p.innerHTML = '<div id="bag"></div>'; bagStart(); }
     else if (tab === 'memoria') { p.innerHTML = '<div id="mem" class="mem"></div>'; loadMem(); }
     else { p.innerHTML = notesHtml(); loadNotes(); }
@@ -662,7 +666,7 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
   /* cada um marca presença a cada 15 s e manda um resumo do personagem; quem some por 70 s aparece fora da mesa */
   const PHOTO_RE = /^[0-9a-f-]{36}\/[0-9a-f-]{36}\/[\w.-]{1,80}$/i;
   const BAR_N = { PV: 'Pontos de Vida', EST: 'Estresse', PF: 'Pontos de Fadiga' };
-  let PARTY = null, partyT = null, partyCid = '', partyOff = 0, pingBusy = false, pingAgain = false, sumSent = '', MYSUM = null, sumT = null;
+  let PARTY = null, partyT = null, partyCid = '', partyOff = 0, pingBusy = false, pingAgain = false, sumSent = '', MYSUM = null, sumT = null, sumChk = false;
   const clampN = function (v, a, b) { return Math.max(a, Math.min(b, Math.round(num(v)))); };
   function sumOf(doc, sys) {
     const o = {};
@@ -721,6 +725,11 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
       if (mine) sumSent = s;
       PARTY = rows; partyOff = 0;
       paintParty();
+      if (!isOwner() && sumSent && !sumChk && !pingAgain) {
+        const row = rows.filter(function (p) { return p.user_id === me().id; })[0];
+        let sent = null; try { sent = JSON.parse(sumSent); } catch (x) { /* ok */ }
+        if (row && row.info && sent && !same(row.info, sent)) { sumChk = true; mySheetSum().then(function () { sumChk = false; }, function () { sumChk = false; }); }
+      }
     } catch (e) { /* sem rede: tenta no próximo ciclo */ }
     finally { pingBusy = false; if (pingAgain) { pingAgain = false; ping(); } }
   }
@@ -991,6 +1000,42 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
     return dst;
   }
   let SH = null, shFor = null, shSv = '', shT = null, shView = null, shRO = false, shOwner = null, shErr = '';
+  /* versão da ficha na nuvem: grava só se ninguém gravou depois; se gravou, junta as mudanças dos dois */
+  let shBase = null, shRev = 0, shSaving = false, shPollT = null, shPollBusy = false, shStale = null;
+  const jclone = function (x) { return x == null ? x : JSON.parse(JSON.stringify(x)); };
+  const isObj = function (x) { return !!x && typeof x === 'object' && !Array.isArray(x); };
+  function same(a, b) {
+    if (a === b) return true;
+    if (!a || !b || typeof a !== 'object' || typeof b !== 'object' || Array.isArray(a) !== Array.isArray(b)) return false;
+    const ka = Object.keys(a), kb = Object.keys(b);
+    return ka.length === kb.length && ka.every(function (k) { return Object.prototype.hasOwnProperty.call(b, k) && same(a[k], b[k]); });
+  }
+  /* junta três versões: o que só eu mudei fica meu, o que só o outro mudou vem dele; o mesmo campo nos dois, fica o meu */
+  function merge3(base, mine, theirs) {
+    if (same(mine, theirs) || same(theirs, base)) return mine;
+    if (same(mine, base)) return jclone(theirs);
+    if (isObj(mine) && isObj(theirs)) {
+      const b = isObj(base) ? base : {}, out = {}, has = Object.prototype.hasOwnProperty;
+      Object.keys(mine).concat(Object.keys(theirs).filter(function (k) { return !has.call(mine, k); })).forEach(function (k) {
+        if (!has.call(mine, k)) { if (!(has.call(b, k) && same(b[k], theirs[k]))) out[k] = jclone(theirs[k]); return; }
+        if (!has.call(theirs, k)) { if (!(has.call(b, k) && same(b[k], mine[k]))) out[k] = mine[k]; return; }
+        out[k] = merge3(b[k], mine[k], theirs[k]);
+      });
+      return out;
+    }
+    if (Array.isArray(mine) && Array.isArray(theirs) && Array.isArray(base) && mine.length === theirs.length && mine.length === base.length) {
+      return mine.map(function (x, i) { return merge3(base[i], x, theirs[i]); });
+    }
+    return mine;
+  }
+  /* caminhos (como ['dnd5e','hp','cur']) que mudaram de uma versão para outra */
+  function diffPaths(a, b, pre, out) {
+    if (same(a, b)) return out;
+    if (isObj(a) && isObj(b)) { Object.keys(a).concat(Object.keys(b).filter(function (k) { return !(k in a); })).forEach(function (k) { diffPaths(a[k], b[k], pre.concat(k), out); }); }
+    else if (Array.isArray(a) && Array.isArray(b) && a.length === b.length) a.forEach(function (x, i) { diffPaths(x, b[i], pre.concat(String(i)), out); });
+    else out.push(pre);
+    return out;
+  }
   const photoUrls = {};
   const CALC = {};
   function sysData() { const s = cur.system; SH[s] = deepFill(SH[s] || {}, sheetDefault(s)); return SH[s]; }
@@ -1043,7 +1088,7 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
     c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
     c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
     const blob = await new Promise(function (res) { c.toBlob(res, 'image/jpeg', 0.85); });
-    const path = cur.id + '/' + me().id + '/retrato-' + Date.now().toString(36) + '.jpg';
+    const path = cur.id + '/' + shOwner + '/retrato-' + Date.now().toString(36) + '.jpg';
     shSv = 'Enviando retrato…'; paintSv();
     const r = await api('/storage/v1/object/players/' + path, { method: 'POST', headers: { 'Content-Type': 'image/jpeg', 'x-upsert': 'true' }, body: blob });
     if (!r.ok) { shSv = 'Não consegui enviar o retrato.'; paintSv(); return; }
@@ -1173,30 +1218,127 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
   }
   const skey = function (uidv) { return 'ht-sheet-' + cur.id + '-' + uidv; };
   async function loadSheet(uidv, ro) {
-    shRO = !!ro; shOwner = uidv; shFor = cur.id + ':' + uidv; shErr = '';
-    SH = ro ? null : lsGet(skey(uidv), null);
+    if (shT) { clearTimeout(shT); saveSheet(); }
+    shRO = !!ro; shOwner = uidv; shFor = cur.id + ':' + uidv; shErr = ''; shBase = null; shRev = 0; shStale = null;
+    const mine = uidv === me().id;
+    SH = mine ? lsGet(skey(uidv), null) : null;
+    shSv = '';
     if (SH) paintSheet();
     const want = shFor;
     try {
-      const r = await api('/rest/v1/pdocs?campaign_id=eq.' + cur.id + '&kind=eq.sheet&user_id=eq.' + uidv + '&select=data');
+      const r = await api('/rest/v1/pdocs?campaign_id=eq.' + cur.id + '&kind=eq.sheet&user_id=eq.' + uidv + '&select=data,rev');
       if (!r.ok) throw new Error('x');
       const j = await r.json();
       if (want !== shFor || shT) return;
-      if (j[0] && j[0].data) { SH = j[0].data; if (!ro) lsSet(skey(uidv), SH); shSv = ro ? '' : 'Salvo na nuvem'; }
-      else if (!SH) SH = { name: '' };
+      if (j[0] && j[0].data) { SH = j[0].data; shBase = jclone(SH); shRev = j[0].rev || 0; if (mine) lsSet(skey(uidv), SH); shSv = mine ? 'Salvo na nuvem' : ''; }
+      else { if (!SH) SH = { name: '' }; shBase = {}; shRev = 0; }
     } catch (e) { if (!SH) SH = { name: '' }; shSv = 'Sem conexão. Mostrando o que está neste aparelho.'; }
-    if (want === shFor) { paintSheet(); paintSv(); }
+    if (want === shFor) { paintSheet(); paintSv(); shPollStart(); }
   }
   function saveSheetSoon() { if (shRO) return; shSv = 'Salvando…'; paintSv(); clearTimeout(shT); shT = setTimeout(saveSheet, 900); }
+  /* gravação antiga (sem versão), para o caso de o banco ainda não ter a função nova */
+  async function saveSheetOld(doc) {
+    const r = await api('/rest/v1/pdocs?on_conflict=campaign_id,user_id,kind', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, JSONH), body: JSON.stringify({ campaign_id: cur.id, kind: 'sheet', data: doc }) });
+    if (!r.ok) throw new Error('x');
+  }
   async function saveSheet() {
-    shT = null; lsSet(skey(me().id), SH);
+    shT = null;
+    if (!SH || !cur) return;
+    const owner = shOwner, key = shFor, mine = owner === me().id;
+    if (mine) lsSet(skey(owner), SH);
+    let done = false;
+    shSaving = true;
     try {
-      const r = await api('/rest/v1/pdocs?on_conflict=campaign_id,user_id,kind', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, JSONH), body: JSON.stringify({ campaign_id: cur.id, kind: 'sheet', data: SH }) });
-      if (!r.ok) throw new Error('x');
-      shSv = 'Salvo na nuvem';
-    } catch (e) { shSv = 'Sem conexão. Salvo neste aparelho.'; }
+      for (let k = 0; k < 4 && !done; k++) {
+        const sent = jclone(SH);
+        const r = await api('/rest/v1/rpc/save_sheet', { method: 'POST', headers: JSONH, body: JSON.stringify({ cid: cur.id, uid: owner, doc: sent, base: shRev }) });
+        if (r.status === 404 && mine) { await saveSheetOld(sent); shBase = sent; done = true; break; }
+        if (!r.ok) throw new Error(await errText(r));
+        const j = (await r.json())[0] || {};
+        if (key !== shFor) return;
+        if (j.ok) { shRev = j.rev || 0; shBase = sent; done = true; }
+        else shTake(j.data || {}, j.rev, j.edited_by);
+      }
+      shSv = done ? (mine ? 'Salvo na nuvem' : 'Salvo na ficha de ' + memberName(owner)) : 'A ficha mudou várias vezes seguidas. Tento de novo na próxima mudança.';
+    } catch (e) { shSv = mine ? 'Sem conexão. Salvo neste aparelho.' : 'Não consegui salvar: ' + e.message; }
+    finally { shSaving = false; }
+    if (key !== shFor) return;
     paintSv();
-    if (shOwner === me().id) sumMine(SH);
+    if (!done) return;
+    if (mine) sumMine(SH); else if (isOwner()) pushSum(owner, SH);
+  }
+  /* chegou uma versão mais nova (do jogador ou do Mestre): junta com o que está na tela */
+  const shEditing = function () { const a = document.activeElement; return !!(a && a.closest && a.closest('#sheet') && a.matches('input, textarea, select')); };
+  function shTake(theirs, rev, by) {
+    const before = SH ? jclone(SH) : {};
+    SH = merge3(shBase || {}, SH || {}, theirs || {});
+    shBase = jclone(theirs || {}); shRev = rev || 0;
+    const mine = shOwner === me().id;
+    if (mine) lsSet(skey(shOwner), SH);
+    const ch = diffPaths(before, SH, [], []);
+    if (!ch.length) return;
+    if (shEditing()) { shStale = (shStale || []).concat(ch); shPatchInputs(); shFlash(ch); }
+    else { paintSheet(); shFlash(ch); }
+    if (by && by !== me().id) {
+      if (mine && cur && by === cur.owner) msgToast('O Mestre atualizou a sua ficha.');
+      else if (!mine && by === shOwner) { shSv = memberName(shOwner) + ' mexeu na ficha agora.'; paintSv(); }
+    }
+    if (mine) sumMine(SH);
+  }
+  /* enquanto alguém digita na ficha: atualiza só os outros campos, sem redesenhar */
+  function shPatchInputs() {
+    const box = $('#sheet'), a = document.activeElement;
+    if (!box) return;
+    box.querySelectorAll('[data-k]').forEach(function (el) {
+      if (el === a) return;
+      const k = el.dataset.k, v = k.indexOf('@') === 0 ? getP(SH, k.slice(1)) : getP(sysData(), k), t = v == null ? '' : String(v);
+      if (el.value !== t) el.value = t;
+    });
+    calcAll();
+  }
+  /* o campo que mudou por outra pessoa brilha por um instante */
+  function shFlash(paths) {
+    const box = $('#sheet');
+    if (!box || !cur) return;
+    const els = [];
+    paths.forEach(function (p) {
+      let rel;
+      if (p[0] !== cur.system) { if (p[0] === 'photo') { const av = box.querySelector('.avatar'); if (av) els.push(av); return; } rel = ['@' + p[0]]; }
+      else rel = p.slice(1);
+      for (let n = rel.length; n > 0; n--) {
+        const x = rel.slice(0, n).join('.').replace(/["\\]/g, '');
+        const hit = box.querySelectorAll('[data-k="' + x + '"],[data-pip="' + x + '"],[data-tog="' + x + '"],[data-cyc="' + x + '"],[data-chk="' + x + '"]');
+        if (hit.length) { hit.forEach(function (el) { els.push(el.dataset.pip ? (el.closest('.track') || el) : el); }); break; }
+      }
+    });
+    els.forEach(function (el) { el.classList.add('chg'); });
+    setTimeout(function () { els.forEach(function (el) { el.classList.remove('chg'); }); }, 2600);
+  }
+  /* a cada 5 s, com a ficha aberta: vê se alguém gravou uma versão nova */
+  function shPollStart() { clearInterval(shPollT); shPollT = setInterval(shPoll, 5000); }
+  function shPollStop() { clearInterval(shPollT); shPollT = null; }
+  async function shPoll() {
+    if (!SH || !cur || document.hidden || shPollBusy) return;
+    if (!$('#sheet')) { shPollStop(); return; }
+    if (EMBED && !window.innerWidth) return;
+    if (shStale && !shEditing()) { const ch = shStale; shStale = null; paintSheet(); shFlash(ch); }
+    if (shT || shSaving) return;
+    const key = shFor;
+    shPollBusy = true;
+    try {
+      const r = await api('/rest/v1/pdocs?campaign_id=eq.' + cur.id + '&kind=eq.sheet&user_id=eq.' + shOwner + '&rev=neq.' + shRev + '&select=data,rev,edited_by');
+      if (!r.ok) return;
+      const j = await r.json();
+      if (key !== shFor || !j[0] || shT || shSaving) return;
+      shTake(j[0].data || {}, j[0].rev, j[0].edited_by);
+    } catch (e) { /* sem rede: tenta no próximo ciclo */ }
+    finally { shPollBusy = false; }
+  }
+  /* o Mestre mexeu na ficha de alguém: o resumo do grupo (vida, classe) acompanha na hora */
+  async function pushSum(uidv, doc) {
+    try { await api('/rest/v1/presence?campaign_id=eq.' + cur.id + '&user_id=eq.' + uidv, { method: 'PATCH', headers: Object.assign({ Prefer: 'return=minimal' }, JSONH), body: JSON.stringify({ info: sumOf(doc, cur.system) }) }); } catch (e) { /* o jogador atualiza quando abrir o app */ }
+    if (EMBED) { try { parent.postMessage({ ht: 'party' }, location.origin); } catch (e) { /* ok */ } }
+    else if (partyT) ping();
   }
   function sheetRoll(kind, key, lbl) {
     const d = sysData();
@@ -1249,7 +1391,7 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
     if (!ms.length) return '<div class="card"><p class="muted">Nenhum jogador na mesa ainda.</p></div>';
     if (!shView || !ms.some(function (m) { return m.user_id === shView; })) shView = ms[0].user_id;
     return '<div class="table" role="group" aria-label="Escolher jogador">' + ms.map(function (m) { return '<button type="button" class="btn q sm" data-pv="' + m.user_id + '" aria-pressed="' + (m.user_id === shView) + '"' + (m.user_id === shView ? ' style="border-color:var(--accent);color:var(--accent)"' : '') + '>' + esc(m.name) + '</button>'; }).join('') + '</div>' +
-      sheetPaneHtml('<h2>Ficha de ' + esc((ms.filter(function (m) { return m.user_id === shView; })[0] || {}).name || '') + '</h2>');
+      sheetPaneHtml('<div class="sh-head"><h2>Ficha de ' + esc(memberName(shView)) + '</h2><p class="hint-s">Você também pode editar. ' + esc(memberName(shView)) + ' vê a mudança em alguns segundos.</p></div>');
   }
 
   /* ---------- mochila ---------- */
@@ -1781,26 +1923,36 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
   /* muda a própria ficha (poções, defesa) sem depender da aba Ficha estar aberta */
   async function sheetEdit(fn) {
     const uid = me().id, s = cur.system;
-    let full = null;
-    try {
-      const r = await api('/rest/v1/pdocs?campaign_id=eq.' + cur.id + '&kind=eq.sheet&user_id=eq.' + uid + '&select=data');
-      if (r.ok) { const j = await r.json(); full = j[0] && j[0].data ? j[0].data : null; }
-    } catch (e) { /* tenta a cópia local */ }
-    if (!full) full = lsGet(skey(uid), null);
-    if (!full) return '';
-    full[s] = deepFill(full[s] || {}, sheetDefault(s));
-    const msg = fn(full[s]);
-    if (!msg) return '';
-    lsSet(skey(uid), full);
-    BS = full;
-    if (SH && shOwner === uid && !shRO) SH = full;
-    paintBag();
-    sumMine(full);
-    try {
-      const r = await api('/rest/v1/pdocs?on_conflict=campaign_id,user_id,kind', { method: 'POST', headers: Object.assign({ Prefer: 'resolution=merge-duplicates,return=minimal' }, JSONH), body: JSON.stringify({ campaign_id: cur.id, kind: 'sheet', data: full }) });
-      if (!r.ok) throw new Error('x');
-    } catch (e) { return msg + ' (salvo só neste aparelho)'; }
-    return msg;
+    for (let k = 0; k < 4; k++) {
+      let full = null, rev = 0, online = false;
+      try {
+        const r = await api('/rest/v1/pdocs?campaign_id=eq.' + cur.id + '&kind=eq.sheet&user_id=eq.' + uid + '&select=data,rev');
+        if (r.ok) { const j = await r.json(); full = j[0] && j[0].data ? j[0].data : null; rev = j[0] ? (j[0].rev || 0) : 0; online = true; }
+      } catch (e) { /* tenta a cópia local */ }
+      if (!full) full = lsGet(skey(uid), null);
+      if (!full) return '';
+      full[s] = deepFill(full[s] || {}, sheetDefault(s));
+      const msg = fn(full[s]);
+      if (!msg) return '';
+      let saved = false;
+      if (online) {
+        try {
+          const r = await api('/rest/v1/rpc/save_sheet', { method: 'POST', headers: JSONH, body: JSON.stringify({ cid: cur.id, uid: uid, doc: full, base: rev }) });
+          if (r.status === 404) { await saveSheetOld(full); saved = true; }
+          else if (r.ok) { const j = (await r.json())[0] || {}; if (!j.ok) continue; saved = true; rev = j.rev || 0; }
+        } catch (e) { /* fica neste aparelho */ }
+      }
+      lsSet(skey(uid), full);
+      BS = full;
+      if (SH && shOwner === uid) {
+        if (saved) { SH = merge3(shBase || {}, SH, full); shBase = jclone(full); shRev = rev; } else SH = jclone(full);
+        if ($('#sheet')) { if (shEditing()) shPatchInputs(); else paintSheet(); }
+      }
+      paintBag();
+      sumMine(full);
+      return saved ? msg : msg + ' (salvo só neste aparelho)';
+    }
+    return '';
   }
   function applyEffect(x, to, n) {
     const s = cur.system;
@@ -2512,6 +2664,10 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
     else if (t.dataset && t.dataset.chk && SH) { sysData()[t.dataset.chk] = t.checked; saveSheetSoon(); }
     else if (t.dataset && t.dataset.rr && SH) paintSheet();
     else if (t.id === 'photo' && t.files && t.files[0]) { uploadPhoto(t.files[0]).catch(function () { shSv = 'Não consegui usar esta imagem.'; paintSv(); }); t.value = ''; }
+  });
+  document.addEventListener('focusout', function (e) {
+    if (!shStale || !e.target.closest || !e.target.closest('#sheet')) return;
+    setTimeout(function () { if (!shStale || shEditing()) return; const ch = shStale; shStale = null; paintSheet(); shFlash(ch); }, 0);
   });
   document.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.id === 'expr') { e.preventDefault(); doRoll(rollExpr(dice.expr)); } if (e.key === 'Escape') { if (histIsOpen()) { histClose(); const b = $('#hbtn'); if (b) b.focus(); } else if (!$('#dlg').hidden) dlgClose(); else if ($('#stage') && !$('#stage').hidden) stageClose(); } });
   /* presença: volta na hora ao reabrir o app; ao fechar, avisa a saída */
