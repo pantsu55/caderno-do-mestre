@@ -662,7 +662,7 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
   /* cada um marca presença a cada 15 s e manda um resumo do personagem; quem some por 70 s aparece fora da mesa */
   const PHOTO_RE = /^[0-9a-f-]{36}\/[0-9a-f-]{36}\/[\w.-]{1,80}$/i;
   const BAR_N = { PV: 'Pontos de Vida', EST: 'Estresse', PF: 'Pontos de Fadiga' };
-  let PARTY = null, partyT = null, partyCid = '', partyOff = 0, pingBusy = false, sumSent = '', MYSUM = null, sumT = null;
+  let PARTY = null, partyT = null, partyCid = '', partyOff = 0, pingBusy = false, pingAgain = false, sumSent = '', MYSUM = null, sumT = null;
   const clampN = function (v, a, b) { return Math.max(a, Math.min(b, Math.round(num(v)))); };
   function sumOf(doc, sys) {
     const o = {};
@@ -690,11 +690,11 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
     return o;
   }
   /* depois de salvar a própria ficha: o grupo vê a mudança em pouco tempo */
-  function sumMine(doc) {
+  function sumMine(doc, now) {
     if (!cur || EMBED || isOwner() || !doc) return;
     MYSUM = sumOf(doc, cur.system);
     paintParty();
-    if (partyT && JSON.stringify(MYSUM) !== sumSent) { clearTimeout(sumT); sumT = setTimeout(ping, 1200); }
+    if (partyT && JSON.stringify(MYSUM) !== sumSent) { clearTimeout(sumT); if (now) ping(); else sumT = setTimeout(ping, 1200); }
   }
   async function mySheetSum() {
     if (!cur || EMBED || isOwner()) return;
@@ -703,11 +703,12 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
       const r = await api('/rest/v1/pdocs?campaign_id=eq.' + cid + '&kind=eq.sheet&user_id=eq.' + me().id + '&select=data');
       if (!r.ok) return;
       const j = await r.json();
-      if (cur && cur.id === cid && j[0] && j[0].data) sumMine(j[0].data);
+      if (cur && cur.id === cid && j[0] && j[0].data) sumMine(j[0].data, true);
     } catch (e) { /* fica o resumo deste aparelho */ }
   }
   async function ping() {
-    if (!cur || EMBED || !partyT || pingBusy) return;
+    if (!cur || EMBED || !partyT) return;
+    if (pingBusy) { pingAgain = true; return; }
     if (partyOff && Date.now() - partyOff < 120000) return;
     const cid = cur.id, mine = isOwner() ? {} : MYSUM, s = mine ? JSON.stringify(mine) : '';
     pingBusy = true;
@@ -721,7 +722,7 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
       PARTY = rows; partyOff = 0;
       paintParty();
     } catch (e) { /* sem rede: tenta no próximo ciclo */ }
-    finally { pingBusy = false; }
+    finally { pingBusy = false; if (pingAgain) { pingAgain = false; ping(); } }
   }
   /* ao fechar a página: avisa a saída na hora (sem esperar os 70 s) */
   function pingBye(cid) {

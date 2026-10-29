@@ -511,6 +511,24 @@ main.app { grid-row: 2; min-height: 0; overflow: hidden; position: relative; }
 .tab .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 9px var(--accent); }
 .tab-body { display: grid; gap: 10px; padding-top: 14px; }
 
+/* sons dentro das notas: botões no meio do texto */
+.cue-pill { display: inline-flex; align-items: center; gap: 6px; vertical-align: 1px; min-height: 30px; margin: 1px 2px; padding: 2px 12px 2px 8px; border-radius: 999px; border: 1px solid var(--cp, var(--active)); background: color-mix(in srgb, var(--cp, var(--active)) 14%, var(--surface)); color: var(--fg); font-size: 15px; font-weight: 700; line-height: 1.2; white-space: nowrap; transition: background-color 0.12s, box-shadow 0.12s, color 0.12s; }
+.cue-pill svg { width: 15px; height: 15px; color: var(--cp, var(--active)); }
+.cue-pill .lamp { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid var(--cp, var(--accent)); }
+.cue-pill.k-amb { --cp: var(--accent); }
+.cue-pill.k-trk { --cp: var(--ok); }
+button.cue-pill:hover { box-shadow: 0 0 16px -6px var(--cp, var(--active)); }
+button.cue-pill:active, .cue-pill.playing, .cue-pill[aria-pressed="true"] { background: var(--cp, var(--active)); border-color: var(--cp, var(--active)); color: var(--active-ink); box-shadow: 0 0 18px -4px var(--cp, var(--active)); }
+.cue-pill.k-amb[aria-pressed="true"], .cue-pill.k-amb.playing { color: var(--accent-ink); }
+.cue-pill[aria-pressed="true"] svg, .cue-pill.playing svg, button.cue-pill:active svg { color: inherit; }
+.cue-pill[aria-pressed="true"] .lamp { background: currentColor; border-color: currentColor; animation: lamp 2s ease-in-out infinite; }
+.cue-pill.miss { --cp: var(--line); color: var(--muted); border-style: dashed; background: transparent; font-weight: 400; }
+.cue-pill.miss svg { color: var(--muted); }
+.cue-pick { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 4px; padding: 10px 12px; border: 1px dashed var(--line); border-radius: 12px; background: var(--bg); }
+.cue-pick .lbl-s { margin-right: 6px; }
+.cue-pick .linkbtn { margin-left: auto; }
+.icon-btn.on { background: var(--active-soft); color: var(--fg); }
+
 /* notas da cena */
 details.note { border: 1px solid var(--line); border-radius: 12px; background: var(--surface); box-shadow: var(--card-shadow); }
 details.note summary { list-style: none; display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 54px; padding: 12px 16px; cursor: pointer; font-weight: 700; font-size: 17px; }
@@ -714,6 +732,32 @@ details.note[open] summary .caret { transform: rotate(180deg); }
 .sp-devs { display: flex; flex-wrap: wrap; gap: 6px; }
 .sp-vol { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 10px; }
 .sp-vol span { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+/* tocando agora */
+.sp-now { display: grid; grid-template-columns: 52px minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px 12px 10px 10px; border-radius: 12px; background: var(--bg); border: 1px solid var(--line); }
+.sp-now img, .sp-now-ph { width: 52px; height: 52px; border-radius: 8px; object-fit: cover; background: var(--surface-2); display: grid; place-items: center; color: var(--muted); }
+.sp-now-ph svg { width: 22px; height: 22px; }
+.sp-now-t { min-width: 0; display: grid; gap: 1px; }
+.sp-now-t .lbl-s { color: var(--ok); }
+.sp-now.paused .sp-now-t .lbl-s { color: var(--muted); }
+.sp-now-n { font-weight: 700; font-size: 15px; line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-now-a { color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-now-bar { height: 4px; margin-top: 5px; border-radius: 99px; background: var(--line); overflow: hidden; }
+.sp-now-bar i { display: block; height: 100%; border-radius: inherit; background: var(--ok); box-shadow: 0 0 8px -1px var(--ok); }
+.sp-now.paused .sp-now-bar i { background: var(--muted); box-shadow: none; }
+.sp-now-tm { display: flex; justify-content: space-between; font-family: var(--font-mono); font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+/* buscar no Spotify (Preparar) */
+.sp-findbox { display: grid; gap: 10px; padding: 12px; border: 1px dashed var(--line); border-radius: 12px; background: var(--bg); }
+.sp-find { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.sp-find input[type="search"] { flex: 1 1 240px; width: auto; min-width: 0; }
+.sp-res { list-style: none; padding: 0; margin: 0; display: grid; gap: 6px; max-height: 420px; overflow-y: auto; overscroll-behavior: contain; }
+.sp-res li { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 8px 6px 6px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); }
+.sp-res img, .sp-res .ph { width: 44px; height: 44px; border-radius: 6px; object-fit: cover; background: var(--surface-2); display: grid; place-items: center; color: var(--muted); }
+.sp-res .ph svg { width: 18px; height: 18px; }
+.sp-res-t { min-width: 0; }
+.sp-res-t b { display: block; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-res-t small { display: block; color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sp-res .k { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ok); margin-right: 8px; }
+input[type="search"] { width: 100%; min-height: 46px; padding: 10px 12px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; }
 .tracks { list-style: none; padding: 0; display: grid; gap: 6px; }
 .trk { display: grid; grid-template-columns: 22px minmax(0, 1fr); align-items: center; gap: 8px; width: 100%; min-height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); text-align: left; font-size: 14px; font-weight: 700; }
 .trk[aria-current="true"] { background: var(--active); border-color: var(--active); color: var(--active-ink); box-shadow: 0 0 18px -6px var(--glow); }
@@ -882,6 +926,15 @@ details.basic .add-bar { padding: 2px 0 14px; }
 .pal .n { font-weight: 700; font-size: 15px; line-height: 1.2; }
 .pal[aria-pressed="true"] { border-color: var(--active); box-shadow: 0 0 0 2px var(--active), 0 0 22px -6px var(--glow); }
 .narrow { max-width: 380px; }
+.cred { display: grid; gap: 10px; padding: 14px 16px; border-radius: 14px; border: 1px solid var(--ok); background: color-mix(in srgb, var(--ok) 8%, var(--surface)); box-shadow: 0 0 26px -12px var(--ok); }
+.cred-h { display: flex; align-items: center; gap: 8px; font-size: 16px; }
+.cred-h svg { width: 18px; height: 18px; color: var(--ok); }
+.cred-g { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 8px 14px; margin: 0; align-items: center; }
+.cred-g dt { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.cred-g dd { margin: 0; min-width: 0; }
+.cred-g code { font-family: var(--font-mono); font-size: 15px; overflow-wrap: anywhere; }
+.cred-g code.pw { display: inline-block; font-size: 20px; letter-spacing: 0.06em; color: var(--fg); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 4px 10px; -webkit-user-select: all; user-select: all; }
+.cred-msg { font-family: var(--font-mono); font-size: 13px; min-height: 0; }
 .inline-form { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) auto; gap: 10px; align-items: end; }
 .link-box { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
 .link-box code { font-family: var(--font-mono); font-size: 14px; word-break: break-all; color: var(--accent); }
@@ -1024,18 +1077,19 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   const $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
   const esc = function (s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); };
   const inline = function (s) { return esc(s).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>').replace(/\*(.+?)\*/g, '<em>$1</em>'); };
-  function rich(text) {
+  function rich(text, fmt) {
+    fmt = fmt || inline;
     return String(text).split(/\n{2,}/).map(function (b) {
       const lines = b.split('\n').filter(Boolean);
       if (!lines.length) return '';
       if (lines.every(function (l) { return /^\s*-\s+/.test(l); })) {
-        return '<ul>' + lines.map(function (l) { return '<li>' + inline(l.replace(/^\s*-\s+/, '')) + '</li>'; }).join('') + '</ul>';
+        return '<ul>' + lines.map(function (l) { return '<li>' + fmt(l.replace(/^\s*-\s+/, '')) + '</li>'; }).join('') + '</ul>';
       }
-      return '<p>' + lines.map(inline).join('<br>') + '</p>';
+      return '<p>' + lines.map(fmt).join('<br>') + '</p>';
     }).join('');
   }
   /* ---------- ícones (traço simples, herdam a cor do texto) ---------- */
-  const APP_VER = '0.45';
+  const APP_VER = '0.46';
   const RAVEN = '<svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>';
   const SV = function (p, extra) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '>' + p + '</svg>'; };
   const ICO = {
@@ -1808,6 +1862,8 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   /* ---------- mesa online (jogadores com conta) e perfil ---------- */
   const SYSTEMS = [['daggerheart', 'Daggerheart'], ['dnd5e', 'D&D 5e'], ['gurps', 'GURPS']];
   let CAMP = undefined, campFor = null, campBusy = false, campMsg = '', campDelArm = false, campSys = 'daggerheart', campRm = null;
+  /* conta criada (ou senha nova): a senha provisória só aparece aqui, na memória da página, até tocar em Pronto */
+  let campCred = null, campAddBusy = false, campPwArm = null, campPwBusy = null, campDraft = { email: '', name: '' };
   const playUrl = function () { return location.origin + location.pathname.replace(/[^/]*$/, '') + 'jogar.html'; };
   const campOnline = function () { return mode === 'online'; };
   async function campLoad() {
@@ -1842,15 +1898,65 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     try { const r = await sbReq('/rest/v1/campaigns?id=eq.' + CAMP.id, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ system: v }) }); if (!r.ok) throw new Error('x'); toast('Sistema da ficha atualizado.'); }
     catch (e) { CAMP.system = old; toast('Não consegui trocar o sistema.'); render(); }
   }
+  /* a função "jogadores" do Supabase cria a conta com senha provisória (a chave secreta fica lá) e já põe na mesa */
+  async function jogFn(body) {
+    let r;
+    try { r = await sbReq('/functions/v1/jogadores', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); }
+    catch (e) { throw new Error(e && /sess/.test(e.message) ? 'Sua sessão expirou. Entre de novo.' : 'Sem conexão. Tente de novo.'); }
+    const j = await r.json().catch(function () { return {}; });
+    if (r.status === 404 && /function was not found|not_found/i.test((j.message || '') + (j.code || ''))) throw new Error('sem-funcao');
+    if (!r.ok) throw new Error(j.message || 'Não consegui fazer isso agora.');
+    return j;
+  }
   async function campAdd(email, nm) {
-    if (!CAMP) return;
-    campMsg = '';
+    if (!CAMP || campAddBusy) return;
+    campDraft = { email: email, name: nm };
+    campMsg = ''; campAddBusy = true; render();
     try {
-      const r = await sbReq('/rest/v1/rpc/add_member', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cid: CAMP.id, em: email, nm: nm }) });
-      if (!r.ok) { const j = await r.json().catch(function () { return {}; }); throw new Error(j.message || 'erro'); }
-      toast('Jogador adicionado.');
+      const j = await jogFn({ action: 'criar', cid: CAMP.id, email: email, name: nm });
+      campDraft = { email: '', name: '' };
+      if (j.created && j.password) { campCred = { name: nm, email: email.trim().toLowerCase(), password: j.password, nova: false }; toast('Conta criada. Falta mandar a senha para ' + nm + '.'); }
+      else toast(nm + ' já tinha conta e entrou na mesa.');
       await campLoad();
-    } catch (e) { campMsg = e.message === 'erro' ? 'Não consegui adicionar agora.' : e.message; render(); }
+    } catch (e) {
+      if (e.message === 'sem-funcao') {
+        /* sem a função no Supabase: só põe na mesa quem já tem conta */
+        try {
+          const r = await sbReq('/rest/v1/rpc/add_member', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cid: CAMP.id, em: email, nm: nm }) });
+          if (!r.ok) { const j = await r.json().catch(function () { return {}; }); throw new Error(j.message || 'Não consegui adicionar agora.'); }
+          toast('Jogador adicionado.');
+          campDraft = { email: '', name: '' };
+          await campLoad();
+        } catch (x) { campMsg = x.message; }
+      } else campMsg = e.message;
+    }
+    campAddBusy = false; render();
+  }
+  async function campNewPw(uidv) {
+    if (!CAMP || campPwBusy) return;
+    const m = (CAMP.members || []).filter(function (x) { return x.user_id === uidv; })[0];
+    campPwArm = null; campPwBusy = uidv; campMsg = ''; render();
+    try {
+      const j = await jogFn({ action: 'senha', cid: CAMP.id, uid: uidv });
+      campCred = { name: m ? m.name : 'o jogador', email: '', password: j.password, nova: true };
+    } catch (e) { campMsg = e.message === 'sem-funcao' ? 'Para gerar senhas pelo app, a função "jogadores" precisa estar no Supabase.' : e.message; }
+    campPwBusy = null; render();
+  }
+  function credMsg() {
+    const c = campCred;
+    if (!c) return '';
+    return c.nova
+      ? 'Oi, ' + c.name + '! Sua nova senha provisória da mesa ' + A.name + ' é ' + c.password + '\nEntre em ' + playUrl() + ' e troque a senha no botão Perfil.'
+      : 'Oi, ' + c.name + '! Sua conta na mesa ' + A.name + ' está pronta.\nEntre em: ' + playUrl() + '\nE-mail: ' + c.email + '\nSenha provisória: ' + c.password + '\nDepois de entrar, troque a senha no botão Perfil.';
+  }
+  function credHtml() {
+    const c = campCred;
+    if (!c) return '';
+    return '<div class="cred" role="status"><p class="cred-h">' + ICO.check + (c.nova ? 'Nova senha para <b>' + esc(c.name) + '</b>' : 'Conta criada para <b>' + esc(c.name) + '</b>') + '</p>' +
+      '<dl class="cred-g">' + (c.email ? '<dt>E-mail</dt><dd><code>' + esc(c.email) + '</code></dd>' : '') + '<dt>Senha provisória</dt><dd><code class="pw">' + esc(c.password) + '</code></dd></dl>' +
+      '<p class="hint">A senha só aparece agora. Mande para ' + esc(c.name) + ' junto com o link; depois de entrar, dá para trocar no botão Perfil.</p>' +
+      (c.show ? '<textarea class="cred-msg" id="cred-msg" readonly rows="5" aria-label="Mensagem para o jogador">' + esc(credMsg()) + '</textarea>' : '') +
+      '<div class="row"><button type="button" class="btn primary sm" data-action="credCopy">' + (c.copied ? ICO.check + 'Mensagem copiada' : 'Copiar mensagem para o jogador') + '</button><button type="button" class="btn ghost sm" data-action="credDone">Pronto</button></div></div>';
   }
   async function campRemove(uidv) {
     try { await sbReq('/rest/v1/members?campaign_id=eq.' + CAMP.id + '&user_id=eq.' + encodeURIComponent(uidv), { method: 'DELETE' }); CAMP.members = CAMP.members.filter(function (m) { return m.user_id !== uidv; }); } catch (e) { toast('Não consegui remover.'); }
@@ -1884,13 +1990,16 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
         (campMsg ? '<p class="hint" role="status">' + esc(campMsg) + '</p>' : '') + '</section>';
     }
     const mem = (CAMP.members || []).map(function (m) {
-      return '<li class="lib-row">' + '<span class="lib-n">' + esc(m.name) + '</span><button type="button" class="btn sm' + (campRm === m.user_id ? ' danger-fill' : ' ghost danger') + '" data-action="campRm" data-id="' + m.user_id + '">' + (campRm === m.user_id ? 'Confirmar remover' : 'Remover') + '</button></li>';
+      const pw = campPwBusy === m.user_id ? '<button type="button" class="btn sm ghost" disabled>Gerando…</button>'
+        : '<button type="button" class="btn sm ' + (campPwArm === m.user_id ? 'quiet' : 'ghost') + '" data-action="campPw" data-id="' + m.user_id + '" title="Gera uma senha provisória nova para quem esqueceu a dele">' + (campPwArm === m.user_id ? 'Confirmar nova senha' : 'Nova senha') + '</button>';
+      return '<li class="lib-row">' + '<span class="lib-n">' + esc(m.name) + '</span>' + pw + '<button type="button" class="btn sm' + (campRm === m.user_id ? ' danger-fill' : ' ghost danger') + '" data-action="campRm" data-id="' + m.user_id + '">' + (campRm === m.user_id ? 'Confirmar remover' : 'Remover') + '</button></li>';
     }).join('');
     return head + '<div class="sec-h"><h2>Entrada dos jogadores</h2></div><div class="link-box"><code>' + esc(playUrl()) + '</code><button type="button" class="btn quiet sm" data-action="campCopy">Copiar link</button></div>' +
       '<div class="field narrow"><label for="camp-sys">Sistema da ficha</label>' + sysSel(CAMP.system) + '</div></section>' +
-      '<section class="sec"><div class="sec-h"><h2>Jogadores</h2><p class="hint">Crie a conta de cada jogador no painel do Supabase (Authentication, Users, Add user, com Auto Confirm User marcado) e adicione o e-mail aqui. Cada um troca a própria senha no perfil.</p></div>' +
+      '<section class="sec"><div class="sec-h"><h2>Jogadores</h2><p class="hint">Escreva o e-mail do jogador e o nome dele na mesa. Se ele ainda não tem conta, o app cria uma com senha provisória para você mandar; se já tem, ele só entra na mesa. Cada um troca a própria senha no Perfil.</p></div>' +
+      credHtml() +
       (mem ? '<ul class="lib-list">' + mem + '</ul>' : '<p class="empty-hint">Nenhum jogador ainda.</p>') +
-      '<form id="camp-add" class="inline-form"><div class="field"><label for="cm-email">E-mail da conta</label><input type="email" id="cm-email" autocomplete="off" inputmode="email" required></div><div class="field"><label for="cm-name">Nome na mesa</label><input type="text" id="cm-name" autocomplete="off" placeholder="Ex.: Ana" required></div><button type="submit" class="btn primary">Adicionar</button></form>' +
+      '<form id="camp-add" class="inline-form"><div class="field"><label for="cm-email">E-mail do jogador</label><input type="email" id="cm-email" autocomplete="off" inputmode="email" autocapitalize="off" spellcheck="false" required value="' + esc(campDraft.email) + '"></div><div class="field"><label for="cm-name">Nome na mesa</label><input type="text" id="cm-name" autocomplete="off" placeholder="Ex.: Ana" maxlength="40" required value="' + esc(campDraft.name) + '"></div><button type="submit" class="btn primary"' + (campAddBusy ? ' disabled' : '') + '>' + (campAddBusy ? 'Criando…' : 'Adicionar') + '</button></form>' +
       (campMsg ? '<p class="hint" role="status">' + esc(campMsg) + '</p>' : '') + '</section>' +
       '<section class="sec"><div class="sec-h"><h2>Excluir</h2><p class="hint">Apaga a mesa online, as rolagens e o acesso dos jogadores a esta aventura. A aventura continua.</p></div><button type="button" class="btn add' + (campDelArm ? ' danger-fill' : ' danger') + '" data-action="campDel">' + (campDelArm ? 'Confirmar exclusão da mesa online' : 'Excluir mesa online') + '</button></section>';
   }
@@ -1940,7 +2049,8 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (partyFor !== cid) { mPingBye(); PARTY = null; partyFor = cid; pingSent = false; }
     pingBusy = true;
     try {
-      const r = await sbReq('/rest/v1/rpc/ping', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cid: cid, inf: pingSent ? null : {} }) });
+      /* só marca presença: o resumo de personagem é coisa dos jogadores, e nulo nunca apaga o que já está lá */
+      const r = await sbReq('/rest/v1/rpc/ping', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ cid: cid, inf: null }) });
       if (r.status === 404) { pingOff = Date.now(); return; }
       if (!r.ok) return;
       const rows = await r.json();
@@ -2438,6 +2548,95 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     const j = st && st.json;
     spSay('Não começou a tocar em ' + pick.name + '. Tentativas: ' + log.join(' → ') + '. ' + (j ? 'Estado: ' + (j.item ? '"' + j.item.name + '"' : 'sem faixa') + ', pausado.' + (j.device ? ' Aparelho do estado: ' + j.device.name + ' (' + j.device.type + '), restrito=' + !!j.device.is_restricted + ', sessão privada=' + !!j.device.is_private_session + '.' : '') + (j.actions && j.actions.disallows ? ' Bloqueado: ' + (Object.keys(j.actions.disallows).join(', ') || 'nada') + '.' : '') : 'O Spotify não informa reprodução ativa.'));
   }
+  /* buscar no Spotify pelo nome (em Preparar) */
+  let spFind = null, spReq = 0;
+  function spImg(list) {
+    const l = (list || []).filter(function (x) { return x && /^https:\/\//.test(x.url || ''); }).sort(function (a, b) { return (a.width || 0) - (b.width || 0); });
+    const pick = l.filter(function (x) { return (x.width || 0) >= 64; })[0] || l[l.length - 1];
+    return pick ? pick.url : '';
+  }
+  const spBy = function (x) { return ((x && x.artists) || []).map(function (a) { return a && a.name; }).filter(Boolean).join(', '); };
+  function spResults(j) {
+    const out = [], url = function (x) { return x && x.external_urls && x.external_urls.spotify ? x.external_urls.spotify : (x && x.uri) || ''; };
+    ((j.playlists && j.playlists.items) || []).filter(Boolean).forEach(function (x) { out.push({ type: 'Playlist', name: x.name || '', by: x.owner && x.owner.display_name ? 'de ' + x.owner.display_name : '', img: spImg(x.images), url: url(x) }); });
+    ((j.tracks && j.tracks.items) || []).filter(Boolean).forEach(function (x) { out.push({ type: 'Faixa', name: x.name || '', by: spBy(x), img: spImg(x.album && x.album.images), url: url(x) }); });
+    ((j.albums && j.albums.items) || []).filter(Boolean).forEach(function (x) { out.push({ type: 'Álbum', name: x.name || '', by: spBy(x), img: spImg(x.images), url: url(x) }); });
+    return out.filter(function (x) { return x.name && spParse(x.url); });
+  }
+  async function spSearchRun(k, q) {
+    q = String(q || '').trim();
+    const prev = spFind && spFind.k === k ? spFind.res : null, my = ++spReq;
+    spFind = { k: k, q: q, res: prev, err: '', busy: !!q };
+    render();
+    if (!q) return;
+    const r = await spApi('GET', '/search?type=playlist,track,album&limit=5&market=from_token&q=' + encodeURIComponent(q));
+    if (my !== spReq || !spFind || spFind.k !== k) return;
+    spFind.busy = false;
+    if (r.status === 401) spFind.err = 'conectar';
+    else if (r.status === 429) spFind.err = 'O Spotify pediu um tempo. Tente de novo em alguns segundos.';
+    else if (!spOk(r.status) || !r.json) spFind.err = r.status ? 'O Spotify não respondeu (resposta ' + r.status + ').' : 'Sem conexão com o Spotify.';
+    else { spFind.res = spResults(r.json); if (!spFind.res.length) spFind.err = 'Nada encontrado para “' + q + '”. Tente outras palavras, em inglês costuma ter mais.'; }
+    render();
+  }
+  function spFindHtml(k) {
+    if (!spFind || spFind.k !== k) return '<button type="button" class="btn quiet sm" data-action="spFindOpen" data-i="' + k + '">' + ICO.note + '<span>Buscar no Spotify</span></button>';
+    const f = spFind;
+    if (!SP.enabled) return '<div class="sp-findbox"><p class="hint">A busca do Spotify funciona no site publicado do Hollow Table.</p><button type="button" class="linkbtn" data-action="spFindClose">Fechar</button></div>';
+    if (!spStore.get() || f.err === 'conectar') return '<div class="sp-findbox"><p class="hint">Para buscar, conecte o Spotify neste aparelho. Depois do login você volta para cá.</p><div class="row"><button type="button" class="btn primary sm" data-action="spConnect">Conectar Spotify</button><button type="button" class="linkbtn" data-action="spFindClose">Fechar</button></div></div>';
+    const res = f.res || [];
+    return '<div class="sp-findbox"><form class="sp-find" data-k="' + k + '"><input type="search" id="sp-q" value="' + esc(f.q) + '" placeholder="Nome da música, playlist ou álbum" aria-label="Buscar no Spotify" autocomplete="off" enterkeyhint="search"><button type="submit" class="btn quiet sm"' + (f.busy ? ' disabled' : '') + '>' + (f.busy ? 'Buscando…' : 'Buscar') + '</button><button type="button" class="linkbtn" data-action="spFindClose">Fechar</button></form>' +
+      (f.err ? '<p class="hint" role="status">' + esc(f.err) + '</p>' : '') +
+      (res.length ? '<ul class="sp-res">' + res.map(function (x, n) {
+        return '<li>' + (x.img ? '<img src="' + esc(x.img) + '" alt="" loading="lazy">' : '<span class="ph">' + ICO.note + '</span>') + '<div class="sp-res-t"><b>' + esc(x.name) + '</b><small><span class="k">' + x.type + '</span>' + esc(x.by) + '</small></div>' +
+          '<button type="button" class="btn sm primary" data-action="spPick" data-i="' + k + '" data-n="' + n + '">Usar</button></li>';
+      }).join('') + '</ul>' : '') + '</div>';
+  }
+  /* o que está tocando agora no Spotify (na Mesa); confere a cada 5 s e anda o tempo a cada 1 s */
+  let spNow = null, spNowAt = 0, spNowBusy = false;
+  const mmss = function (ms) { const s = Math.max(0, Math.floor((ms || 0) / 1000)); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+  function spNowPos() { return spNow ? Math.min(spNow.dur || 0, spNow.pos + (spNow.playing ? Date.now() - spNowAt : 0)) : 0; }
+  function spNowHtml() {
+    const n = spNow;
+    if (!n) return '';
+    const pos = spNowPos(), pct = n.dur ? Math.min(100, pos / n.dur * 100) : 0;
+    return (n.img ? '<img src="' + esc(n.img) + '" alt="">' : '<span class="sp-now-ph">' + ICO.note + '</span>') +
+      '<div class="sp-now-t"><p class="lbl-s">' + (n.playing ? 'Tocando agora' : 'Pausado') + (n.dev ? ' · ' + esc(n.dev) : '') + '</p><p class="sp-now-n">' + esc(n.name) + '</p>' + (n.by ? '<p class="sp-now-a">' + esc(n.by) + '</p>' : '') +
+      '<div class="sp-now-bar" role="progressbar" aria-label="Tempo da música" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + Math.round(pct) + '"><i style="width:' + pct.toFixed(1) + '%"></i></div><p class="sp-now-tm"><span>' + mmss(pos) + '</span><span>' + mmss(n.dur) + '</span></p></div>';
+  }
+  function paintSpNow() {
+    const el = $('#sp-now');
+    if (!el) return;
+    el.hidden = !spNow;
+    el.classList.toggle('paused', !!(spNow && !spNow.playing));
+    el.innerHTML = spNowHtml();
+  }
+  async function spNowPoll() {
+    if (spNowBusy || mode !== 'mesa' || document.hidden || !SP.enabled || !spStore.get()) return;
+    spNowBusy = true;
+    try {
+      const r = await spApi('GET', '/me/player?additional_types=episode&market=from_token');
+      if (!(r.status === 204 || spOk(r.status))) return;
+      const j = r.json, it = j && j.item;
+      const n = it ? { name: it.name || '', by: spBy(it) || (it.show && it.show.name) || '', img: spImg(it.album ? it.album.images : it.images), dur: it.duration_ms || 0, pos: j.progress_ms || 0, playing: !!j.is_playing, dev: j.device && j.device.name ? j.device.name : '' } : null;
+      spNow = n; spNowAt = Date.now();
+      const playing = !!(n && n.playing);
+      if (playing !== spPlaying) { spPlaying = playing; render(); return; }
+      paintSpNow();
+    } finally { spNowBusy = false; }
+  }
+  function spNowTick() {
+    if (!spNow || !spNow.playing) return;
+    const el = $('#sp-now');
+    if (!el || el.hidden) return;
+    const pos = spNowPos(), bar = el.querySelector('.sp-now-bar i'), tm = el.querySelector('.sp-now-tm span');
+    if (bar) bar.style.width = (spNow.dur ? Math.min(100, pos / spNow.dur * 100) : 0).toFixed(1) + '%';
+    if (tm) tm.textContent = mmss(pos);
+    if (spNow.dur && pos >= spNow.dur) spNowPoll();
+  }
+  setInterval(spNowPoll, 5000);
+  setInterval(spNowTick, 1000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) spNowPoll(); });
+  function spNowBox() { return spStore.get() ? '<div class="sp-now' + (spNow && !spNow.playing ? ' paused' : '') + '" id="sp-now"' + (spNow ? '' : ' hidden') + '>' + spNowHtml() + '</div>' : ''; }
   function musicHtml() {
     const t = mus(), n = S.tracks.length;
     const list = n > 1 ? '<ol class="tracks" aria-label="Músicas da cena">' + S.tracks.map(function (tr, k) {
@@ -2453,7 +2652,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (SP.enabled && spModeGet() === 'app') {
       const it0 = spParse(t.url);
       const href = it0 ? it0.uri + ':play' : safeUrl(t.url);
-      h += '<div class="music"><a class="play" href="' + esc(href) + '" aria-label="Tocar ' + esc(t.name) + ' no app do Spotify">' + ICO.play + '</a>' + txt + '</div>' +
+      h += '<div class="music"><a class="play" href="' + esc(href) + '" aria-label="Tocar ' + esc(t.name) + ' no app do Spotify">' + ICO.play + '</a>' + txt + '</div>' + spNowBox() +
         '<div class="sp-row"><span>Modo app: o play abre o Spotify.</span><button type="button" class="linkbtn" data-action="spMode" data-id="api">Usar o controle direto</button></div>';
       return h + list + '</section>';
     }
@@ -2463,7 +2662,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     }
     const on = !!spStore.get();
     const txt2 = on ? txt : txt.replace(/<\/div>$/, '<button type="button" class="linkbtn" data-action="spToggle">Conectar Spotify</button></div>');
-    h += '<div class="music"><button type="button" class="play" data-action="spToggle" aria-label="' + (on ? (spPlaying ? 'Pausar ' : 'Tocar ') + esc(t.name) : 'Conectar ao Spotify') + '">' + (spPlaying ? ICO.pause : ICO.play) + '</button>' + txt2 + '</div>' + msg;
+    h += '<div class="music"><button type="button" class="play" data-action="spToggle" aria-label="' + (on ? (spPlaying ? 'Pausar ' : 'Tocar ') + esc(t.name) : 'Conectar ao Spotify') + '">' + (spPlaying ? ICO.pause : ICO.play) + '</button>' + txt2 + '</div>' + spNowBox() + msg;
     if (on) h += spDevHtml();
     if (spFailed) h += '<div class="sp-row"><button type="button" class="btn sm primary" data-action="spMode" data-id="app">Usar o modo app</button></div>';
     return h + list + '</section>';
@@ -2721,8 +2920,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     } else {
       LIB[c.id].play(t);
     }
-    const btn = $('[data-action="fx"][data-id="' + c.id + '"]');
-    if (btn) { btn.classList.add('playing'); setTimeout(function () { btn.classList.remove('playing'); }, Math.min(dur(c), 4) * 1000); }
+    $$('[data-action="fx"][data-id="' + c.id + '"]').forEach(function (btn) { btn.classList.add('playing'); setTimeout(function () { btn.classList.remove('playing'); }, Math.min(dur(c), 4) * 1000); });
   }
   function startAmb(c, level) {
     const out = ctx.createGain(), stops = [];
@@ -2962,6 +3160,64 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       return '<button type="button" class="btn quiet" data-action="combo" data-i="' + ci + '" aria-pressed="' + on + '">' + esc(cb.name || 'Combo') + '</button>';
     }).join('') + '</div></section>';
   }
+  /* sons dentro das notas: [[Nome]] vira um botão na Mesa (efeito, ambiente, combo ou música da cena, pelo nome) */
+  const CUE_RE = /\[\[([^\[\]\n]{1,60})\]\]/g;
+  const fold = function (x) { return String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/\s+/g, ' ').trim().toLowerCase(); };
+  const COMBO_ICO = SV('<rect x="3.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.6"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.6"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.6"/>');
+  function cueRef(name) {
+    const k = fold(name);
+    if (!k) return null;
+    const c = S.cues.filter(function (x) { return fold(label(x)) === k; })[0];
+    if (c) return { t: c.kind === 'amb' ? 'amb' : 'fx', id: c.id, name: label(c) };
+    for (let i = 0; i < S.combos.length; i++) if (fold(S.combos[i].name) === k) return { t: 'combo', i: i, name: S.combos[i].name };
+    for (let i = 0; i < S.tracks.length; i++) if (fold(S.tracks[i].name) === k) return { t: 'track', i: i, name: S.tracks[i].name };
+    return null;
+  }
+  function cuePill(name) {
+    const r = cueRef(name);
+    if (!r) return '<span class="cue-pill miss" title="Nenhum som com esse nome nesta cena">' + ICO.note + esc(name) + '</span>';
+    if (r.t === 'fx') return '<button type="button" class="cue-pill k-fx" data-action="fx" data-id="' + esc(r.id) + '" title="Tocar o efeito">' + ICO.play + esc(r.name) + '</button>';
+    if (r.t === 'amb') return '<button type="button" class="cue-pill k-amb" data-action="amb" data-id="' + esc(r.id) + '" aria-pressed="' + !!active[r.id] + '" title="Ligar ou desligar o ambiente"><span class="lamp" aria-hidden="true"></span>' + esc(r.name) + '</button>';
+    if (r.t === 'combo') {
+      const on = comboCues(S.combos[r.i]).some(function (c) { return c.kind === 'amb' && active[c.id]; });
+      return '<button type="button" class="cue-pill k-combo" data-action="combo" data-i="' + r.i + '" aria-pressed="' + on + '" title="Tocar o combo">' + COMBO_ICO + esc(r.name) + '</button>';
+    }
+    return '<button type="button" class="cue-pill k-trk" data-action="trackGo" data-i="' + r.i + '" aria-pressed="' + (r.i === S.mi && spPlaying) + '" title="Tocar esta música">' + ICO.note + esc(r.name) + '</button>';
+  }
+  function inlineCue(line) {
+    const names = [];
+    const keep = String(line).replace(CUE_RE, function (m, nm) { names.push(nm); return '\u0000' + (names.length - 1) + '\u0000'; });
+    return inline(keep).replace(/\u0000(\d+)\u0000/g, function (m, k) { return cuePill(names[+k]); });
+  }
+  /* no editor da nota: escolher um som da cena e pôr [[Nome]] onde o cursor estava */
+  let noteCuePick = -1;
+  const noteSel = {};
+  function cueChoices() {
+    return S.cues.map(function (c) { return { k: c.kind === 'amb' ? 'amb' : 'fx', name: label(c) }; })
+      .concat(S.combos.filter(function (x) { return String(x.name || '').trim(); }).map(function (x) { return { k: 'combo', name: x.name }; }))
+      .concat(S.tracks.filter(function (x) { return String(x.name || '').trim(); }).map(function (x) { return { k: 'trk', name: x.name }; }));
+  }
+  function cuePickHtml(i) {
+    const ch = cueChoices();
+    const ico = { fx: ICO.play, amb: '<span class="lamp" aria-hidden="true"></span>', combo: COMBO_ICO, trk: ICO.note };
+    return '<div class="cue-pick" role="group" aria-label="Inserir um som na nota"><span class="lbl-s">Inserir na nota</span>' +
+      (ch.length ? ch.map(function (c) { return '<button type="button" class="cue-pill k-' + c.k + '" data-action="noteCueIns" data-i="' + i + '" data-name="' + esc(c.name) + '">' + ico[c.k] + esc(c.name) + '</button>'; }).join('')
+        : '<span class="hint">Esta cena ainda não tem sons nem músicas. Adicione mais abaixo, em Música e Sons.</span>') +
+      '<button type="button" class="linkbtn" data-action="noteCueClose">Fechar</button></div>';
+  }
+  function noteCueIns(i, name) {
+    const ta = document.getElementById('f-notes.' + i + '.text');
+    if (!ta || !name) return;
+    const v = ta.value, sel = noteSel[i] || [v.length, v.length];
+    const s0 = Math.min(sel[0], v.length), s1 = Math.max(s0, Math.min(sel[1], v.length));
+    const before = v.slice(0, s0), after = v.slice(s1);
+    const ins = (before && !/\s$/.test(before) ? ' ' : '') + '[[' + name.replace(/[\[\]\n]/g, '') + ']]' + (after && !/^\s/.test(after) ? ' ' : '');
+    ta.value = before + ins + after;
+    const pos = (before + ins).length;
+    noteSel[i] = [pos, pos];
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    if (matchMedia('(pointer: fine)').matches) { try { ta.focus({ preventScroll: true }); ta.setSelectionRange(pos, pos); } catch (e) { /* ok */ } }
+  }
   function notesHtml() {
     let h = '';
     const cd = S.countdown;
@@ -2969,7 +3225,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (!S.notes.length) return h + '<p class="empty-hint">Esta cena ainda não tem notas. Escreva em Preparar.</p>';
     const allEmpty = S.notes.every(function (n) { return !String(n.text || '').trim(); });
     return h + S.notes.map(function (n, i) {
-      return '<details class="note" data-note="' + i + '"' + (n.open ? ' open' : '') + '><summary><span>' + esc(n.title || 'Sem título') + '</span>' + ICO.caret + '</summary><div class="rich">' + (String(n.text || '').trim() ? rich(n.text) : '<p class="empty-hint">Nota vazia.</p>') + '</div></details>';
+      return '<details class="note" data-note="' + i + '"' + (n.open ? ' open' : '') + '><summary><span>' + esc(n.title || 'Sem título') + '</span>' + ICO.caret + '</summary><div class="rich">' + (String(n.text || '').trim() ? rich(n.text, inlineCue) : '<p class="empty-hint">Nota vazia.</p>') + '</div></details>';
     }).join('') + (allEmpty ? '<div class="empty-cta"><p>Esta cena ainda não tem texto para narrar.</p><button type="button" class="btn quiet" data-action="goPrep" data-id="sec-notas">Escrever as notas</button></div>' : '');
   }
   function imagesHtml() {
@@ -3078,16 +3334,17 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       return '<div class="note-ed"><div class="note-ed-h"><input type="text" class="note-title" id="f-notes.' + i + '.title" data-bind="notes.' + i + '.title" value="' + esc(n.title) + '" placeholder="Título da nota" aria-label="Título da nota ' + (i + 1) + '">' +
         '<div class="mini-tools"><button type="button" class="icon-btn sm" data-action="noteUp" data-i="' + i + '" aria-label="Subir nota" title="Subir"' + (i === 0 ? ' disabled' : '') + '>' + ICO.up + '</button>' +
         '<button type="button" class="icon-btn sm" data-action="noteDown" data-i="' + i + '" aria-label="Descer nota" title="Descer"' + (i === S.notes.length - 1 ? ' disabled' : '') + '>' + ICO.down + '</button>' +
+        '<button type="button" class="icon-btn sm' + (noteCuePick === i ? ' on' : '') + '" data-action="noteCueOpen" data-i="' + i + '" aria-label="Inserir um som na nota" aria-expanded="' + (noteCuePick === i) + '" title="Inserir um som">' + ICO.note + '</button>' +
         '<button type="button" class="icon-btn sm danger" data-action="noteDel" data-i="' + i + '" aria-label="Remover nota" title="Remover">' + ICO.trash + '</button></div></div>' +
-        '<textarea class="read auto" id="f-notes.' + i + '.text" data-bind="notes.' + i + '.text" rows="4" aria-label="Texto da nota ' + (i + 1) + '" placeholder="O que você vai narrar ou consultar nesta parte">' + esc(n.text) + '</textarea></div>';
+        '<textarea class="read auto" id="f-notes.' + i + '.text" data-bind="notes.' + i + '.text" rows="4" aria-label="Texto da nota ' + (i + 1) + '" placeholder="O que você vai narrar ou consultar nesta parte">' + esc(n.text) + '</textarea>' + (noteCuePick === i ? cuePickHtml(i) : '') + '</div>';
     }).join('');
-    const notas = '<section class="sec" id="sec-notas"><div class="sec-h"><h2>Notas</h2><p class="hint">Use **negrito** e comece a linha com "- " para fazer listas. Na Mesa, cada nota vira uma seção que abre e fecha.</p></div>' +
+    const notas = '<section class="sec" id="sec-notas"><div class="sec-h"><h2>Notas</h2><p class="hint">Use **negrito** e comece a linha com "- " para fazer listas. Escreva [[nome do som]], ou toque no botão da nota musical, para pôr na nota um botão que toca aquele som, combo ou música da cena. Na Mesa, cada nota vira uma seção que abre e fecha.</p></div>' +
       (notes || '<p class="empty-hint">Nenhuma nota ainda.</p>') + '<button type="button" class="btn quiet add" data-action="noteAdd">' + ICO.plus + '<span>Adicionar nota</span></button></section>';
-    const musica = '<section class="sec" id="sec-musica"><div class="sec-h"><h2>Música</h2><p class="hint">Links do Spotify: playlist, álbum ou faixa. Com mais de uma, você escolhe qual tocar na Mesa.</p></div>' +
+    const musica = '<section class="sec" id="sec-musica"><div class="sec-h"><h2>Música</h2><p class="hint">Playlist, álbum ou faixa do Spotify: busque pelo nome ou cole o link. Com mais de uma, você escolhe qual tocar na Mesa.</p></div>' +
       S.tracks.map(function (t, k) {
         return '<div class="trk-ed"><div class="trk-ed-h"><span class="num">' + (k + 1) + '</span><input type="text" class="trk-name" id="f-tracks.' + k + '.name" data-bind="tracks.' + k + '.name" value="' + esc(t.name) + '" placeholder="Nome da música" aria-label="Nome da música ' + (k + 1) + '">' +
           '<button type="button" class="icon-btn sm danger" data-action="trackDel" data-i="' + k + '" aria-label="Remover música" title="Remover">' + ICO.trash + '</button></div>' +
-          '<div class="facts-grid two">' + inp('Link do Spotify', 'tracks.' + k + '.url', t.url, 'https://open.spotify.com/…') + inp('Termos de busca', 'tracks.' + k + '.terms', t.terms, 'Para achar parecidas') + '</div></div>';
+          '<div class="facts-grid two">' + inp('Link do Spotify', 'tracks.' + k + '.url', t.url, 'https://open.spotify.com/…') + inp('Termos de busca', 'tracks.' + k + '.terms', t.terms, 'Para achar parecidas') + '</div>' + spFindHtml(k) + '</div>';
       }).join('') + '<button type="button" class="btn quiet add" data-action="trackAdd">' + ICO.plus + '<span>Adicionar música</span></button></section>';
     const cues = S.cues.map(function (c) {
       return '<div class="cue"><button type="button" class="icon-btn" data-action="cueTest" data-id="' + c.id + '" aria-label="Ouvir ' + esc(label(c)) + '" title="' + (c.kind === 'fx' ? 'Ouvir' : 'Ouvir 4 s') + '">' + ICO.play + '</button>' +
@@ -3174,6 +3431,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   const pathInUse = function (p) { return A.scenes.some(function (sc) { return sc.images.concat(sc.cues).some(function (x) { return x.path === p; }); }); };
   function carry(next) { next.fear = S.fear; next.vol = S.vol; }
   function afterSceneChange() {
+    noteCuePick = -1;
     unreveal(); if (tab === 'adv' && !S.foes.length) tab = 'notas';
     armDel = false;
     resetScroll = true; sbHydrate(S); render();
@@ -3366,10 +3624,28 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (a === 'sceneNext') { setScene(A.cur + 1); return; }
     if (a === 'goPrep') { if (mode !== 'prep') resetScroll = true; mode = 'prep'; render(); const t = document.getElementById(id); if (t) t.scrollIntoView({ block: 'start' }); return; }
     if (a === 'jump') { const t = document.getElementById(id); if (t) t.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); return; }
-    if (a === 'mode') { const m = el.getAttribute('data-mode'); libStop(); libDelArm = null; if (m !== mode) resetScroll = true; mode = m; if (mode === 'online' && (CAMP === undefined || campFor !== A.id) && !campBusy) campLoad(); render(); return; }
+    if (a === 'mode') { const m = el.getAttribute('data-mode'); libStop(); libDelArm = null; if (m !== 'online') { campCred = null; campPwArm = null; } if (m !== mode) resetScroll = true; mode = m; if (mode === 'online' && (CAMP === undefined || campFor !== A.id) && !campBusy) campLoad(); render(); return; }
     if (a === 'fear') { S.fear = Math.max(0, Math.min(12, S.fear + Number(el.getAttribute('data-d')))); save(); renderDock(); return; }
-    if (a === 'trackAdd') { S.tracks.push({ name: '', terms: '', url: '' }); S.mi = S.tracks.length - 1; commit(); return; }
-    if (a === 'trackDel') { S.tracks.splice(i, 1); S.mi = Math.max(0, Math.min(S.mi, S.tracks.length - 1)); spResume = ''; commit(); return; }
+    if (a === 'trackAdd') { spFind = null; S.tracks.push({ name: '', terms: '', url: '' }); S.mi = S.tracks.length - 1; commit(); return; }
+    if (a === 'trackDel') { spFind = null; S.tracks.splice(i, 1); S.mi = Math.max(0, Math.min(S.mi, S.tracks.length - 1)); spResume = ''; commit(); return; }
+    if (a === 'spFindOpen') {
+      const t = S.tracks[i], q = t ? (String(t.terms || '').trim() || String(t.name || '').trim()).replace(/[·•|,;]+/g, ' ').replace(/\s+/g, ' ').trim() : '';
+      if (q && SP.enabled && spStore.get()) spSearchRun(i, q); else { spReq++; spFind = { k: i, q: q, res: null, err: '', busy: false }; render(); }
+      setTimeout(function () { const f = $('#sp-q'); if (f && matchMedia('(pointer: fine)').matches) f.focus(); }, 30);
+      return;
+    }
+    if (a === 'spFindClose') { spReq++; spFind = null; render(); return; }
+    if (a === 'spConnect') { spLogin().catch(function () { toast('Não consegui abrir o login do Spotify.'); }); return; }
+    if (a === 'spPick') {
+      const r = spFind && spFind.res && spFind.res[Number(el.getAttribute('data-n'))], t = S.tracks[i];
+      if (!r || !t) return;
+      t.url = r.url;
+      if (!String(t.name || '').trim()) t.name = r.name;
+      if (!String(t.terms || '').trim() && spFind.q) t.terms = spFind.q;
+      spReq++; spFind = null; spResume = ''; commit();
+      toast('Escolhida: ' + r.name + '.');
+      return;
+    }
     if (a === 'trackGo') {
       const n = S.tracks.length, d = el.getAttribute('data-d');
       if (!n) return;
@@ -3440,7 +3716,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       if (revealed) publish(S.images.filter(function (im) { return im.id === revealed; })[0]); else campHide();
       render(); return;
     }
-    if (a === 'spToggle') { spToggle(); return; }
+    if (a === 'spToggle') { spToggle().then(function () { setTimeout(spNowPoll, 1200); }); return; }
     if (a === 'spDevices') { spLoadDevices(); return; }
     if (a === 'spDev') { const x = spList && spList[i]; if (x) { spDev.set({ id: x.id, name: x.name }); spList = null; spSay('Vai tocar em ' + x.name + '.'); } return; }
     if (a === 'spMode') { spModeSet(id); spFailed = false; spMsg = ''; render(); return; }
@@ -3460,9 +3736,12 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       render(); return;
     }
     if (a === 'noteAdd') { S.notes.push({ title: 'Nova nota', open: true, text: '' }); commit(); return; }
-    if (a === 'noteDel') { S.notes.splice(i, 1); commit(); return; }
-    if (a === 'noteUp' && i > 0) { const n = S.notes.splice(i, 1)[0]; S.notes.splice(i - 1, 0, n); commit(); return; }
-    if (a === 'noteDown' && i < S.notes.length - 1) { const n = S.notes.splice(i, 1)[0]; S.notes.splice(i + 1, 0, n); commit(); return; }
+    if (a === 'noteDel') { noteCuePick = -1; S.notes.splice(i, 1); commit(); return; }
+    if (a === 'noteCueOpen') { noteCuePick = noteCuePick === i ? -1 : i; render(); return; }
+    if (a === 'noteCueClose') { noteCuePick = -1; render(); return; }
+    if (a === 'noteCueIns') { noteCueIns(i, el.getAttribute('data-name')); return; }
+    if (a === 'noteUp' && i > 0) { noteCuePick = -1; const n = S.notes.splice(i, 1)[0]; S.notes.splice(i - 1, 0, n); commit(); return; }
+    if (a === 'noteDown' && i < S.notes.length - 1) { noteCuePick = -1; const n = S.notes.splice(i, 1)[0]; S.notes.splice(i + 1, 0, n); commit(); return; }
     if (a === 'libTab') { libTab = id; libQ = ''; libDelArm = null; if (libPick) libPick.type = id; render(); return; }
     if (a === 'fsPlay') { fsPreview(id); return; }
     if (a === 'fsSave') { fsSave(id); return; }
@@ -3500,7 +3779,16 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (a === 'proClose') { $('#prodlg').hidden = true; return; }
     if (a === 'campCreate') { campCreate(); return; }
     if (a === 'campCopy') { const l = playUrl(); (navigator.clipboard ? navigator.clipboard.writeText(l) : Promise.reject()).then(function () { toast('Link copiado.'); }).catch(function () { toast(l); }); return; }
-    if (a === 'campRm') { if (campRm !== id) { campRm = id; render(); return; } campRemove(id); return; }
+    if (a === 'campRm') { campPwArm = null; if (campRm !== id) { campRm = id; render(); return; } campRemove(id); return; }
+    if (a === 'campPw') { campRm = null; if (campPwArm !== id) { campPwArm = id; render(); return; } campNewPw(id); return; }
+    if (a === 'credDone') { campCred = null; render(); return; }
+    if (a === 'credCopy') {
+      const msg = credMsg();
+      const done = function () { if (campCred) { campCred.copied = true; render(); } toast('Mensagem copiada. Cole no WhatsApp ou onde preferir.'); };
+      const fail = function () { if (campCred) { campCred.show = true; render(); const t = $('#cred-msg'); if (t) { t.focus(); t.select(); } } toast('Copie a mensagem abaixo.'); };
+      try { if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(msg).then(done, fail); else fail(); } catch (x) { fail(); }
+      return;
+    }
     if (a === 'campDel') { if (!campDelArm) { campDelArm = true; render(); return; } campDelete(); return; }
     if (a === 'scene') { setScene(i); return; }
     if (a === 'sceneAdd') { sceneAdd(); return; }
@@ -3543,11 +3831,13 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (f.id === 'camp-add') { e.preventDefault(); campAdd($('#cm-email').value.trim(), $('#cm-name').value.trim()); return; }
     if (f.id === 'fs-keyform') { e.preventDefault(); const v = $('#fs-key').value.trim(); if (v) { fsKey = v; lsSet(FS_KEY, v); render(); } return; }
     if (f.id === 'fs-form') { e.preventDefault(); fsSearch(); }
+    if (f.classList && f.classList.contains('sp-find')) { e.preventDefault(); const q = $('#sp-q'); spSearchRun(Number(f.getAttribute('data-k')), q ? q.value : ''); }
   });
   document.addEventListener('input', function (e) {
     const t = e.target;
     if (t.tagName === 'TEXTAREA') autoGrow(t);
     if (t.id === 'fs-q') { fsQ = t.value; return; }
+    if (t.id === 'sp-q') { if (spFind) spFind.q = t.value; return; }
     if (t.id === 'lib-q') { libQ = t.value; if (libPick) { const b = $('.pick-body'); if (b) b.innerHTML = libRows(true); } else { const keep = t.selectionStart; render(); } return; }
     if (t.getAttribute && t.getAttribute('data-libname')) {
       const it = libFind(t.getAttribute('data-libname'));
@@ -3669,6 +3959,11 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     else if (e.key === 'Escape' && dlg) { dlg = null; renderDlg(); }
   });
 
+  /* guarda onde o cursor estava em cada nota, para inserir o som ali */
+  document.addEventListener('focusout', function (e) {
+    const t = e.target, b = t && t.getAttribute && t.getAttribute('data-bind'), m = b && b.match(/^notes\.(\d+)\.text$/);
+    if (m) noteSel[+m[1]] = [t.selectionStart, t.selectionEnd];
+  });
   document.addEventListener('toggle', function (e) {
     const d = e.target;
     if (d && d.matches && d.matches('details.note')) {
