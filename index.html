@@ -641,7 +641,7 @@ details.note[open] summary .caret { transform: rotate(180deg); }
 .pf-hope { display: inline-flex; align-items: center; gap: 4px; }
 .pf-hope i { width: 7px; height: 7px; transform: rotate(45deg); border: 1px solid var(--ok); }
 .pf-hope i.f { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
-.pb-acts { flex: none; display: grid; grid-template-columns: repeat(2, auto); gap: 6px; align-content: center; }
+.pb-acts { flex: none; display: grid; gap: 6px; align-content: center; }
 .pb-acts .btn { justify-content: flex-start; min-height: 34px; padding: 0 12px; }
 .pb-acts .btn svg { width: 16px; height: 16px; }
 .hist-b .cnt { min-width: 20px; height: 20px; padding: 0 6px; margin-left: auto; border-radius: 99px; background: var(--accent); color: var(--accent-ink); font-family: var(--font-mono); font-size: 11px; line-height: 20px; text-align: center; box-shadow: 0 0 10px -2px var(--accent); }
@@ -998,9 +998,37 @@ details.basic .add-bar { padding: 2px 0 14px; }
 .drawer-h h2 { font-family: var(--font-display); font-weight: 600; font-size: 18px; letter-spacing: 0.1em; text-transform: uppercase; color: #E9E6F7; }
 .drawer-h .btn { color: #E9E6F7; border-color: #2A2645; background: #1B1830; }
 .drawer iframe { flex: 1; width: 100%; border: 0; background: #0A0912; }
-.mapov { position: fixed; inset: 0; z-index: 46; display: flex; flex-direction: column; background: #0A0912; }
-.mapov[hidden] { display: none; }
-.mapov iframe { flex: 1; width: 100%; border: 0; background: #0A0912; }
+.mesa.jogo-v { max-width: none; width: 100%; box-sizing: border-box; grid-template-columns: minmax(0, 1fr) var(--console-w); }
+.jogo-slot { min-width: 0; min-height: 0; height: 100%; padding: 12px 0 14px; box-sizing: border-box; }
+.jogo-host { height: 100%; }
+.jogo-off { display: grid; place-items: center; text-align: center; padding: 24px; }
+.jogo-off > div { max-width: 26rem; display: grid; gap: 10px; justify-items: center; }
+.jogo-off h2 { font-family: var(--font-display); letter-spacing: 0.06em; font-size: 24px; }
+.jogo-off p { color: var(--muted); }
+.jogo-side { min-width: 0; min-height: 0; display: flex; flex-direction: column; padding-top: 12px; }
+.jtabs { display: flex; flex: none; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.jtabs button { flex: 1; min-height: 42px; padding: 0 4px; border-right: 1px solid var(--line); color: var(--muted); font-weight: 700; font-size: 13px; }
+.jtabs button:last-child { border-right: 0; }
+.jtabs button[aria-selected="true"] { color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 -2px 0 var(--accent); }
+.jpane { flex: 1; min-height: 0; overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; touch-action: pan-y; padding: 14px 2px 28px; }
+.jpane[hidden] { display: none; }
+.jconsole { max-height: none; overflow: visible; margin: 0; }
+.jnotes .jn-t { font-family: var(--font-display); font-size: 21px; letter-spacing: 0.04em; margin: 2px 0 12px; }
+#jhist { margin: 0; padding: 0; }
+.feed-list li.luta { border-left: 2px solid var(--line); }
+.feed-list li.luta .fw { display: flex; align-items: center; gap: 8px; font-weight: 400; color: var(--muted); }
+.feed-list li.luta .fw svg { width: 15px; height: 15px; flex: none; }
+.feed-list li.luta .fw > span { flex: 1; min-width: 0; }
+.feed-list li.luta.big { border-left-color: var(--accent); }
+.feed-list li.luta.big .fw { color: var(--fg); font-weight: 700; }
+.feed-list li.luta.big .fw svg { color: var(--accent); }
+@media (max-width: 900px) {
+  .mesa.jogo-v { display: block; height: auto; }
+  body[data-mode="mesa"] main.app:has(.jogo-v) { overflow-y: auto; }
+  .jogo-slot { height: 62vh; min-height: 340px; }
+  .jogo-side { padding-top: 0; }
+  .jpane { overflow: visible; }
+}
 
 /* aviso */
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 60; max-width: calc(100% - 32px); padding: 10px 18px; border-radius: 999px; background: var(--fg); color: var(--bg); font-size: 15px; text-align: center; opacity: 0; pointer-events: none; transition: opacity 0.15s; }
@@ -1076,7 +1104,6 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   </div>
 </div>
 <div class="gate dlg" id="advdlg" hidden role="dialog" aria-modal="true" aria-label="Aventuras"></div>
-<div class="mapov" id="mapov" hidden role="dialog" aria-label="Mapa da mesa"><div class="drawer-h"><h2>Mapa</h2><button type="button" class="btn quiet sm" data-action="mapClose">Fechar</button></div><iframe title="Mapa da mesa"></iframe></div>
 <aside class="drawer" id="jogdrawer" hidden aria-label="Jogadores"><div class="drawer-h"><h2>Jogadores</h2><button type="button" class="btn quiet sm" data-action="jogClose">Fechar</button></div><iframe title="Fichas e mochilas dos jogadores"></iframe></aside>
 <div class="gate dlg" id="prodlg" hidden role="dialog" aria-modal="true" aria-label="Perfil"></div>
 <div class="gate dlg" id="libdlg" hidden role="dialog" aria-modal="true" aria-label="Biblioteca"></div>
@@ -1084,6 +1111,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <footer class="dock" id="dock" hidden></footer>
 
+<script src="mapa.js"></script>
 <script>
 (function () {
   'use strict';
@@ -1103,7 +1131,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     }).join('');
   }
   /* ---------- ícones (traço simples, herdam a cor do texto) ---------- */
-  const APP_VER = '0.51';
+  const APP_VER = '0.52';
   const RAVEN = '<svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>';
   const SV = function (p, extra) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '>' + p + '</svg>'; };
   const ICO = {
@@ -1134,6 +1162,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     login: SV('<path d="M14 4h3.5A1.5 1.5 0 0 1 19 5.5v13a1.5 1.5 0 0 1-1.5 1.5H14"/><path d="M10 8l4 4-4 4M14 12H4"/>'),
     cloud: SV('<path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5H7z"/>', ' stroke-width="1.7"'),
     link: SV('<path d="M10 14a4.5 4.5 0 0 0 6.4 0l2.8-2.8a4.5 4.5 0 0 0-6.4-6.4L11.5 6"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-2.8 2.8a4.5 4.5 0 0 0 6.4 6.4L12.5 18"/>'),
+    foe: SV('<path d="M14.5 17.5 3.5 6.5v-3h3l11 11M13 19l6-6M16 16l4 4M18.5 21l2.5-2.5"/><path d="m14.5 6.5 3.5-3h3v3l-3.5 3.5M5 14l4 4M7 17l-3 3M3 19l2 2"/>'),
     map: SV('<path d="M3.5 6.5 9 4l6 2.5L20.5 4v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>'),
     bag: SV('<path d="M6 10a6 6 0 0 1 12 0v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/><path d="M9.5 4.6V4a2.5 2.5 0 0 1 5 0v.6"/><path d="M9 14h6v4H9z"/>')
   };
@@ -2230,7 +2259,6 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     return bar('<div class="pfs" id="pfs" role="group" aria-label="Jogadores">' + framesHtml() + '</div>' +
       '<div class="pb-acts"><button type="button" class="btn quiet sm" data-action="jogOpen" data-t="fichas">' + ICO.people + 'Fichas</button>' +
       '<button type="button" class="btn quiet sm" data-action="jogOpen" data-t="mochilas">' + ICO.bag + 'Mochilas</button>' +
-      '<button type="button" class="btn quiet sm" data-action="mapOpen">' + ICO.map + 'Mapa</button>' +
       '<button type="button" class="btn quiet sm hist-b" id="histbtn" data-action="histOpen" aria-expanded="' + histIsOpen() + '" aria-controls="mhist">' + DIE + 'Rolagens<span class="cnt" id="histcnt"' + (histN ? '' : ' hidden') + '>' + (histN > 9 ? '9+' : histN) + '</span></button></div>');
   }
 
@@ -2278,6 +2306,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   }
   function evToast(x) {
     const w = whoOf(x.user_id, x.who), res = x.result || {};
+    if (x.kind === 'luta') return;
     if (x.kind === 'item') {
       const has = res.total !== undefined && res.total !== null && res.total !== '';
       tstPush('item', '<span class="tst-av">' + ICO.bag + '</span><span class="tst-x"><b class="tst-who">' + esc(w.name) + (w.sub ? '<small>' + esc(w.sub) + '</small>' : '') + '</b><span class="tst-l">' + esc(x.label || '') + (res.tag ? ' · ' + esc(res.tag) : '') + '</span></span>' + (has ? '<b class="tst-n">' + esc(res.total) + '</b>' : ''));
@@ -2318,6 +2347,10 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   function histLi(x, k) {
     const res = x.result || {}, w = whoOf(x.user_id, x.who), fresh = k < histFresh;
     const tm = '<small>' + (w.sub ? esc(w.sub) + ' · ' : '') + new Date(x.at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '</small>';
+    if (x.kind === 'luta') {
+      const big = res.ev === 'turn' || res.ev === 'start' || res.ev === 'end';
+      return '<li class="luta' + (big ? ' big' : '') + (fresh ? ' fresh' : '') + '"><span class="fw">' + ICO.foe + '<span>' + esc(x.label || '') + '</span><small>' + new Date(x.at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) + '</small></span></li>';
+    }
     if (x.kind === 'item') {
       const has = res.total !== undefined && res.total !== null && res.total !== '';
       return '<li class="ev' + (fresh ? ' fresh' : '') + '"><span class="fw">' + ICO.bag + esc(w.name) + tm + '</span><span class="fe">' + esc(x.label || '') + (res.tag ? ' · ' + esc(res.tag) : '') + '</span>' + (has ? '<b class="fr good">' + esc(res.total) + '</b>' : '') + '</li>';
@@ -2331,6 +2364,8 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (c) { c.hidden = !histN; c.textContent = histN > 9 ? '9+' : String(histN); }
   }
   function paintHist() {
+    const side = $('#jhist');
+    if (side) { const t0 = side.parentNode ? side.parentNode.scrollTop : 0; side.innerHTML = HIST.length ? HIST.map(histLi).join('') : '<li class="feed-empty">Nenhuma rolagem ainda. Quando alguém rolar ou o combate andar, aparece aqui.</li>'; if (side.parentNode) side.parentNode.scrollTop = t0; }
     const h = $('#mhist');
     if (!h || h.hidden) return;
     const keep = h.querySelector('.feed-list'), top = keep ? keep.scrollTop : 0;
@@ -2359,14 +2394,6 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (h) h.hidden = true;
     histFresh = 0;
     const b = $('#histbtn'); if (b) b.setAttribute('aria-expanded', 'false');
-  }
-  window.addEventListener('message', function (e) { if (e.origin === location.origin && e.data && e.data.ht === 'mapclose') { const d = $('#mapov'); if (d) d.hidden = true; } });
-  function mapOpen() {
-    const d = $('#mapov');
-    if (!d) return;
-    const f = d.querySelector('iframe'), src = 'jogar.html?embed=mapa&adv=' + encodeURIComponent(A.id);
-    if (f.getAttribute('src') !== src) f.setAttribute('src', src);
-    d.hidden = false;
   }
   function jogOpen(t, uidv) {
     const d = $('#jogdrawer');
@@ -3361,6 +3388,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       '<section class="c-sec"><h2>Efeitos</h2>' + (pads ? '<div class="pads">' + pads + '</div>' : '<p class="c-empty">Nenhum efeito nesta cena.</p>') + '</section>';
   }
   function renderMesa() {
+    if (mesaView === 'jogo') return renderJogo();
     if (tab === 'adv' && !S.foes.length) tab = 'notas';
     if (tab !== 'notas' && tab !== 'img' && tab !== 'adv') tab = 'notas';
     const fx = S.cues.filter(function (c) { return c.kind === 'fx'; });
@@ -3378,6 +3406,77 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       '<div class="tabs" role="tablist" aria-label="Partes da cena">' + tabs + '</div>' +
       '<div class="tab-body" role="tabpanel">' + body + '</div></div></section>' +
       '<aside class="console" data-keep="console" aria-label="Som">' + consoleHtml(amb, fx) + '</aside></div></div>';
+  }
+
+  /* ---------- vista Jogo: o mapa no lugar das notas, com combate, histórico, ferramentas, som e notas ao lado ---------- */
+  let mesaView = lsGet('ht-mesa-view', 'cena') === 'jogo' ? 'jogo' : 'cena';
+  let jtab = ['combate', 'hist', 'mapa', 'som', 'notas'].indexOf(lsGet('ht-jogo-tab', 'combate')) >= 0 ? lsGet('ht-jogo-tab', 'combate') : 'combate';
+  const JOGO = { el: null, tools: null, fight: null, ctl: null, cid: '' };
+  const MIMG = {};
+  async function mapImgUrl(bucket, path) {
+    const k = bucket + '/' + path;
+    if (MIMG[k]) return MIMG[k];
+    const r = await sbReq('/storage/v1/object/authenticated/' + bucket + '/' + path);
+    if (!r.ok) throw new Error('imagem');
+    MIMG[k] = URL.createObjectURL(await r.blob());
+    return MIMG[k];
+  }
+  function jogoParty() {
+    const rows = PARTY || (CAMP && CAMP.members || []).map(function (m) { return { user_id: m.user_id, name: m.name, mestre: false, info: {} }; });
+    return rows.map(function (p) { return { user_id: p.user_id, name: p.name, mestre: !!p.mestre, info: p.info || {} }; });
+  }
+  function jogoDrop() { if (JOGO.ctl) { try { JOGO.ctl.destroy(); } catch (e) { /* ok */ } } JOGO.ctl = null; JOGO.el = JOGO.tools = JOGO.fight = null; JOGO.cid = ''; }
+  function jogoEnsure() {
+    if (!campHere() || !window.HTMap) { jogoDrop(); return false; }
+    if (JOGO.ctl && JOGO.cid === CAMP.id) return true;
+    jogoDrop();
+    JOGO.el = document.createElement('div'); JOGO.el.className = 'jogo-host';
+    JOGO.tools = document.createElement('div'); JOGO.tools.className = 'jogo-tools';
+    JOGO.fight = document.createElement('div'); JOGO.fight.className = 'jogo-fight';
+    JOGO.cid = CAMP.id;
+    JOGO.ctl = window.HTMap.mount(JOGO.el, {
+      api: sbReq, cid: CAMP.id, uid: sbUser().id, owner: true, system: CAMP.system || 'dnd5e', fill: true,
+      imgUrl: mapImgUrl, toolsEl: JOGO.tools, combatEl: JOGO.fight,
+      toast: function (t) { toast(t); },
+      myName: function () { return 'Mestre'; },
+      onLog: function () { evPoll(true); },
+      party: jogoParty
+    });
+    return true;
+  }
+  function jogoAttach() {
+    if (mode !== 'mesa' || mesaView !== 'jogo') return;
+    const slot = $('#jogo-slot');
+    if (!slot || !jogoEnsure()) return;
+    const act = document.activeElement, keep = act && (JOGO.tools.contains(act) || JOGO.fight.contains(act)) ? act : null;
+    const pos = keep && typeof keep.selectionStart === 'number' ? keep.selectionStart : null;
+    slot.appendChild(JOGO.el);
+    const pt = $('#jp-mapa'), pf = $('#jp-combate');
+    if (pt) pt.appendChild(JOGO.tools);
+    if (pf) pf.appendChild(JOGO.fight);
+    if (keep) { try { keep.focus({ preventScroll: true }); if (pos != null) keep.setSelectionRange(pos, pos); } catch (e) { /* ok */ } }
+    JOGO.ctl.relayout();
+    paintHist();
+  }
+  function jogoTab(id) {
+    jtab = id; lsSet('ht-jogo-tab', id);
+    $$('.jtabs [data-id]').forEach(function (b) { b.setAttribute('aria-selected', String(b.getAttribute('data-id') === id)); });
+    $$('.jpane').forEach(function (p) { p.hidden = p.id !== 'jp-' + id; });
+    if (id === 'hist') paintHist();
+  }
+  function renderJogo() {
+    const fx = S.cues.filter(function (c) { return c.kind === 'fx'; }), amb = S.cues.filter(function (c) { return c.kind === 'amb'; });
+    const party = partyBarHtml(), ok = campHere();
+    const T = [['combate', 'Combate'], ['hist', 'Histórico'], ['mapa', 'Mapa'], ['som', 'Som'], ['notas', 'Notas']];
+    const side = '<aside class="jogo-side" aria-label="Combate, histórico, mapa, som e notas"><div class="jtabs" role="tablist">' + T.map(function (t) { return '<button type="button" role="tab" data-action="jtab" data-id="' + t[0] + '" aria-selected="' + (jtab === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</div>' +
+      '<div class="jpane" id="jp-combate" data-keep="jp-combate"' + (jtab === 'combate' ? '' : ' hidden') + '>' + (ok ? '' : '<p class="empty-hint">O combate usa a mesa online.</p>') + '</div>' +
+      '<div class="jpane" id="jp-hist" data-keep="jp-hist"' + (jtab === 'hist' ? '' : ' hidden') + '><ul class="feed-list" id="jhist"></ul></div>' +
+      '<div class="jpane" id="jp-mapa" data-keep="jp-mapa"' + (jtab === 'mapa' ? '' : ' hidden') + '>' + (ok ? '' : '<p class="empty-hint">Os mapas ficam na mesa online.</p>') + '</div>' +
+      '<div class="jpane" id="jp-som" data-keep="jp-som"' + (jtab === 'som' ? '' : ' hidden') + '><div class="console jconsole">' + consoleHtml(amb, fx) + '</div></div>' +
+      '<div class="jpane jnotes" id="jp-notas" data-keep="jp-notas"' + (jtab === 'notas' ? '' : ' hidden') + '><p class="eyebrow">' + esc('Cena ' + (A.cur + 1) + ' de ' + A.scenes.length) + '</p><h2 class="jn-t">' + esc(S.title || 'Sem título') + '</h2>' + notesHtml() + '</div></aside>';
+    const stage = ok ? '<div class="jogo-slot" id="jogo-slot"></div>'
+      : '<div class="jogo-off"><div><p class="eyebrow">Jogo</p><h2>Mapa e combate</h2><p>O mapa, a névoa e o combate são compartilhados com os jogadores pela mesa online desta aventura.</p>' + (sbUser() ? '<button type="button" class="btn primary" data-action="mode" data-mode="online">' + ICO.people + 'Abrir a mesa online</button>' : '<button type="button" class="btn primary" data-action="gateOpen">Entrar na nuvem</button>') + '</div></div>';
+    return '<div class="mesa-wrap' + (party ? ' has-party' : '') + '">' + party + '<div class="mesa jogo-v">' + stage + side + '</div></div>';
   }
 
   const PALETTES = [
@@ -3639,7 +3738,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       '<div class="brand">' + RAVEN + '<span>Hollow Table</span></div><span class="ver">versão ' + APP_VER + '</span>' +
       '<button type="button" class="adv-btn" data-action="advOpen" aria-haspopup="dialog" title="Trocar de aventura">' + ICO.books + '<span>' + esc(A.name) + '</span>' + ICO.caret + '</button></div>' +
       '<div class="bar-c">' + (scenesMode ? sceneSwitcherHtml() : '') + '</div>' +
-      '<div class="bar-r"><div class="seg" role="radiogroup" aria-label="Modo"><button type="button" role="radio" aria-checked="' + (mode === 'prep') + '" data-action="mode" data-mode="prep">Preparar</button><button type="button" role="radio" aria-checked="' + (mode === 'mesa') + '" data-action="mode" data-mode="mesa">Mesa</button></div>' +
+      '<div class="bar-r"><div class="seg" role="radiogroup" aria-label="Modo"><button type="button" role="radio" aria-checked="' + (mode === 'prep') + '" data-action="mode" data-mode="prep">Preparar</button><button type="button" role="radio" aria-checked="' + (mode === 'mesa' && mesaView === 'cena') + '" data-action="mode" data-mode="mesa">Mesa</button><button type="button" role="radio" aria-checked="' + (mode === 'mesa' && mesaView === 'jogo') + '" data-action="mode" data-mode="jogo">Jogo</button></div>' +
       (mode === 'prep' ? saveBtnHtml() : '') +
       '<button type="button" class="cloud" id="cloud" data-st="' + cloudShown() + '" style="' + cloudPhase() + '" data-action="cloud" aria-label="Nuvem: ' + esc(SB_LABEL[sbState] || '') + '" title="Nuvem: ' + esc(SB_LABEL[sbState] || '') + '"><span class="face"></span>' + CLOUD_TRAIL + ICO.cloud + '<span class="dot"></span></button></div></div>';
   }
@@ -3689,6 +3788,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     dock.hidden = mode !== 'mesa';
     if (mode === 'mesa') renderDock();
     $$('textarea.auto', main).forEach(autoGrow);
+    jogoAttach();
   }
   function commit() { save(); render(); }
 
@@ -3727,6 +3827,8 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (a === 'sceneNext') { setScene(A.cur + 1); return; }
     if (a === 'goPrep') { if (mode !== 'prep') resetScroll = true; mode = 'prep'; render(); const t = document.getElementById(id); if (t) t.scrollIntoView({ block: 'start' }); return; }
     if (a === 'jump') { const t = document.getElementById(id); if (t) t.scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); return; }
+    if (a === 'mode' && (el.getAttribute('data-mode') === 'jogo' || el.getAttribute('data-mode') === 'mesa')) { const v = el.getAttribute('data-mode') === 'jogo' ? 'jogo' : 'cena'; libStop(); libDelArm = null; campCred = null; campPwArm = null; if (mode !== 'mesa' || mesaView !== v) resetScroll = true; mode = 'mesa'; mesaView = v; lsSet('ht-mesa-view', v); if (v === 'jogo' && (CAMP === undefined || campFor !== A.id) && !campBusy) campLoad().then(function () { if (mode === 'mesa') render(); }); render(); return; }
+    if (a === 'jtab') { jogoTab(id); return; }
     if (a === 'mode') { const m = el.getAttribute('data-mode'); libStop(); libDelArm = null; if (m !== 'online') { campCred = null; campPwArm = null; } if (m !== mode) resetScroll = true; mode = m; if (mode === 'online' && (CAMP === undefined || campFor !== A.id) && !campBusy) campLoad(); render(); return; }
     if (a === 'fear') { S.fear = Math.max(0, Math.min(12, S.fear + Number(el.getAttribute('data-d')))); save(); renderDock(); return; }
     if (a === 'trackAdd') { spFind = null; S.tracks.push({ name: '', terms: '', url: '' }); S.mi = S.tracks.length - 1; commit(); return; }
@@ -3876,8 +3978,6 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (a === 'ptab') { ptab = id; if (id === 'online' && (CAMP === undefined || campFor !== A.id) && !campBusy) campLoad(); render(); return; }
     if (a === 'profile') { profileOpen(); return; }
     if (a === 'jogOpen') { jogOpen(el.getAttribute('data-t')); return; }
-    if (a === 'mapOpen') { mapOpen(); return; }
-    if (a === 'mapClose') { $('#mapov').hidden = true; return; }
     if (a === 'pfOpen') { jogOpen('fichas', id); return; }
     if (a === 'histOpen') { if (histIsOpen()) histClose(); else histOpen(); return; }
     if (a === 'histClose') { histClose(); const b = $('#histbtn'); if (b) b.focus(); return; }
@@ -4062,7 +4162,6 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (e.key === 'Enter' && e.target && e.target.id === 'adv-rn') { e.preventDefault(); const b = $('[data-action="advRenameOk"]'); if (b) b.click(); }
     if (e.key === 'Escape' && pop) { pop = null; renderPop(); return; }
     if (e.key === 'Escape' && histIsOpen()) { histClose(); const b = $('#histbtn'); if (b) b.focus(); return; }
-    if (e.key === 'Escape' && !$('#mapov').hidden) { $('#mapov').hidden = true; return; }
     if (e.key === 'Escape' && !$('#jogdrawer').hidden) { $('#jogdrawer').hidden = true; return; }
     if (e.key === 'Escape' && libPick) { libPick = null; libStop(); renderPicker(); render(); }
     else if (e.key === 'Escape' && dlg) { dlg = null; renderDlg(); }

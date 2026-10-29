@@ -394,6 +394,44 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
   .tst-t { animation: tst-time var(--tt, 20s) linear forwards !important; }
 }
 main.wide { max-width: none; }
+/* ---- aba Jogo: mapa ao lado de combate, dados e histórico ---- */
+.jogo { display: grid; gap: 12px; min-width: 0; }
+.jogo.wide { grid-template-columns: minmax(0, 1fr) 340px; align-items: stretch; }
+.jogo-map { min-width: 0; min-height: 0; }
+.jogo.wide .jogo-map { height: 100%; }
+.jogo-side { min-width: 0; display: grid; gap: 12px; align-content: start; }
+.jogo.wide .jogo-side { overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; touch-action: pan-y; padding-right: 2px; }
+.jogo-tabs { display: flex; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: var(--surface); }
+.jogo-tabs button { flex: 1; min-height: 42px; border: 0; border-right: 1px solid var(--line); background: none; color: var(--muted); font: 600 14px var(--font); cursor: pointer; }
+.jogo-tabs button:last-child { border-right: 0; }
+.jogo-tabs button[aria-selected="true"] { color: var(--accent); background: var(--accent-soft); box-shadow: inset 0 -2px 0 var(--accent); }
+.jogo.wide .jogo-tabs { display: none; }
+.jg-sec { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 12px; display: grid; gap: 10px; min-width: 0; }
+.jogo:not(.wide) .jg-sec[data-off] { display: none; }
+.jg-h { font: 600 11px var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); margin: 0; }
+.result.mini { min-height: 86px; padding: 10px 8px; border-radius: 12px; }
+.result.mini .n { font-size: 40px; }
+.result.mini .empty { margin: 0; font-size: 13px; }
+.jg-dice { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.jg-dice .die { min-height: 46px; font-size: 15px; border-radius: 11px; }
+.jg-dice .die.big { grid-column: span 2; background: var(--accent-soft); border-color: var(--accent); color: var(--accent); font-size: 19px; }
+.jg-sec .btn.act { min-height: 52px; }
+.jg-nh { gap: 8px; align-items: flex-end; flex-wrap: nowrap; }
+.jg-nh .field { flex: 0 0 76px; }
+.jg-nh input { width: 100%; }
+.jg-nh .btn { flex: 1; }
+.jg-more { font-size: 13px; min-height: 34px; text-align: left; padding: 0 4px; color: var(--muted); }
+.jg-hs .hist-l { max-height: none; margin: 0; padding: 0; }
+.jogo.wide .jg-hs { min-height: 200px; }
+.hist-l li.luta { border-left: 2px solid var(--line); }
+.hist-l li.luta .hw { display: flex; align-items: center; gap: 8px; font-weight: 400; color: var(--muted); }
+.hist-l li.luta .hw svg { width: 15px; height: 15px; flex: none; color: var(--muted); }
+.hist-l li.luta .hw span { flex: 1; min-width: 0; }
+.hist-l li.luta.big { border-left-color: var(--accent); }
+.hist-l li.luta.big .hw { color: var(--fg); font-weight: 700; }
+.hist-l li.luta.big .hw svg { color: var(--accent); }
+.tst.luta.mine { box-shadow: 0 0 0 1px var(--accent), 0 0 30px -6px var(--accent); }
+
 .embed-map main { padding: 0; }
 .embed-map body { padding: 0; }
 .embed-map .pane { padding: 0; gap: 0; }
@@ -603,7 +641,7 @@ main.wide { max-width: none; }
   function isOwner() { return !!(cur && me() && cur.owner === me().id); }
   function drawLobby() {
     const u = me();
-    if (EMBED_MAP) { app.innerHTML = '<div class="pane one" id="pane"></div>'; tab = 'mapa'; drawPane(); return; }
+    if (EMBED_MAP) { app.innerHTML = '<div class="pane one" id="pane"></div>'; tab = 'jogo'; drawPane(); return; }
     if (EMBED) {
       app.innerHTML = '<div class="emb-tabs" role="tablist" aria-label="Ver">' + [['fichas', 'Fichas'], ['mochilas', 'Mochilas']].map(function (t) { return '<button type="button" class="tab" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</div><div class="pane one" id="pane"></div>';
       drawPane(); return;
@@ -612,16 +650,17 @@ main.wide { max-width: none; }
     histClose();
     app.innerHTML = topBar(cur.name, '<span class="sys">' + esc(SYS[cur.system] || cur.system) + '</span>') +
       '<div class="party" id="party" role="list" aria-label="Grupo: quem está na mesa"></div>' +
-      '<nav class="nav" role="tablist" aria-label="Ferramentas">' + [own ? ['fichas', 'Fichas', 'ficha'] : ['ficha', 'Ficha', 'ficha'], own ? ['mochilas', 'Mochilas', 'mochila'] : ['mochila', 'Mochila', 'mochila'], own ? null : ['memoria', 'Memória', 'memoria'], ['mapa', 'Mapa', 'mapa'], ['notas', 'Anotações', 'notas'], ['dados', 'Dados', 'dados']].filter(Boolean).map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + ICO[t[2]] + '<span>' + t[1] + '</span>' + (t[2] === 'mochila' ? '<span class="nb" id="nb-m" hidden></span>' : '') + '</button>'; }).join('') + '</nav>' +
+      '<nav class="nav" role="tablist" aria-label="Ferramentas">' + [own ? ['fichas', 'Fichas', 'ficha'] : ['ficha', 'Ficha', 'ficha'], own ? ['mochilas', 'Mochilas', 'mochila'] : ['mochila', 'Mochila', 'mochila'], own ? null : ['memoria', 'Memória', 'memoria'], ['jogo', 'Jogo', 'mapa'], ['notas', 'Anotações', 'notas'], ['dados', 'Dados', 'dados']].filter(Boolean).map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + ICO[t[2]] + '<span>' + t[1] + '</span>' + (t[2] === 'mochila' ? '<span class="nb" id="nb-m" hidden></span>' : '') + '</button>'; }).join('') + '</nav>' +
       '<div class="pane" id="pane"></div>';
     partyStart();
     evStart();
     drawPane();
     startStage();
   }
-  /* ---------- mapa ---------- */
-  let mapCtl = null, mapPres = {};
-  function stopMap() { if (mapCtl) { try { mapCtl.destroy(); } catch (e) { /* ok */ } mapCtl = null; } }
+  /* ---------- jogo: mapa, combate, dados rápidos e histórico juntos ---------- */
+  let mapCtl = null, mapPres = {}, jogoT = null, jogoSec = 'combate';
+  try { jogoSec = localStorage.getItem('ht-jogo-sec') || 'combate'; } catch (e) { /* ok */ }
+  function stopMap() { if (mapCtl) { try { mapCtl.destroy(); } catch (e) { /* ok */ } mapCtl = null; } clearInterval(jogoT); jogoT = null; }
   async function mapLoadPresence() {
     if (!cur || !isOwner()) return;
     try {
@@ -630,27 +669,76 @@ main.wide { max-width: none; }
       (await r.json()).forEach(function (x) { mapPres[x.user_id] = x.info || {}; });
     } catch (e) { /* ok */ }
   }
+  function myInitBonus() {
+    const u = me().id, doc = (shFor === u && SH) ? SH : lsGet(skey(u), null);
+    const d = doc && doc.dnd5e;
+    return d && d.at ? md5(d.at.des) : 0;
+  }
+  async function rollInit() {
+    const b = myInitBonus(), n = rnd(20), r = { total: n + b, text: '[' + n + ']' + (b ? ' ' + modStr(b) : ''), expr: 'd20' + modStr(b), tag: n === 20 ? 'Crítico!' : (n === 1 ? 'Falha crítica' : ''), tone: n === 20 ? 'good' : (n === 1 ? 'bad' : '') };
+    await doRoll(r, 'Iniciativa');
+    return r.total;
+  }
+  function jogoQuickHtml() {
+    const sys = cur.system;
+    const sp = sys === 'daggerheart' ? '<button type="button" class="btn act" data-a="duality">Rolar Dualidade<small>2d12 · Esperança e Medo' + (dice.mod ? ' · ' + modStr(dice.mod) : '') + '</small></button>'
+      : (sys === 'gurps' ? '<div class="row jg-nh"><div class="field"><label for="nh">NH</label><input id="nh" type="number" inputmode="numeric" min="1" max="40" value="' + dice.nh + '"></div><button type="button" class="btn act" data-a="gurps">Teste 3d6<small>contra o NH</small></button></div>' : '');
+    return '<div class="result mini" id="result" aria-live="polite"></div>' + sp +
+      '<div class="jg-dice" role="group" aria-label="Dados">' + [4, 6, 8, 10, 12, 20, 100].map(function (n) { return '<button type="button" class="die' + (n === 20 ? ' big' : '') + '" data-die="' + n + '" aria-label="Rolar d' + n + '">d' + n + '</button>'; }).join('') + '</div>' +
+      '<button type="button" class="ghost jg-more" data-tab="dados">Quantidade, modificador e mais opções na aba Dados</button>';
+  }
+  function jogoHtml() {
+    const secs = [['combate', 'Combate'], ['dados', 'Dados'], ['hist', 'Histórico']];
+    return '<div class="jogo" id="jogo"><div class="jogo-map" id="mapa"></div><aside class="jogo-side" aria-label="Combate, dados e histórico">' +
+      '<div class="jogo-tabs" role="tablist">' + secs.map(function (s) { return '<button type="button" role="tab" data-js="' + s[0] + '" aria-selected="' + (jogoSec === s[0]) + '">' + s[1] + '</button>'; }).join('') + '</div>' +
+      '<section class="jg-sec" data-jp="combate"' + (jogoSec === 'combate' ? '' : ' data-off') + '><div id="jg-fight"></div></section>' +
+      '<section class="jg-sec" data-jp="dados"' + (jogoSec === 'dados' ? '' : ' data-off') + '><h3 class="jg-h">Dados</h3>' + jogoQuickHtml() + '</section>' +
+      '<section class="jg-sec jg-hs" data-jp="hist"' + (jogoSec === 'hist' ? '' : ' data-off') + '><h3 class="jg-h">Histórico da mesa</h3><ul class="hist-l" id="jg-hist"></ul></section>' +
+      '</aside></div>';
+  }
+  function jogoSize() {
+    const j = $('#jogo'); if (!j) return;
+    const wide = window.innerWidth >= 980, top = j.getBoundingClientRect().top + window.scrollY - window.scrollY;
+    const n = $('.nav'), res = n && getComputedStyle(n).position === 'fixed' ? n.offsetHeight + 8 : 0;
+    const h = Math.max(380, window.innerHeight - j.getBoundingClientRect().top - res - 12);
+    j.classList.toggle('wide', wide);
+    if (wide) { j.style.height = h + 'px'; $('#mapa').style.height = ''; }
+    else { j.style.height = ''; $('#mapa').style.height = Math.max(340, Math.round(window.innerHeight * 0.62)) + 'px'; }
+    if (mapCtl) mapCtl.relayout();
+  }
   function startMap() {
     stopMap();
     const host = $('#mapa');
     if (!host || !window.HTMap) { if (host) host.innerHTML = '<p class="muted">Não consegui carregar o mapa. Recarregue a página.</p>'; return; }
     mapLoadPresence();
+    jogoSize();
     mapCtl = window.HTMap.mount(host, {
-      api: api, cid: cur.id, uid: me().id, owner: isOwner(), full: EMBED_MAP,
+      api: api, cid: cur.id, uid: me().id, owner: isOwner(), system: cur.system, full: EMBED_MAP, fill: !EMBED_MAP,
       imgUrl: imgUrl,
+      combatEl: $('#jg-fight'),
+      myName: myName,
+      rollInit: cur.system === 'dnd5e' && !isOwner() ? rollInit : null,
+      onLog: function () { evPoll(); },
       onEsc: EMBED_MAP ? function () { try { parent.postMessage({ ht: 'mapclose' }, location.origin); } catch (e) { /* ok */ } } : null,
       toast: function (t, tone) { msgToast(t, tone); },
-      reserve: function () { const n = $('.nav'); return n && getComputedStyle(n).position === 'fixed' ? n.offsetHeight + 8 : 0; },
       party: function () {
-        return partyRows().map(function (p) { const i = (PARTY && p.info && Object.keys(p.info).length ? p.info : mapPres[p.user_id]) || {}; return { user_id: p.user_id, name: p.name, mestre: !!p.mestre, info: i }; });
+        return partyRows().map(function (p) { const i = (PARTY && p.info && Object.keys(p.info).length ? p.info : mapPres[p.user_id]) || (p.user_id === me().id ? MYSUM : null) || {}; return { user_id: p.user_id, name: p.name, mestre: !!p.mestre, info: i }; });
       }
     });
+    paintResult(); paintHist();
+    jogoT = setInterval(function () { if (!document.hidden) jogoSize(); }, 2500);
   }
+  function jogoTab(s) {
+    jogoSec = s; try { localStorage.setItem('ht-jogo-sec', s); } catch (e) { /* ok */ }
+    document.querySelectorAll('[data-js]').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.js === s)); });
+    document.querySelectorAll('[data-jp]').forEach(function (p) { if (p.dataset.jp === s) p.removeAttribute('data-off'); else p.setAttribute('data-off', ''); });
+  }
+  window.addEventListener('resize', function () { if (tab === 'jogo') jogoSize(); });
   function setTab(t) { tab = t; document.querySelectorAll('[data-tab]').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tab === tab)); }); drawPane(); }
   function drawPane() {
     stopBag(); shPollStop(); stopMap();
     const p = $('#pane');
-    app.classList.toggle('wide', tab === 'mapa');
+    app.classList.toggle('wide', tab === 'jogo');
     if (!p) return;
     p.classList.add('one');
     if (tab === 'dados') { p.innerHTML = diceHtml(); paintResult(); }
@@ -658,7 +746,7 @@ main.wide { max-width: none; }
     else if (tab === 'fichas') { p.innerHTML = fichasHtml(); loadSheet(shView, false); }
     else if (tab === 'mochila' || tab === 'mochilas') { p.innerHTML = '<div id="bag"></div>'; bagStart(); }
     else if (tab === 'memoria') { p.innerHTML = '<div id="mem" class="mem"></div>'; loadMem(); }
-    else if (tab === 'mapa') { p.innerHTML = '<div id="mapa"></div>'; startMap(); }
+    else if (tab === 'jogo') { p.innerHTML = EMBED_MAP ? '<div id="mapa"></div>' : jogoHtml(); startMap(); }
     else { p.innerHTML = notesHtml(); loadNotes(); }
   }
 
@@ -984,6 +1072,7 @@ main.wide { max-width: none; }
         HIST.unshift(x);
         if (x.user_id === u) return;
         if (!histIsOpen()) histN++;
+        if (x.kind === 'luta') { lutaToast(x); return; }
         if (x.kind === 'item') {
           if (!x.result || x.result.to !== u) return;
           const w = whoOf(x.user_id, x.who);
@@ -1002,6 +1091,10 @@ main.wide { max-width: none; }
   function histLi(x, k) {
     const res = x.result || {}, w = whoOf(x.user_id, x.who), fresh = k < histFresh ? ' new' : '';
     const tm = new Date(x.at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }), meta = '<small>' + (w.sub ? esc(w.sub) + ' · ' : '') + tm + '</small>';
+    if (x.kind === 'luta') {
+      const big = res.ev === 'turn' || res.ev === 'start' || res.ev === 'end';
+      return '<li class="luta ev-' + esc(res.ev || '') + (big ? ' big' : '') + fresh + '"><span class="hw">' + ICO.foe + '<span>' + esc(x.label || '') + '</span><small>' + tm + '</small></span></li>';
+    }
     if (x.kind === 'item') {
       const has = res.total !== undefined && res.total !== null && res.total !== '';
       return '<li class="ev' + fresh + '"><span class="hw">' + ICO.mochila + esc(w.name) + meta + '</span><span class="he">' + esc(itemLabel(x)) + (res.tag ? ' · ' + esc(res.tag) : '') + '</span>' + (has ? '<b class="hr good">' + esc(res.total) + '</b>' : '') + '</li>';
@@ -1009,8 +1102,18 @@ main.wide { max-width: none; }
     const tone = ['good', 'bad', 'hot'].indexOf(res.tone) >= 0 ? res.tone : '';
     return '<li class="' + fresh.trim() + '"><span class="hw">' + esc(w.name) + meta + '</span><span class="he">' + esc((x.label ? x.label + ' · ' : '') + [x.expr, res.text].filter(Boolean).join(' · ')) + (res.tag ? ' · ' + esc(res.tag) : '') + '</span><b class="hr ' + tone + '">' + esc(res.total) + '</b></li>';
   }
+  function lutaToast(x) {
+    const res = x.result || {}, u = me().id;
+    if (['turn', 'start', 'end', 'down'].indexOf(res.ev) < 0) return;
+    const mine = res.ev === 'turn' && res.u === u;
+    tstPush('luta' + (mine ? ' t-good mine' : ''), '<span class="tst-av">' + ICO.foe + '</span><span class="tst-x"><b class="tst-who">' + (mine ? 'Sua vez!' : (res.ev === 'turn' ? (cur.system === 'daggerheart' ? 'Holofote' : 'Próximo turno') : 'Combate')) + '</b><span class="tst-l">' + esc(x.label || '') + '</span></span>', mine ? 9000 : 6000);
+    try { if (mine && navigator.vibrate) navigator.vibrate([30, 60, 30]); } catch (e) { /* ok */ }
+  }
+  document.addEventListener('click', function (e) { const b = e.target.closest('[data-js]'); if (b) jogoTab(b.dataset.js); });
   function histIsOpen() { const h = $('#hist'); return !!(h && !h.hidden); }
   function paintHist() {
+    const side = $('#jg-hist');
+    if (side) { const top = side.scrollTop; side.innerHTML = HIST.length ? HIST.map(histLi).join('') : '<li class="hist-e">Nenhuma rolagem ainda. Quando alguém rolar, aparece aqui.</li>'; side.scrollTop = top; hydrate(side); }
     const h = $('#hist');
     if (!h || h.hidden) return;
     const keep = h.querySelector('.hist-l'), top = keep ? keep.scrollTop : 0;
