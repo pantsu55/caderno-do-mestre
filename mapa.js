@@ -132,6 +132,8 @@
     '.mp-empty[hidden] { display: none; }',
     '.mp-insp { position: absolute; left: 10px; bottom: 10px; z-index: 4; width: min(330px, calc(100% - 20px)); max-height: calc(100% - 120px); overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; touch-action: pan-y; padding: 12px; border-radius: 14px; background: rgba(19, 17, 34, 0.97); border: 1px solid var(--line); box-shadow: 0 16px 40px -16px #000; display: grid; gap: 10px; box-sizing: border-box; }',
     '.mp-insp[hidden] { display: none; }',
+    '.mp-insp.mini { width: auto; max-width: calc(100% - 20px); display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 14px; border-radius: 12px; }',
+    '.mp-mini-n { font-family: var(--m-serif); font-size: 15px; letter-spacing: 0.04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }',
     '.mp-insp-h { display: flex; justify-content: space-between; align-items: center; gap: 8px; }',
     '.mp-x { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line); background: var(--surface-2); color: var(--fg); cursor: pointer; font-size: 18px; line-height: 1; }',
     '.mp-side { position: absolute; top: 0; left: 0; bottom: 0; z-index: 5; width: min(350px, 94%); overflow-y: auto; overflow-x: hidden; overscroll-behavior: contain; touch-action: pan-y; padding: 60px 12px 12px; background: rgba(19, 17, 34, 0.97); border-right: 1px solid var(--line); box-shadow: 14px 0 40px rgba(0, 0, 0, 0.5); box-sizing: border-box; }',
@@ -241,7 +243,7 @@
     var view = { x: 0, y: 0, k: 1 }, views = {}, atMin = true;
     var pend = {}, busy = {}, sendT = {}, hpBase = {}, hpT = {};
     var fight = null, fightRev = -1, fightBusy = false;
-    var pts = {}, selDraw = false, mode = null, gest = null, timers = [], dead = false, saveT = null, fogT = null, pubT = null, pubBusy = false, pubAgain = false, drawQ = 0, fogQ = 0, tick = 0, lastFull = 0;
+    var pts = {}, selDraw = false, editOpen = false, mode = null, gest = null, timers = [], dead = false, saveT = null, fogT = null, pubT = null, pubBusy = false, pubAgain = false, drawQ = 0, fogQ = 0, tick = 0, lastFull = 0;
 
     var toolsBox = null, fightBox = ctx.combatEl || null;
     host.innerHTML = '<div class="mp' + (ctx.full ? ' full' : '') + (ctx.fill ? ' fill' : '') + '"><svg class="mp-svg" xmlns="http://www.w3.org/2000/svg"><defs class="mp-defs"></defs><g class="mp-w"><g class="L-img"></g><g class="L-grid"></g><g class="L-obj"></g><g class="L-fog"></g><g class="L-tok"></g><g class="L-hl"></g><g class="L-rul"></g></g></svg>' +
@@ -617,6 +619,8 @@
       if (!o) { box.hidden = true; box.innerHTML = ''; return; }
       if (box.contains(document.activeElement) && box._for === o.id && document.activeElement.tagName === 'INPUT' && document.activeElement.type !== 'checkbox') return;
       box._for = o.id;
+      box.classList.toggle('mini', !editOpen);
+      if (!editOpen) { box.innerHTML = '<b class="mp-mini-n">' + esc(o.kind === 'tok' ? tokName(o) : ((o.data && o.data.n) || 'Objeto')) + '</b><button type="button" class="mp-b" data-ma="edit">Editar</button><button type="button" class="mp-x" data-ma="unsel" aria-label="Tirar a seleção">×</button>'; box.hidden = false; return; }
       var d = o.data || {}, isTok = o.kind === 'tok', h = '<div class="mp-insp-h"><h3>' + (isTok ? 'Token' : 'Objeto') + '</h3><button type="button" class="mp-x" data-ma="unsel" aria-label="Fechar">×</button></div>';
       h += '<div class="mp-row"><label>Nome<input type="text" data-md="n" maxlength="40" value="' + esc(d.n || '') + '"' + (isTok && o.owner ? ' placeholder="' + esc(partyOf(o.owner).c || '') + '"' : '') + '></label></div>';
       if (isTok) {
@@ -816,7 +820,7 @@
       if (!map) return null;
       var o = { id: uuid(), kind: kind, data: data, owner: ownerId || null, hidden: !!hidden, gone: false, seq: 1e15 };
       o.cell = cellIdx(o);
-      objs[o.id] = o; busy[o.id] = Date.now() + 2500; sel = o.id; drawObjs(); insp(); fightPanel();
+      objs[o.id] = o; busy[o.id] = Date.now() + 2500; sel = o.id; editOpen = true; drawObjs(); insp(); fightPanel();
       try { await post('/rest/v1/map_objs', { id: o.id, map_id: map.id, campaign_id: cid, kind: kind, data: data, owner: o.owner, hidden: o.hidden, cell: o.cell }); }
       catch (e) { delete objs[o.id]; if (sel === o.id) sel = null; drawObjs(); insp(); ctx.toast('Não consegui adicionar ao mapa.', 'bad'); return null; }
       return o;
@@ -834,6 +838,7 @@
       if (!members.length) { ctx.toast('Todos os jogadores já estão no mapa.', ''); return; }
       var c = viewCenterCell(), n0 = Object.keys(have).length;
       members.forEach(function (m, n) { var p = freeCell(c[0], c[1]); create('tok', { n: '', x: p[0], y: p[1], s: 1, col: COLORS[(n0 + n) % COLORS.length] }, m.user_id, false); });
+      editOpen = false; insp();
     }
     function setCfg(p, soft, geomChange, beforeFG) {
       if (!map) return;
@@ -1125,7 +1130,7 @@
       }
       if (tool === 'grid' && owner) { mode = 'gridmove'; gest = { sx: p[0], sy: p[1], ox: G.ox, oy: G.oy, fg: FG ? Object.assign({}, FG) : null }; svg.classList.add('dragging'); return; }
       if (o) {
-        if (owner && sel !== o.id) { sel = o.id; selDraw = true; insp(); fightPanel(); }
+        if (owner && sel !== o.id) { sel = o.id; editOpen = false; selDraw = true; fightPanel(); }
         if (canMove(o) && !(o.data && o.data.lk)) {
           var wv = toWorld(p[0], p[1]), ctr = o.kind === 'tok' ? tokCenter(o.data) : [G.ox + num(o.data.x, 0) * G.s, G.oy + num(o.data.y, 0) * G.s];
           mode = 'drag'; drag = { id: o.id, sx: p[0], sy: p[1], x0: num(o.data.x, 0), y0: num(o.data.y, 0), gx: wv[0] - ctr[0], gy: wv[1] - ctr[1], from: o.kind === 'tok' ? tokCell(o.data) : null, started: false };
@@ -1223,7 +1228,7 @@
       else if (mode === 'tap') drawObjs();
       else if (mode === 'pan' && gest && !gest.moved) { if (owner && sel) { sel = null; drawObjs(); insp(); fightPanel(); } if (ruler && tool !== 'ruler') { ruler = null; drawRuler(); } }
       mode = null; gest = null;
-      if (selDraw) { selDraw = false; drawObjs(); }
+      if (selDraw) { selDraw = false; drawObjs(); insp(); }
     }
     svg.addEventListener('pointerup', endPtr);
     svg.addEventListener('pointercancel', endPtr);
@@ -1282,6 +1287,7 @@
       else if (a === 'del') delObj();
       else if (a === 'hide') setHidden();
       else if (a === 'dup') dup();
+      else if (a === 'edit') { editOpen = true; insp(); }
       else if (a === 'unsel') { sel = null; drawObjs(); insp(); fightPanel(); }
       else if (a === 'fin') { var o3 = selObj(); if (o3) fightAct('add', o3.id); }
       else if (a === 'fout') { var o4 = selObj(); if (o4) fightAct('rm', o4.id); }
