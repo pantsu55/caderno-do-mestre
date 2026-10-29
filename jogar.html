@@ -1230,7 +1230,10 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
       if (!r.ok) throw new Error('x');
       const j = await r.json();
       if (want !== shFor || shT) return;
-      if (j[0] && j[0].data) { SH = j[0].data; shBase = jclone(SH); shRev = j[0].rev || 0; if (mine) lsSet(skey(uidv), SH); shSv = mine ? 'Salvo na nuvem' : ''; }
+      if (j[0] && j[0].data) {
+        SH = j[0].data; shBase = jclone(SH); shRev = j[0].rev || 0; shSv = mine ? 'Salvo na nuvem' : '';
+        if (mine) lsSet(skey(uidv), SH); else if (isOwner()) pushSum(uidv, SH, true);
+      }
       else { if (!SH) SH = { name: '' }; shBase = {}; shRev = 0; }
     } catch (e) { if (!SH) SH = { name: '' }; shSv = 'Sem conexão. Mostrando o que está neste aparelho.'; }
     if (want === shFor) { paintSheet(); paintSv(); shPollStart(); }
@@ -1334,9 +1337,18 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
     } catch (e) { /* sem rede: tenta no próximo ciclo */ }
     finally { shPollBusy = false; }
   }
-  /* o Mestre mexeu na ficha de alguém: o resumo do grupo (vida, classe) acompanha na hora */
-  async function pushSum(uidv, doc) {
-    try { await api('/rest/v1/presence?campaign_id=eq.' + cur.id + '&user_id=eq.' + uidv, { method: 'PATCH', headers: Object.assign({ Prefer: 'return=minimal' }, JSONH), body: JSON.stringify({ info: sumOf(doc, cur.system) }) }); } catch (e) { /* o jogador atualiza quando abrir o app */ }
+  /* o Mestre mexeu (ou só abriu) a ficha de alguém: o resumo do grupo (retrato, vida, classe) acompanha na hora,
+     inclusive de quem ainda nunca abriu o app */
+  const sumPushed = {};
+  async function pushSum(uidv, doc, onlyIfNew) {
+    const inf = sumOf(doc, cur.system), s = JSON.stringify(inf);
+    if (onlyIfNew && sumPushed[uidv] === s) return;
+    sumPushed[uidv] = s;
+    try {
+      const r = await api('/rest/v1/rpc/put_summary', { method: 'POST', headers: JSONH, body: JSON.stringify({ cid: cur.id, uid: uidv, inf: inf }) });
+      if (r.status === 404) await api('/rest/v1/presence?campaign_id=eq.' + cur.id + '&user_id=eq.' + uidv, { method: 'PATCH', headers: Object.assign({ Prefer: 'return=minimal' }, JSONH), body: JSON.stringify({ info: inf }) });
+      else if (!r.ok) delete sumPushed[uidv];
+    } catch (e) { delete sumPushed[uidv]; }
     if (EMBED) { try { parent.postMessage({ ht: 'party' }, location.origin); } catch (e) { /* ok */ } }
     else if (partyT) ping();
   }
