@@ -757,7 +757,7 @@ details.note[open] summary .caret { transform: rotate(180deg); }
 .sp-res-t b { display: block; font-size: 15px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sp-res-t small { display: block; color: var(--muted); font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .sp-res .k { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--ok); margin-right: 8px; }
-input[type="search"] { width: 100%; min-height: 46px; padding: 10px 12px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; }
+input[type="search"] { -webkit-appearance: none; appearance: none; width: 100%; min-height: 46px; padding: 10px 12px; background: var(--surface); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; transition: border-color 0.12s, box-shadow 0.12s; }
 .tracks { list-style: none; padding: 0; display: grid; gap: 6px; }
 .trk { display: grid; grid-template-columns: 22px minmax(0, 1fr); align-items: center; gap: 8px; width: 100%; min-height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface-2); text-align: left; font-size: 14px; font-weight: 700; }
 .trk[aria-current="true"] { background: var(--active); border-color: var(--active); color: var(--active-ink); box-shadow: 0 0 18px -6px var(--glow); }
@@ -876,7 +876,7 @@ input[type="search"] { width: 100%; min-height: 46px; padding: 10px 12px; backgr
 .cue-k, .cue-src { font-family: var(--font-mono); font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase; border: 1px solid var(--line); border-radius: 999px; padding: 3px 10px; color: var(--muted); white-space: nowrap; }
 .cue-k.k-amb { border-color: var(--active-line); color: var(--fg); }
 .add-bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
-.add-bar select, .add-bar input[type="text"] { width: auto; flex: 1 1 220px; }
+.add-bar select, .add-bar input[type="text"], .add-bar input[type="search"] { width: auto; flex: 1 1 220px; }
 details.basic { border: 1px dashed var(--line); border-radius: 12px; padding: 0 14px; }
 details.basic summary { list-style: none; display: flex; align-items: center; gap: 8px; min-height: 48px; cursor: pointer; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
 details.basic summary::-webkit-details-marker { display: none; }
@@ -909,6 +909,16 @@ details.basic .add-bar { padding: 2px 0 14px; }
 .lib-row { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; padding: 8px 10px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
 .lib-play { flex: none; }
 .lib-n { flex: 1 1 160px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.lib-cred { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.03em; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; max-width: 16rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fs-opts { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+.fs-opts .hint { flex: 1 1 260px; font-size: 13px; }
+.fs-info { flex: 1 1 220px; min-width: 0; display: grid; gap: 3px; }
+.fs-info .lib-n { flex: none; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow-wrap: anywhere; line-height: 1.3; }
+.fs-row > .btn { margin-left: auto; }
+.fs-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 2px 12px; font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.03em; color: var(--muted); }
+.fs-star { color: var(--crit); }
+.fs-star i { font-style: normal; color: var(--muted); }
+.fs-lic { border: 1px solid color-mix(in srgb, var(--accent) 55%, var(--line)); color: var(--accent); border-radius: 999px; padding: 0 8px; font-size: 11px; letter-spacing: 0.06em; }
 .lib-name { flex: 1 1 160px; min-width: 0; width: auto !important; min-height: 40px !important; background: var(--bg) !important; }
 .lib-kind { width: auto !important; min-height: 40px !important; background: var(--bg) !important; }
 .lib-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; }
@@ -1089,7 +1099,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     }).join('');
   }
   /* ---------- ícones (traço simples, herdam a cor do texto) ---------- */
-  const APP_VER = '0.46';
+  const APP_VER = '0.47';
   const RAVEN = '<svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>';
   const SV = function (p, extra) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '>' + p + '</svg>'; };
   const ICO = {
@@ -1123,7 +1133,8 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     bag: SV('<path d="M6 10a6 6 0 0 1 12 0v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/><path d="M9.5 4.6V4a2.5 2.5 0 0 1 5 0v.6"/><path d="M9 14h6v4H9z"/>')
   };
   const safeUrl = function (u) { return /^https:\/\//i.test(u) ? u : '#'; };
-  const fmtDur = function (n) { return n.toFixed(1).replace('.', ',') + ' s'; };
+  /* 4,2 s até um minuto; daí em diante, 2:30 */
+  const fmtDur = function (n) { n = Number(n) || 0; if (n < 59.95) return n.toFixed(1).replace('.', ',') + ' s'; const t = Math.round(n); return Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0'); };
 
   /* ---------- imagens de exemplo (ilustrações geradas) ---------- */
   const svg = function (s) { return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s); };
@@ -1657,6 +1668,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       return '<li class="lib-row"><button type="button" class="icon-btn lib-play" data-action="libPlay" data-id="' + it.id + '" aria-label="' + (libPlaying === it.id ? 'Parar' : 'Ouvir') + ' ' + esc(it.name) + '">' + (libPlaying === it.id ? ICO.stop : ICO.play) + '</button>' +
         (forPick ? '<span class="lib-n">' + esc(it.name) + '</span>' : '<input type="text" class="lib-name" data-libname="' + it.id + '" value="' + esc(it.name) + '" aria-label="Nome">') +
         '<span class="tag">' + (it.kind === 'amb' ? 'Ambiente' : 'Efeito') + (it.dur ? ', ' + fmtDur(it.dur) : '') + '</span>' +
+        (it.cred && it.cred.fs && !forPick ? '<a class="lib-cred" href="https://freesound.org/s/' + Number(it.cred.fs) + '/" target="_blank" rel="noopener" title="Ver no Freesound">' + esc(it.cred.by || 'Freesound') + (it.cred.lic && it.cred.lic !== 'CC0' ? ' · ' + esc(it.cred.lic) : '') + '</a>' : '') +
         (forPick ? '<button type="button" class="btn sm' + (used ? ' quiet' : ' primary') + '" data-action="libUse" data-id="' + it.id + '"' + (used ? ' disabled' : '') + '>' + (used ? 'Na cena' : 'Adicionar') + '</button>'
           : '<select class="lib-kind" data-libkind="' + it.id + '" aria-label="Tipo"><option value="fx"' + (it.kind !== 'amb' ? ' selected' : '') + '>Efeito</option><option value="amb"' + (it.kind === 'amb' ? ' selected' : '') + '>Ambiente</option></select><button type="button" class="btn sm' + (libDelArm === it.id ? ' danger-fill' : ' ghost danger') + '" data-action="libDel" data-id="' + it.id + '">' + (libDelArm === it.id ? 'Confirmar' : 'Excluir') + '</button>') + '</li>';
     }).join('') + '</ul>';
@@ -1668,71 +1680,141 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     }).join('') + '</nav>';
   }
   const libCounts = function () { return { snd: LIBR.items.filter(function (x) { return x.type === 'snd'; }).length, img: LIBR.items.filter(function (x) { return x.type === 'img'; }).length }; };
-  /* ---------- busca no Freesound (só licença CC0) ---------- */
-  const FS_KEY = 'ht-fskey';
-  let fsKey = lsGet(FS_KEY) || '', fsQ = '', fsLen = 'fx', fsRes = null, fsBusy = false, fsMsg = '', fsAudio = null, fsPlay = null, fsSaving = {};
+  /* ---------- busca no Freesound ----------
+     Pede os 60 sons mais baixados que batem com a busca (um de cada pacote) e reordena aqui:
+     palavras buscadas no nome ou nas tags, nota (pesada pelo número de votos) e downloads.
+     Música (pela categoria do Freesound ou pelas tags) desce, a não ser que a busca peça música;
+     o que o Freesound classifica como paisagem sonora (ambiente) ou efeito sobe um pouco na busca do tipo certo. */
+  const FS_KEY = 'ht-fskey', FS_CRED = 'ht-fscred', FS_PAGE = 15;
+  const FS_FIELDS = 'id,name,duration,previews,username,license,tags,num_downloads,avg_rating,num_ratings,category_code';
+  const FS_MUSIC = ['music', 'musical', 'song', 'melody', 'beat', 'beats', 'drum', 'drums', 'drumloop', 'synth', 'synthesizer', 'piano', 'guitar', 'chord', 'chords', 'bpm', 'lofi', 'lo-fi', 'hip-hop', 'hiphop', 'techno', 'edm', 'trance', 'dubstep', 'remix', 'vocals', 'singing', 'instrumental'];
+  const FS_AMBI = ['ambience', 'ambiance', 'ambient', 'atmosphere', 'atmos', 'background', 'field-recording', 'fieldrecording', 'soundscape', 'loop', 'seamless', 'loopable'];
+  const FS_STOP = ['the', 'and', 'of', 'an', 'in', 'on', 'with', 'at', 'to', 'for'];
+  let fsKey = lsGet(FS_KEY) || '', fsQ = '', fsLen = 'fx', fsCred = lsGet(FS_CRED, true) !== false, fsRes = null, fsShow = FS_PAGE, fsBusy = false, fsMsg = '', fsAudio = null, fsPlay = null, fsSaving = {}, fsReq = 0;
   function fsStop() { if (fsAudio) { try { fsAudio.pause(); } catch (e) { /* ok */ } fsAudio = null; } fsPlay = null; }
+  /* licença: CC0 não pede nada, CC BY pede crédito; não comercial e Sampling+ ficam de fora */
+  function fsLic(l) {
+    const s = String(l || '').toLowerCase();
+    if (/noncommercial|by-nc|sampling/.test(s)) return null;
+    if (/zero|commons 0|cc0/.test(s)) return { code: 'CC0', credit: false };
+    const v = s.match(/\/by\/(\d\.\d)/);
+    return { code: 'CC BY' + (v ? ' ' + v[1] : ''), credit: true };
+  }
+  const fsWords = function (x) { return fold(x).split(/[^a-z0-9]+/).filter(function (w) { return w; }); };
+  const fsName = function (x) { return String(x || '').replace(/\.(wav|mp3|aiff?|flac|ogg|m4a)$/i, ''); };
+  function fsRank(list, q, kind) {
+    const terms = fsWords(q).filter(function (t) { return t.length > 1 && FS_STOP.indexOf(t) < 0; })
+      .map(function (t) { return t.length > 3 && /s$/.test(t) ? t.slice(0, -1) : t; });
+    const wantsMusic = terms.some(function (t) { return FS_MUSIC.some(function (m) { return m.indexOf(t) === 0 || t.indexOf(m) === 0; }); });
+    return list.map(function (x) {
+      const tags = (x.tags || []).map(fold), words = fsWords(x.name).concat(fsWords(tags.join(' '))), cat = String(x.category_code || '');
+      const hit = terms.length ? terms.filter(function (t) { return words.some(function (w) { return w.indexOf(t) === 0; }); }).length / terms.length : 1;
+      const n = x.num_ratings || 0, bay = (n * (x.avg_rating || 0) + 9) / (n + 3);
+      const music = !wantsMusic && (cat === 'm' || cat.indexOf('m-') === 0 || tags.some(function (g) { return FS_MUSIC.indexOf(g) >= 0; }));
+      const fits = kind === 'amb' ? (cat.indexOf('ss') === 0 || tags.some(function (g) { return FS_AMBI.indexOf(g) >= 0; })) : cat.indexOf('fx') === 0;
+      x.lic = fsLic(x.license);
+      x.rank = Math.log10((x.num_downloads || 0) + 1) + 1.3 * (bay - 3) + 5 * hit - (music ? 4 : 0) + (fits ? 0.75 : 0);
+      return x;
+    }).filter(function (x) { return x.lic && x.previews; }).sort(function (a, b) { return b.rank - a.rank; });
+  }
   async function fsSearch() {
-    if (!fsKey || !fsQ.trim()) return;
+    const q = fsQ.trim();
+    if (!fsKey || !q) return;
+    const my = ++fsReq;
     fsStop(); fsBusy = true; fsMsg = ''; render();
-    const range = fsLen === 'fx' ? '[0 TO 20]' : '[25 TO 900]';
-    const u = 'https://freesound.org/apiv2/search/text/?query=' + encodeURIComponent(fsQ.trim()) +
-      '&filter=' + encodeURIComponent('license:"Creative Commons 0" duration:' + range) +
-      '&fields=id,name,duration,previews,username&page_size=15&token=' + encodeURIComponent(fsKey);
+    const dur = fsLen === 'fx' ? 'duration:[0 TO 20]' : 'duration:[25 TO 300]', CC0 = 'license:"Creative Commons 0"';
+    const url = function (lic) {
+      return 'https://freesound.org/apiv2/search/text/?query=' + encodeURIComponent(q) +
+        '&filter=' + encodeURIComponent(lic + ' AND ' + dur) +
+        '&sort=downloads_desc&group_by_pack=1&page_size=60&fields=' + FS_FIELDS + '&token=' + encodeURIComponent(fsKey);
+    };
+    let res = null, msg = '';
     try {
-      const r = await fetch(u);
-      if (r.status === 401 || r.status === 403) { fsMsg = 'A chave do Freesound não foi aceita. Confira se copiou inteira.'; fsRes = null; }
-      else if (!r.ok) { fsMsg = 'O Freesound não respondeu (' + r.status + '). Tente de novo.'; fsRes = null; }
-      else { const j = await r.json(); fsRes = j.results || []; if (!fsRes.length) fsMsg = 'Nada encontrado. Tente outra palavra, de preferência em inglês (rain, tavern, door).'; }
-    } catch (e) { fsMsg = 'Não consegui falar com o Freesound. Verifique a conexão.'; fsRes = null; }
-    fsBusy = false; render();
+      let r = await fetch(url(fsCred ? 'license:("Creative Commons 0" OR "Attribution")' : CC0)), j = r.ok ? await r.json() : null;
+      /* se o Freesound recusar o filtro com as duas licenças (ou não achar nada com ele), tenta só com CC0 */
+      if (fsCred && (r.status === 400 || (j && !(j.results || []).length))) { r = await fetch(url(CC0)); j = r.ok ? await r.json() : null; }
+      if (r.status === 401 || r.status === 403) msg = 'A chave do Freesound não foi aceita. Confira se copiou inteira.';
+      else if (!r.ok || !j) msg = 'O Freesound não respondeu (' + r.status + '). Tente de novo.';
+      else { res = fsRank(j.results || [], q, fsLen); if (!res.length) msg = 'Nada encontrado. Tente outra palavra, de preferência em inglês (rain, tavern, door).'; }
+    } catch (e) { msg = 'Não consegui falar com o Freesound. Verifique a conexão.'; }
+    if (my !== fsReq) return;
+    fsRes = res; fsMsg = msg; fsShow = FS_PAGE; fsBusy = false; render();
   }
   function fsPreview(id) {
-    if (fsPlay === id) { fsStop(); render(); return; }
+    if (fsPlay === Number(id)) { fsStop(); render(); return; }
     fsStop();
     const it = (fsRes || []).filter(function (x) { return x.id === Number(id); })[0];
     if (!it) return;
-    fsAudio = new Audio(it.previews['preview-lq-mp3']);
+    fsAudio = new Audio(it.previews['preview-hq-mp3'] || it.previews['preview-lq-mp3']);
     fsPlay = Number(id);
     fsAudio.onended = function () { fsPlay = null; fsAudio = null; if (mode === 'lib') render(); };
     fsAudio.play().catch(function () { fsPlay = null; toast('Não consegui tocar esta prévia.'); render(); });
     render();
   }
+  const fsSaved = function (fid) { return LIBR.items.some(function (it) { return it.cred && it.cred.fs === fid; }); };
   async function fsSave(id) {
     const it = (fsRes || []).filter(function (x) { return x.id === Number(id); })[0];
-    if (!it || fsSaving[id]) return;
+    if (!it || fsSaving[id] || fsSaved(it.id)) return;
     if (!sbUser()) { toast('Entre na Nuvem para guardar na biblioteca.'); return; }
     fsSaving[id] = true; render();
     try {
       const r = await fetch(it.previews['preview-hq-mp3']);
       if (!r.ok) throw new Error('baixar');
       const blob = await r.blob();
-      const file = new File([blob], it.name.replace(/\.[^.]+$/, '') + '.mp3', { type: 'audio/mpeg' });
-      await libAdd(file, 'snd');
-      toast('Guardado na biblioteca: ' + it.name);
+      const li = await libAdd(new File([blob], fsName(it.name) + '.mp3', { type: 'audio/mpeg' }), 'snd');
+      /* o tipo segue a busca, e o crédito fica guardado com o som */
+      li.kind = fsLen === 'amb' ? 'amb' : 'fx';
+      li.cred = { fs: it.id, name: fsName(it.name), by: it.username, lic: it.lic ? it.lic.code : '' };
+      libSave();
+      toast('Guardado na biblioteca: ' + fsName(it.name));
     } catch (e) { toast('Não consegui baixar este som. Tente outro, ou baixe pelo site e envie como arquivo.'); }
     delete fsSaving[id]; render();
   }
+  const fsNum = function (n) { n = n || 0; return n >= 10000 ? Math.round(n / 1000) + ' mil' : (n >= 1000 ? (n / 1000).toFixed(1).replace('.', ',').replace(',0', '') + ' mil' : String(n)); };
+  function fsRow(x) {
+    const saved = fsSaved(x.id), nm = fsName(x.name);
+    const meta = ['<span>' + fmtDur(x.duration) + '</span>', '<span>' + esc(x.username) + '</span>'];
+    if (x.num_ratings) meta.push('<span class="fs-star" title="Nota média de ' + x.num_ratings + ' voto' + (x.num_ratings > 1 ? 's' : '') + '">★ ' + (x.avg_rating || 0).toFixed(1).replace('.', ',') + ' <i>(' + x.num_ratings + ')</i></span>');
+    meta.push('<span>' + fsNum(x.num_downloads) + ' downloads</span>');
+    if (x.lic.credit) meta.push('<span class="fs-lic" title="Pede crédito ao autor se você publicar o som">' + esc(x.lic.code) + '</span>');
+    return '<li class="lib-row fs-row"><button type="button" class="icon-btn lib-play" data-action="fsPlay" data-id="' + x.id + '" aria-label="' + (fsPlay === x.id ? 'Parar' : 'Ouvir') + ' ' + esc(nm) + '">' + (fsPlay === x.id ? ICO.stop : ICO.play) + '</button>' +
+      '<div class="fs-info"><span class="lib-n" title="' + esc(nm) + '">' + esc(nm) + '</span><span class="fs-meta">' + meta.join('<span class="sr">, </span>') + '</span></div>' +
+      '<button type="button" class="btn sm' + (saved ? ' quiet' : ' primary') + '" data-action="fsSave" data-id="' + x.id + '"' + (fsSaving[x.id] || saved ? ' disabled' : '') + '>' + (saved ? 'Guardado' : (fsSaving[x.id] ? 'Guardando…' : 'Guardar')) + '</button></li>';
+  }
   function fsPanel() {
-    let h = '<section class="sec"><div class="sec-h"><h2>Buscar no Freesound</h2><p class="hint">Sons livres com licença CC0, que não exigem crédito.</p></div>';
+    let h = '<section class="sec"><div class="sec-h"><h2>Buscar no Freesound</h2><p class="hint">Os sons mais baixados e mais bem avaliados aparecem primeiro, um de cada pacote. Busque em inglês.</p></div>';
     if (!fsKey) {
       h += '<p class="hint">Precisa de uma chave gratuita: entre em freesound.org, abra <a href="https://freesound.org/apiv2/apply" target="_blank" rel="noopener">freesound.org/apiv2/apply</a>, crie uma credencial e copie o campo <em>Client secret/Api key</em>. A chave fica só neste aparelho.</p>' +
         '<form id="fs-keyform" class="add-bar"><input type="text" id="fs-key" autocomplete="off" spellcheck="false" placeholder="Chave do Freesound" aria-label="Chave do Freesound"><button type="submit" class="btn primary">Guardar chave</button></form></section>';
       return h;
     }
-    h += '<form id="fs-form" class="add-bar"><input type="text" id="fs-q" value="' + esc(fsQ) + '" placeholder="Ex.: tavern, rain, wolf howl" autocomplete="off" aria-label="O que procurar" style="flex:2 1 220px">' +
-      '<select id="fs-len" aria-label="Tipo"><option value="fx"' + (fsLen === 'fx' ? ' selected' : '') + '>Efeitos (até 20 s)</option><option value="amb"' + (fsLen === 'amb' ? ' selected' : '') + '>Ambientes (25 s ou mais)</option></select>' +
-      '<button type="submit" class="btn primary"' + (fsBusy ? ' disabled' : '') + '>' + (fsBusy ? 'Buscando…' : 'Buscar') + '</button></form>';
+    h += '<form id="fs-form" class="add-bar"><input type="search" id="fs-q" value="' + esc(fsQ) + '" placeholder="Ex.: rain, tavern, wolf howl" autocomplete="off" enterkeyhint="search" aria-label="O que procurar" style="flex:2 1 220px">' +
+      '<select id="fs-len" aria-label="Tipo"><option value="fx"' + (fsLen === 'fx' ? ' selected' : '') + '>Efeitos (até 20 s)</option><option value="amb"' + (fsLen === 'amb' ? ' selected' : '') + '>Ambientes (25 s a 5 min)</option></select>' +
+      '<button type="submit" class="btn primary"' + (fsBusy ? ' disabled' : '') + '>' + (fsBusy ? 'Buscando…' : 'Buscar') + '</button></form>' +
+      '<div class="fs-opts"><label class="chk"><input type="checkbox" id="fs-cred"' + (fsCred ? ' checked' : '') + '>Incluir sons CC BY</label>' +
+      '<p class="hint">CC0 é livre. CC BY pede crédito ao autor se você publicar o som (num stream ou vídeo, por exemplo); o crédito fica guardado com o som, na biblioteca.</p></div>';
     if (fsMsg) h += '<p class="hint" role="status">' + esc(fsMsg) + '</p>';
     if (fsRes && fsRes.length) {
-      h += '<ul class="lib-list">' + fsRes.map(function (x) {
-        return '<li class="lib-row"><button type="button" class="icon-btn lib-play" data-action="fsPlay" data-id="' + x.id + '" aria-label="Ouvir ' + esc(x.name) + '">' + (fsPlay === x.id ? ICO.stop : ICO.play) + '</button>' +
-          '<span class="lib-n" title="' + esc(x.name) + '">' + esc(x.name) + '</span><span class="tag">' + fmtDur(x.duration) + ', ' + esc(x.username) + '</span>' +
-          '<button type="button" class="btn sm primary" data-action="fsSave" data-id="' + x.id + '"' + (fsSaving[x.id] ? ' disabled' : '') + '>' + (fsSaving[x.id] ? 'Guardando…' : 'Guardar') + '</button></li>';
-      }).join('') + '</ul>';
+      h += '<ul class="lib-list fs-list">' + fsRes.slice(0, fsShow).map(fsRow).join('') + '</ul>';
+      if (fsRes.length > fsShow) h += '<div class="row"><button type="button" class="btn quiet sm" data-action="fsMore">Mostrar mais ' + Math.min(FS_PAGE, fsRes.length - fsShow) + '</button></div>';
     }
     h += '<div class="row"><button type="button" class="linkbtn" data-action="fsKeyClear">Trocar a chave</button></div></section>';
     return h;
+  }
+  /* créditos dos sons CC BY guardados, prontos para colar na descrição de um vídeo ou stream */
+  const libCredList = function () { return LIBR.items.filter(function (x) { return x.type === 'snd' && x.cred && /^CC BY/.test(x.cred.lic || ''); }); };
+  function libCredsCopy() {
+    const L = libCredList();
+    if (!L.length) return;
+    const txt = 'Sons do Freesound (freesound.org):\n' + L.map(function (x) { return '"' + (x.cred.name || x.name) + '", de ' + x.cred.by + ' (' + x.cred.lic + '): https://freesound.org/s/' + x.cred.fs + '/'; }).join('\n');
+    const done = function () { toast(L.length === 1 ? 'Crédito copiado.' : L.length + ' créditos copiados.'); };
+    try { navigator.clipboard.writeText(txt).then(done, function () { libCredsShow(txt); }); } catch (e) { libCredsShow(txt); }
+  }
+  function libCredsShow(txt) {
+    const el = $('#lib-creds');
+    if (!el) return;
+    el.hidden = false; el.value = txt; el.focus(); el.select();
+    toast('Selecionei os créditos: é só copiar.');
   }
   function renderLib() {
     const head = '<header class="page-h"><p class="eyebrow">Biblioteca</p><h1>Seus sons e imagens</h1><p class="lede">Sons e imagens que você envia uma vez e usa em qualquer cena ou aventura. Os arquivos ficam guardados na nuvem.</p></header>';
@@ -1744,7 +1826,8 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       '<p class="hint">' + (isImg ? 'Escolha uma ou várias imagens, ou arraste para cá. Elas são reduzidas ao tamanho de tela antes de subir.' : 'Escolha um ou vários arquivos mp3, m4a, ogg ou wav, ou arraste para cá. Arquivos com mais de 25 segundos entram como ambiente; os curtos, como efeito. Dá para trocar depois.') + '</p>' +
       '<div class="row"><label class="btn primary file-btn">' + ICO.upload + '<span>' + (isImg ? 'Escolher imagens' : 'Escolher sons') + '</span><input type="file" id="lib-file" multiple accept="' + (isImg ? 'image/*' : 'audio/*') + '"></label>' + (libBusy ? '<span class="hint" role="status">' + esc(libBusy) + '</span>' : '') + '</div></section>' +
       (isImg ? '' : fsPanel()) +
-      '<section class="sec"><div class="sec-h"><h2>' + (isImg ? 'Suas imagens' : 'Seus sons') + '</h2></div><div class="field narrow"><label for="lib-q">Filtrar pelo nome</label><input type="text" id="lib-q" value="' + esc(libQ) + '" placeholder="Nome do arquivo" autocomplete="off"></div>' + libRows(false) + '</section></div></div>';
+      '<section class="sec"><div class="sec-h"><h2>' + (isImg ? 'Suas imagens' : 'Seus sons') + '</h2></div><div class="field narrow"><label for="lib-q">Filtrar pelo nome</label><input type="text" id="lib-q" value="' + esc(libQ) + '" placeholder="Nome do arquivo" autocomplete="off"></div>' + libRows(false) +
+      (!isImg && libCredList().length ? '<div class="row"><button type="button" class="linkbtn" data-action="libCreds">Copiar os créditos dos sons CC BY (' + libCredList().length + ')</button></div><textarea id="lib-creds" class="cred-msg" rows="4" readonly hidden aria-label="Créditos dos sons"></textarea>' : '') + '</section></div></div>';
   }
   function renderPicker() {
     const el = $('#libdlg');
@@ -3746,6 +3829,8 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (a === 'fsPlay') { fsPreview(id); return; }
     if (a === 'fsSave') { fsSave(id); return; }
     if (a === 'fsKeyClear') { fsKey = ''; fsRes = null; lsSet(FS_KEY, ''); render(); return; }
+    if (a === 'fsMore') { fsShow += FS_PAGE; render(); return; }
+    if (a === 'libCreds') { libCredsCopy(); return; }
     if (a === 'libPlay') { libPreview(id); return; }
     if (a === 'libUse') { if (libPick && libPick.type === 'img') addLibImage(id); else addLibSound(id); renderPicker(); return; }
     if (a === 'libDel') {
@@ -3881,7 +3966,8 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       return;
     }
     if (t.id === 'camp-sys') { campSystemSet(t.value); return; }
-    if (t.id === 'fs-len') { fsLen = t.value; return; }
+    if (t.id === 'fs-len') { fsLen = t.value; if (fsRes && fsQ.trim()) fsSearch(); return; }
+    if (t.id === 'fs-cred') { fsCred = t.checked; lsSet(FS_CRED, fsCred); if (fsRes && fsQ.trim()) fsSearch(); else render(); return; }
     if (t.id === 'fade-sel') { lsSet('ht-fade', t.value); return; }
     if (t.getAttribute && t.getAttribute('data-libkind')) { const it = libFind(t.getAttribute('data-libkind')); if (it) { it.kind = t.value; libSave(); } return; }
     if (t.id === 'lib-file' && t.files && t.files.length) { libAddMany(t.files, libTab === 'img' ? 'img' : 'snd', false); t.value = ''; return; }
