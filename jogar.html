@@ -394,6 +394,35 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
   .tst-t { animation: tst-time var(--tt, 20s) linear forwards !important; }
 }
 @keyframes tst-time { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+/* ---- nuvem: mostra se o que você muda já está salvo (mesmo desenho do app do Mestre) ---- */
+.cloud { --active: var(--accent); position: relative; isolation: isolate; display: inline-grid; place-items: center; width: 42px; height: 42px; padding: 0; border: 0; border-radius: 12px; background: var(--line); color: var(--muted); cursor: pointer; transition: background 0.3s, box-shadow 0.6s, color 0.3s; }
+.cloud:hover { background: color-mix(in srgb, var(--muted) 55%, var(--line)); }
+.cloud .face { position: absolute; z-index: 1; inset: 1.5px; border-radius: 10.5px; background: var(--surface); }
+.cloud > svg { position: relative; z-index: 3; width: 21px; height: 21px; }
+.cloud .dot { position: absolute; z-index: 4; top: 5px; right: 5px; width: 8px; height: 8px; border-radius: 50%; background: var(--muted); box-shadow: 0 0 0 2px var(--surface); transition: background 0.4s, box-shadow 0.4s; }
+.cloud > svg.trail { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; fill: none; stroke-width: 1.6; pointer-events: none; overflow: hidden; }
+.cloud .trail g { opacity: 0; transition: opacity 0.8s ease; }
+.cloud .trail path { stroke: var(--active); animation: cloud-run 14s linear var(--ps, 0s) infinite; }
+.cloud .trail .fast path { animation: cloud-run 1.25s linear var(--pf, 0s) infinite; }
+.cloud .trail .fast path.h { stroke: var(--accent); }
+.cloud[data-cl="ok"] { color: var(--fg); }
+.cloud[data-cl="ok"] .dot { background: var(--ok); }
+.cloud[data-cl="ok"] .trail .slow { opacity: 0.9; }
+.cloud[data-cl="busy"] { color: var(--fg); box-shadow: 0 0 16px -5px var(--active); }
+.cloud[data-cl="busy"] .trail .fast { opacity: 1; }
+.cloud[data-cl="busy"] .dot { background: var(--active); box-shadow: 0 0 0 2px var(--surface), 0 0 8px var(--active); }
+.cloud[data-cl="off"], .cloud[data-cl="err"] { color: #ffb48f; }
+.cloud[data-cl="off"] .dot, .cloud[data-cl="err"] .dot { background: #ff9a6b; }
+.cloud.flash { box-shadow: 0 0 0 1px var(--ok), 0 0 18px -4px var(--ok); }
+.cloud.flash .dot { box-shadow: 0 0 0 2px var(--surface), 0 0 10px var(--ok); }
+@keyframes cloud-run { from { stroke-dashoffset: 0; } to { stroke-dashoffset: -158.372; } }
+@media (prefers-reduced-motion: reduce) {
+  .cloud { transition: background 0.3s, box-shadow 0.6s, color 0.3s !important; }
+  .cloud .trail g { transition: opacity 0.8s ease !important; }
+  .cloud .trail path { animation: cloud-run 14s linear var(--ps, 0s) infinite !important; }
+  .cloud .trail .fast path { animation: cloud-run 1.25s linear var(--pf, 0s) infinite !important; }
+}
+
 @media (max-width: 759px) {
   .tstack { left: max(12px, env(safe-area-inset-left, 0px)); right: max(12px, env(safe-area-inset-right, 0px)); width: auto; bottom: calc(80px + env(safe-area-inset-bottom, 0px)); }
   body.has-pill .tstack { bottom: calc(132px + env(safe-area-inset-bottom, 0px)); }
@@ -470,16 +499,52 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
     }
     return x.access_token;
   }
+  /* nuvem: conta o que está sendo gravado (ficha, mochila, anotações, memória, dados). Presença e leituras não contam */
+  const CLOUD_LABEL = { ok: 'tudo salvo', busy: 'sincronizando…', off: 'sem conexão', err: 'não consegui salvar' };
+  const CLOUD_TRAIL = (function () {
+    const d = 'M23 .8H34A11.2 11.2 0 0 1 45.2 12V34A11.2 11.2 0 0 1 34 45.2H12A11.2 11.2 0 0 1 .8 34V12A11.2 11.2 0 0 1 12 .8Z', P = 158.372, E = 100;
+    const lay = function (T, N, head) {
+      const L = [], I = [], O = [];
+      for (let k = 0; k < N; k++) L.push(k ? head + (T - head) * Math.pow(k / (N - 1), 1.1) : head);
+      L.forEach(function (l, k) { I.push(k ? Math.pow(1 - (L[k - 1] + l) / 2 / T, 1.5) : 1); });
+      for (let k = 0; k < N; k++) O.push(1 - (1 - I[k]) / (k + 1 < N ? 1 - I[k + 1] : 1));
+      return L.map(function (l, k) { return '<path' + (k ? '' : ' class="h"') + ' d="' + d + '" stroke-dasharray="0 ' + (E - l).toFixed(2) + ' ' + l.toFixed(2) + ' ' + (P - E).toFixed(3) + '" stroke-opacity="' + O[k].toFixed(3) + '"/>'; }).join('');
+    };
+    return '<svg class="trail" viewBox="0 0 46 46" aria-hidden="true" focusable="false"><g class="slow">' + lay(60, 14, 3) + '</g><g class="fast">' + lay(90, 16, 5) + '</g></svg>';
+  })();
+  let cPend = 0, cBad = '', cVis = 'ok', cBusyAt = 0, cTimer = null;
+  function cState() { return cPend > 0 ? 'busy' : (cBad || 'ok'); }
+  function cPhase() { const t = performance.now(); return '--ps:' + (-(t % 14000) / 1000).toFixed(3) + 's;--pf:' + (-(t % 1250) / 1000).toFixed(3) + 's'; }
+  function cloudPaint() {
+    const st = cState(), b = document.getElementById('cloud');
+    clearTimeout(cTimer);
+    if (cVis === 'busy' && st !== 'busy') {
+      const wait = 1300 - (Date.now() - cBusyAt);
+      if (wait > 0) { cTimer = setTimeout(cloudPaint, wait); return; }
+      if (st === 'ok' && b) { b.classList.add('flash'); setTimeout(function () { b.classList.remove('flash'); }, 1100); }
+    }
+    if (st === 'busy' && cVis !== 'busy') cBusyAt = Date.now();
+    cVis = st;
+    if (b) { b.setAttribute('data-cl', st); b.setAttribute('aria-label', 'Nuvem: ' + CLOUD_LABEL[st]); b.title = 'Nuvem: ' + CLOUD_LABEL[st]; }
+  }
+  window.addEventListener('offline', function () { cBad = 'off'; cloudPaint(); });
+  window.addEventListener('online', function () { if (cBad === 'off') cBad = ''; cloudPaint(); });
   async function api(path, opt) {
     const t = await token();
     opt = opt || {};
     opt.headers = Object.assign({ apikey: KEY, Authorization: 'Bearer ' + t }, opt.headers || {});
-    return fetch(SB + path, opt);
+    const m = String(opt.method || 'GET').toUpperCase();
+    if (m === 'GET' || m === 'HEAD' || /\/rpc\/(ping|put_summary)|\/presence/.test(path)) return fetch(SB + path, opt);
+    cPend++; cloudPaint();
+    try { const r = await fetch(SB + path, opt); cBad = r.ok ? '' : 'err'; return r; }
+    catch (e) { cBad = navigator.onLine === false ? 'off' : 'err'; throw e; }
+    finally { cPend--; cloudPaint(); }
   }
+
   const JSONH = { 'Content-Type': 'application/json' };
 
   /* ---------- estado ---------- */
-  let camps = null, cur = null, tab = 'dados', loadErr = '';
+  let camps = null, cur = null, tab = 'ficha', loadErr = '';
   let dice = { qty: 1, mod: 0, adv: 0, label: '', priv: false, nh: 10, expr: '' };
   let last = null, notes = { notes: [] }, noteId = null, noteSv = '', noteT = null, noteDelArm = false, notesFor = null;
 
@@ -501,6 +566,7 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
   }
   function topBar(title, sub) {
     return '<div class="top"><div><h1>' + esc(title) + '</h1>' + (sub ? '<div class="sub">' + sub + '</div>' : '') + '</div><div class="who">' +
+      (cur && !EMBED ? '<button type="button" class="cloud" id="cloud" data-cl="' + cVis + '" style="' + cPhase() + '" data-a="cloud" aria-label="Nuvem: ' + CLOUD_LABEL[cVis] + '" title="Nuvem: ' + CLOUD_LABEL[cVis] + '"><span class="face"></span>' + CLOUD_TRAIL + ICO.cloud + '<span class="dot"></span></button>' : '') +
       (cur && !EMBED ? '<button type="button" class="ghost hbtn" id="hbtn" data-a="hist" aria-expanded="false" aria-controls="hist" title="Rolagens e itens da mesa">' + ICO.dados + '<span>Rolagens</span><span class="hb" id="hbadge" hidden></span></button>' : '') +
       (camps && camps.length > 1 && cur ? '<button type="button" class="ghost" data-a="lobby">Mesas</button>' : '') +
       '<button type="button" class="ghost" data-a="profile">Perfil</button><button type="button" class="ghost" data-a="out">Sair</button></div></div>';
@@ -518,6 +584,7 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
     return m ? m.name : (cur && cur.owner === u.id ? 'Mestre' : u.email);
   }
   const ICO = {
+    cloud: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5H7z"/></svg>',
     dados: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M12 2.5l8.5 4.9v9.2L12 21.5l-8.5-4.9V7.4z"/><path d="M12 2.5v19M3.5 7.4l8.5 4.9 8.5-4.9"/></svg>',
     ficha: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9.5" r="2.6"/><path d="M7.5 17c.8-2.3 2.5-3.4 4.5-3.4s3.7 1.1 4.5 3.4"/></svg>',
     notas: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4M9 12h7M9 16h7"/></svg>',
@@ -537,7 +604,7 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
     histClose();
     app.innerHTML = topBar(cur.name, '<span class="sys">' + esc(SYS[cur.system] || cur.system) + '</span>') +
       '<div class="party" id="party" role="list" aria-label="Grupo: quem está na mesa"></div>' +
-      '<nav class="nav" role="tablist" aria-label="Ferramentas">' + [['dados', 'Dados', 'dados'], own ? ['fichas', 'Fichas', 'ficha'] : ['ficha', 'Ficha', 'ficha'], own ? ['mochilas', 'Mochilas', 'mochila'] : ['mochila', 'Mochila', 'mochila'], own ? null : ['memoria', 'Memória', 'memoria'], ['notas', 'Anotações', 'notas']].filter(Boolean).map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + ICO[t[2]] + '<span>' + t[1] + '</span>' + (t[2] === 'mochila' ? '<span class="nb" id="nb-m" hidden></span>' : '') + '</button>'; }).join('') + '</nav>' +
+      '<nav class="nav" role="tablist" aria-label="Ferramentas">' + [own ? ['fichas', 'Fichas', 'ficha'] : ['ficha', 'Ficha', 'ficha'], own ? ['mochilas', 'Mochilas', 'mochila'] : ['mochila', 'Mochila', 'mochila'], own ? null : ['memoria', 'Memória', 'memoria'], ['notas', 'Anotações', 'notas'], ['dados', 'Dados', 'dados']].filter(Boolean).map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + ICO[t[2]] + '<span>' + t[1] + '</span>' + (t[2] === 'mochila' ? '<span class="nb" id="nb-m" hidden></span>' : '') + '</button>'; }).join('') + '</nav>' +
       '<div class="pane" id="pane"></div>';
     partyStart();
     evStart();
@@ -2712,7 +2779,7 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
     }
     if (el.dataset.adv != null) { dice.adv = parseInt(el.dataset.adv, 10); document.querySelectorAll('[data-adv]').forEach(function (b) { b.setAttribute('aria-pressed', String(parseInt(b.dataset.adv, 10) === dice.adv)); }); return; }
     if (el.dataset.tab) { tab = el.dataset.tab; document.querySelectorAll('[data-tab]').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tab === tab)); }); drawPane(); return; }
-    if (el.dataset.camp) { cur = camps.filter(function (c) { return c.id === el.dataset.camp; })[0]; tab = 'dados'; last = null; drawLobby(); return; }
+    if (el.dataset.camp) { cur = camps.filter(function (c) { return c.id === el.dataset.camp; })[0]; tab = cur.owner === me().id ? 'fichas' : 'ficha'; last = null; drawLobby(); return; }
     if (el.dataset.note) { noteId = el.dataset.note; noteDelArm = false; paintNotes(); return; }
     const a = el.dataset.a;
     if (a === 'duality') doRoll(rollDuality());
@@ -2722,6 +2789,7 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
     else if (a === 'histx') { histClose(); const b = $('#hbtn'); if (b) b.focus(); }
     else if (a === 'lobby') { cur = null; drawCamps(); }
     else if (a === 'retry') start();
+    else if (a === 'cloud') { const k = cState(); msgToast('Nuvem: ' + CLOUD_LABEL[k] + '.', k === 'ok' ? 'good' : (k === 'busy' ? '' : 'bad')); }
     else if (a === 'profile') profile();
     else if (a === 'pclose') dlgClose();
     else if (a === 'out') { partyStop(); evStop(); try { localStorage.removeItem('cdm-sb'); } catch (x) { /* ok */ } stopBag(); stopStage(); camps = null; cur = null; drawLogin(); }
