@@ -219,6 +219,7 @@
     eye: S('<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.6"/>'),
     brush: S('<path d="M14.5 4.5l5 5L11 18l-5-5z"/><path d="M6 13c-2 0-3 1.5-3 3.5V20h3.5c2 0 3.5-1 3.5-3"/>'),
     rect: S('<rect x="4" y="5" width="16" height="14" rx="1.5" stroke-dasharray="3 2.5"/>'),
+    undo: S('<path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/>'),
     sword: S('<path d="M14.5 17.5 3.5 6.5v-3h3l11 11M13 19l6-6M16 16l4 4M18.5 21l2.5-2.5"/>')
   };
   var SELECTOR = '[data-mt],[data-ma],[data-mpre],[data-mn],[data-mc],[data-mfm],[data-mfs],[data-mfz],[data-mgt],[data-mgo],[data-mfa],[data-mfr]';
@@ -240,7 +241,7 @@
     var view = { x: 0, y: 0, k: 1 }, views = {}, atMin = true;
     var pend = {}, busy = {}, sendT = {}, hpBase = {}, hpT = {};
     var fight = null, fightRev = -1, fightBusy = false;
-    var pts = {}, mode = null, gest = null, timers = [], dead = false, saveT = null, fogT = null, pubT = null, pubBusy = false, pubAgain = false, drawQ = 0, fogQ = 0, tick = 0, lastFull = 0;
+    var pts = {}, selDraw = false, mode = null, gest = null, timers = [], dead = false, saveT = null, fogT = null, pubT = null, pubBusy = false, pubAgain = false, drawQ = 0, fogQ = 0, tick = 0, lastFull = 0;
 
     var toolsBox = null, fightBox = ctx.combatEl || null;
     host.innerHTML = '<div class="mp' + (ctx.full ? ' full' : '') + (ctx.fill ? ' fill' : '') + '"><svg class="mp-svg" xmlns="http://www.w3.org/2000/svg"><defs class="mp-defs"></defs><g class="mp-w"><g class="L-img"></g><g class="L-grid"></g><g class="L-obj"></g><g class="L-fog"></g><g class="L-tok"></g><g class="L-hl"></g><g class="L-rul"></g></g></svg>' +
@@ -284,14 +285,21 @@
     function fidx(c, r) { if (!FG || c < FG.c0 || r < FG.r0 || c >= FG.c0 + FG.cols || r >= FG.r0 + FG.rows) return -1; return (r - FG.r0) * FG.cols + (c - FG.c0); }
     function bit(b, i) { return i >= 0 && ((b[i >> 3] >> (i & 7)) & 1) === 1; }
     function emptyBits() { return new Uint8Array(FG ? Math.ceil(FG.cols * FG.rows / 8) : 0); }
-    function loadFog() {
-      var c = (map && map.cfg) || {}, on = !!(map && map.fog), bits = on ? b64d(map.fog) : null;
-      fog = { on: on, bits: emptyBits() };
-      if (on && bits && FG && c.fs === FG.fs) {
+    function readBits(src) {
+      var c = (map && map.cfg) || {}, out = emptyBits(), bits = src ? b64d(src) : null;
+      if (bits && FG && c.fs === FG.fs) {
         var f0 = Array.isArray(c.f0) ? c.f0 : [FG.c0, FG.r0], oc = num(map.fog_cols, FG.cols), orr = num(map.fog_rows, FG.rows);
-        for (var r = 0; r < orr; r++) for (var cc = 0; cc < oc; cc++) if (bit(bits, r * oc + cc)) { var ni = fidx(cc + f0[0], r + f0[1]); if (ni >= 0) fog.bits[ni >> 3] |= 1 << (ni & 7); }
+        for (var r = 0; r < orr; r++) for (var cc = 0; cc < oc; cc++) if (bit(bits, r * oc + cc)) { var ni = fidx(cc + f0[0], r + f0[1]); if (ni >= 0) out[ni >> 3] |= 1 << (ni & 7); }
       }
+      return out;
     }
+    /* bits: o que os jogadores veem (publicado); draft: o que o Mestre está preparando, só vai para eles ao salvar */
+    function loadFog() {
+      var on = !!(map && map.fog);
+      fog = { on: on, bits: on ? readBits(map.fog) : emptyBits() };
+      fog.draft = on && map.fog_draft ? readBits(map.fog_draft) : fog.bits.slice();
+    }
+    function pending() { var n = 0; if (!fog || !fog.on) return 0; for (var i = 0; i < fog.bits.length; i++) { var x = fog.bits[i] ^ fog.draft[i]; while (x) { n += x & 1; x >>= 1; } } return n; }
     function shown(c, r) {
       if (owner) { if (!fog || !fog.on) return true; return bit(fog.bits, fidx(c, r)); }
       var pf = P && P.view && P.view.pf; if (!pf) return true;
@@ -299,11 +307,11 @@
       if (!pf._b) pf._b = b64d(pf.b) || new Uint8Array(0);
       return bit(pf._b, rr * pf.nc + cc);
     }
-    function setCell(c, r, v) { var i = fidx(c, r); if (i < 0) return false; if (bit(fog.bits, i) === !!v) return false; if (v) fog.bits[i >> 3] |= 1 << (i & 7); else fog.bits[i >> 3] &= ~(1 << (i & 7)); return true; }
-    function revealedCells() { var out = []; if (!FG || !fog) return out; for (var r = 0; r < FG.rows; r++) for (var c = 0; c < FG.cols; c++) if (bit(fog.bits, r * FG.cols + c)) out.push([c + FG.c0, r + FG.r0]); return out; }
-    function revealCrop() {
+    function setCell(c, r, v) { var i = fidx(c, r), b = fog.draft; if (i < 0) return false; if (bit(b, i) === !!v) return false; if (v) b[i >> 3] |= 1 << (i & 7); else b[i >> 3] &= ~(1 << (i & 7)); return true; }
+    function revealedCells(arr) { var out = [], b = arr || (fog && fog.bits); if (!FG || !fog) return out; for (var r = 0; r < FG.rows; r++) for (var c = 0; c < FG.cols; c++) if (bit(b, r * FG.cols + c)) out.push([c + FG.c0, r + FG.r0]); return out; }
+    function revealCrop(arr) {
       if (!fog || !fog.on) return [0, 0, W(), H()];
-      var rc = revealedCells(); if (!rc.length) return null;
+      var rc = revealedCells(arr); if (!rc.length) return null;
       var x0 = 1e9, y0 = 1e9, x1 = -1e9, y1 = -1e9;
       rc.forEach(function (p) { var b = G.box(p[0], p[1]); x0 = Math.min(x0, b[0]); y0 = Math.min(y0, b[1]); x1 = Math.max(x1, b[2]); y1 = Math.max(y1, b[3]); });
       x0 = Math.max(0, Math.floor(x0)); y0 = Math.max(0, Math.floor(y0)); x1 = Math.min(W(), Math.ceil(x1)); y1 = Math.min(H(), Math.ceil(y1));
@@ -312,7 +320,7 @@
     function bounds() {
       if (!owner) return P && P.view && P.view.crop;
       if (!map) return null;
-      if (fogPrev) return revealCrop();
+      if (fogPrev) return revealCrop(fog && fog.draft);
       return [0, 0, W(), H()];
     }
     function cellName(n) { return G.t === 'hx' ? (n === 1 ? 'hexágono' : 'hexágonos') : (n === 1 ? 'quadrado' : 'quadrados'); }
@@ -371,9 +379,18 @@
       var d = '', fill;
       if (owner) {
         if (!map || !fog || !fog.on || !FG) { L.fog.innerHTML = ''; return; }
-        var hidden = [];
-        for (var r = 0; r < FG.rows; r++) for (var c = 0; c < FG.cols; c++) if (!bit(fog.bits, r * FG.cols + c)) hidden.push([c + FG.c0, r + FG.r0]);
+        var hidden = [], toShow = [], toHide = [];
+        for (var r = 0; r < FG.rows; r++) for (var c = 0; c < FG.cols; c++) {
+          var i = r * FG.cols + c, dv = bit(fog.draft, i), pv = bit(fog.bits, i), cell = [c + FG.c0, r + FG.r0];
+          if (!dv) hidden.push(cell);
+          if (!fogPrev && dv && !pv) toShow.push(cell);
+          if (!fogPrev && !dv && pv) toHide.push(cell);
+        }
         d = cellsPath(hidden); fill = fogPrev ? 'url(#p-fogp)' : 'url(#p-fogm)';
+        var pend = (toShow.length ? '<path d="' + cellsPath(toShow) + '" fill="#5EE1F5" fill-opacity="0.16" stroke="#5EE1F5" stroke-opacity="0.7" stroke-width="1.5" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>' : '') +
+          (toHide.length ? '<path d="' + cellsPath(toHide) + '" fill="#FF8F8F" fill-opacity="0.14" stroke="#FF8F8F" stroke-opacity="0.7" stroke-width="1.5" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>' : '');
+        L.fog.innerHTML = (d ? '<path clip-path="url(#mp-clip)" d="' + d + '" fill="' + fill + '"/>' : '') + (pend ? '<g clip-path="url(#mp-clip)">' + pend + '</g>' : '');
+        return;
       } else {
         var pf = P && P.view && P.view.pf, bb = bounds();
         if (!pf || !bb) { L.fog.innerHTML = ''; return; }
@@ -447,6 +464,7 @@
     function allObjs() { return Object.keys(objs).map(function (k) { return objs[k]; }); }
     function drawObjs() {
       if (dead) return;
+      if (mode === 'drag' || mode === 'tap') { selDraw = true; return; }
       var list = allObjs().filter(visibleNow).sort(function (a, b) { return a.seq - b.seq; });
       L.obj.innerHTML = list.filter(function (o) { return o.kind === 'obj'; }).map(objSvg).join('');
       var k = 0;
@@ -538,7 +556,8 @@
           : '<div class="mp-grp">' + fb('data-mfm="show"', ICON.eye, 'Revelar', fogMode === 'show') + fb('data-mfm="hide"', ICON.fog, 'Esconder', fogMode === 'hide') + '</div>' +
             '<div class="mp-grp">' + fb('data-mfs="brush"', ICON.brush, 'Pincel', fogShape === 'brush') + fb('data-mfs="rect"', ICON.rect, 'Área', fogShape === 'rect') + '</div>' +
             (fogShape === 'brush' ? '<div class="mp-grp" role="group" aria-label="Tamanho do pincel">' + [1, 2, 3].map(function (n) { return fb('data-mfz="' + n + '" aria-label="Pincel tamanho ' + n + '"', '<b style="font:700 13px var(--m-mono)">' + n + '</b>', '', fogSize === n); }).join('') + '</div>' : '') +
-            '<div class="mp-grp">' + fb('data-ma="fogprev"', ICON.eye, 'Ver como jogador', fogPrev) + '</div>';
+            '<div class="mp-grp">' + fb('data-ma="fogprev"', ICON.eye, 'Prévia', fogPrev) + '</div>' +
+            (pending() ? '<div class="mp-grp">' + fb('data-ma="fogsave"', ICON.eye, 'Salvar para os jogadores (' + pending() + ')', null, 'hot') + fb('data-ma="fogundo"', ICON.undo, 'Desfazer', null) + '</div>' : '<span class="mp-note">Os jogadores já veem isto.</span>');
       } else sub.hidden = true;
       root.classList.toggle('mp-narrow', vp()[0] < 720);
     }
@@ -583,7 +602,7 @@
           '<div class="mp-row"><label class="mp-chk"><input type="checkbox" data-mf="gshow"' + (c.grid !== false ? ' checked' : '') + '> Mostrar a grade</label></div>' +
           '<div class="mp-row"><label>Cor da grade<input type="color" data-mf="gcol" value="' + esc(c.gcol || '#ffffff') + '"></label><label>Força<input type="range" min="0.05" max="1" step="0.05" data-mf="gop" value="' + clamp(num(c.gop, 0.35), 0.05, 1) + '"></label></div></div>';
         h += '<div class="mp-sec"><h3>Névoa de guerra</h3><div class="mp-row"><label class="mp-chk"><input type="checkbox" data-mf="fogon"' + (fog && fog.on ? ' checked' : '') + '> Usar névoa neste mapa</label></div>' +
-          (fog && fog.on ? '<p class="mp-hint">Com a ferramenta Névoa, revele com o pincel ou marcando uma área. Os jogadores recebem só o pedaço revelado, recortado: nem o tamanho do mapa chega até eles. Tokens e objetos na escuridão também ficam escondidos.</p><div class="mp-row"><button type="button" class="mp-b" data-ma="fogall">Revelar tudo</button><button type="button" class="mp-b" data-ma="fognone">Esconder tudo</button><button type="button" class="mp-b" data-ma="fogprev" aria-pressed="' + fogPrev + '">' + ICON.eye + 'Ver como jogador</button></div>'
+          (fog && fog.on ? '<p class="mp-hint">Com a ferramenta Névoa, revele com o pincel ou marcando uma área. Nada muda para os jogadores até você tocar em Salvar: em azul, o que vai aparecer; em vermelho, o que vai sumir. Eles recebem só o pedaço revelado, recortado, e os tokens na escuridão ficam escondidos.</p><div class="mp-row"><button type="button" class="mp-b" data-ma="fogall">Revelar tudo</button><button type="button" class="mp-b" data-ma="fognone">Esconder tudo</button><button type="button" class="mp-b" data-ma="fogprev" aria-pressed="' + fogPrev + '">' + ICON.eye + 'Prévia</button></div>' + (pending() ? '<div class="mp-row"><button type="button" class="mp-b pri wide" data-ma="fogsave">Salvar para os jogadores (' + pending() + ')</button><button type="button" class="mp-b" data-ma="fogundo">Desfazer</button></div>' : '<p class="mp-stat on"><i></i>Os jogadores já veem a névoa como está.</p>')
             : '<p class="mp-hint">Ligue para começar com o mapa todo escondido e ir revelando aos poucos.</p>') + '</div>';
         h += '<div class="mp-sec"><h3>Adicionar ao mapa</h3><div class="mp-chips">' + PRESETS.map(function (pr, i) { return '<button type="button" class="mp-b" data-mpre="' + i + '"><i class="mp-sw" style="background:' + pr.col + '"></i>' + esc(pr.n) + '</button>'; }).join('') + '</div>' +
           '<div class="mp-row"><button type="button" class="mp-b" data-ma="addtok">' + ICON.plus + 'Token novo</button><button type="button" class="mp-b" data-ma="addpl">Jogadores no mapa</button></div></div>';
@@ -659,7 +678,7 @@
     }
     async function loadMaps() {
       try {
-        var rows = await j('/rest/v1/maps?campaign_id=eq.' + cid + '&select=id,name,img,cfg,shown,fog,fog_cols,fog_rows&order=created_at.asc');
+        var rows = await j('/rest/v1/maps?campaign_id=eq.' + cid + '&select=id,name,img,cfg,shown,fog,fog_draft,fog_cols,fog_rows&order=created_at.asc');
         var vs = []; try { vs = await j('/rest/v1/map_views?campaign_id=eq.' + cid + '&select=map_id,view,pimg,rev,name') || []; } catch (e) { vs = []; }
         maps = rows || [];
         var vmap = {}; vs.forEach(function (v) { vmap[v.map_id] = v; });
@@ -828,25 +847,33 @@
       schedulePub();
     }
     function remapFog(oldFG) {
-      if (!oldFG || oldFG.fs !== FG.fs) { var had = countBits(); fog.bits = emptyBits(); if (had) ctx.toast('Mudar o tamanho ou o tipo da grade escondeu de novo o mapa inteiro.', ''); return; }
+      if (!oldFG || oldFG.fs !== FG.fs) { var had = countBits(fog.bits) + countBits(fog.draft); fog.bits = emptyBits(); fog.draft = emptyBits(); if (had) ctx.toast('Mudar o tamanho ou o tipo da grade escondeu de novo o mapa inteiro.', ''); return; }
       if (oldFG.c0 === FG.c0 && oldFG.r0 === FG.r0 && oldFG.cols === FG.cols && oldFG.rows === FG.rows) return;
-      var nb = emptyBits();
-      for (var r = 0; r < oldFG.rows; r++) for (var c = 0; c < oldFG.cols; c++) if (bit(fog.bits, r * oldFG.cols + c)) { var ni = fidx(c + oldFG.c0, r + oldFG.r0); if (ni >= 0) nb[ni >> 3] |= 1 << (ni & 7); }
-      fog.bits = nb;
+      var mv = function (src) { var nb = emptyBits(); for (var r = 0; r < oldFG.rows; r++) for (var c = 0; c < oldFG.cols; c++) if (bit(src, r * oldFG.cols + c)) { var ni = fidx(c + oldFG.c0, r + oldFG.r0); if (ni >= 0) nb[ni >> 3] |= 1 << (ni & 7); } return nb; };
+      fog.bits = mv(fog.bits); fog.draft = mv(fog.draft);
     }
-    function countBits() { var n = 0; if (!fog) return 0; for (var i = 0; i < fog.bits.length; i++) { var b = fog.bits[i]; while (b) { n += b & 1; b >>= 1; } } return n; }
+    function countBits(a) { var n = 0; if (!a) return 0; for (var i = 0; i < a.length; i++) { var b = a[i]; while (b) { n += b & 1; b >>= 1; } } return n; }
     function saveMap() {
       if (!map || !FG) return;
       var m = map;
       m.cfg = Object.assign({}, m.cfg, { f0: [FG.c0, FG.r0], fs: FG.fs });
-      m.fog = fog && fog.on ? b64e(fog.bits) : null; m.fog_cols = FG.cols; m.fog_rows = FG.rows;
-      patch('/rest/v1/maps?id=eq.' + m.id, { cfg: m.cfg, fog: m.fog, fog_cols: m.fog_cols, fog_rows: m.fog_rows }).catch(function () { ctx.toast('Não consegui salvar o mapa.', 'bad'); });
+      m.fog = fog && fog.on ? b64e(fog.bits) : null; m.fog_draft = fog && fog.on ? b64e(fog.draft) : null; m.fog_cols = FG.cols; m.fog_rows = FG.rows;
+      patch('/rest/v1/maps?id=eq.' + m.id, { cfg: m.cfg, fog: m.fog, fog_draft: m.fog_draft, fog_cols: m.fog_cols, fog_rows: m.fog_rows }).catch(function () { ctx.toast('Não consegui salvar o mapa.', 'bad'); });
     }
     function fogChanged() {
       if (!fogQ) fogQ = requestAnimationFrame(function () { fogQ = 0; drawFog(); drawObjs(); if (fogPrev) { L.defs.innerHTML = defsHtml(); clampView(); applyView(); } });
       clearTimeout(fogT); fogT = setTimeout(function () { fogT = null; saveMap(); }, 700);
-      schedulePub(1500);
+      var n = pending(); if ((n > 0) !== !!fogChanged.had) { fogChanged.had = n > 0; bars(); panel(); } else updPending(n);
     }
+    function updPending(n) { var el = root.querySelector('[data-ma="fogsave"] .lb'); if (el) el.textContent = 'Salvar para os jogadores (' + n + ')'; }
+    function fogSave() {
+      if (!fog || !fog.on) return;
+      fog.bits = fog.draft.slice(); fogChanged.had = false;
+      clearTimeout(fogT); fogT = null; saveMap(); drawFog(); drawObjs(); bars(); panel();
+      if (map && map.shown) { schedulePub(0); ctx.toast('Névoa salva. Os jogadores já veem a área nova.', 'good'); }
+      else ctx.toast('Névoa salva. Os jogadores verão assim quando você mostrar o mapa.', 'good');
+    }
+    function fogUndo() { if (!fog || !fog.on) return; fog.draft = fog.bits.slice(); fogChanged.had = false; clearTimeout(fogT); fogT = null; saveMap(); drawFog(); bars(); panel(); if (fogPrev) { clampView(); applyView(); } }
     function shrink(file, max, q) {
       return new Promise(function (res, rej) {
         var u = URL.createObjectURL(file), im = new Image();
@@ -1075,6 +1102,9 @@
     function paint(c, r) { var ch = false; G.disk(c, r, fogSize - 1).forEach(function (p) { if (setCell(p[0], p[1], fogMode === 'show')) ch = true; }); if (ch) fogChanged(); }
     svg.addEventListener('pointerdown', function (e) {
       if (!(owner ? map : P)) return;
+      /* um toque novo (primeiro dedo) zera dedos que ficaram presos: no iPad um "levantar" perdido virava pinça */
+      if (e.isPrimary || e.pointerType === 'mouse') { pts = {}; if (mode === 'pinch' || mode === 'idle') { mode = null; gest = null; } }
+      if (e.pointerType === 'touch' || e.pointerType === 'pen') e.preventDefault();
       var p = rel(e); pts[e.pointerId] = p;
       try { svg.setPointerCapture(e.pointerId); } catch (x) { /* ok */ }
       if (Object.keys(pts).length === 2) { pinchStart(); return; }
@@ -1095,7 +1125,7 @@
       }
       if (tool === 'grid' && owner) { mode = 'gridmove'; gest = { sx: p[0], sy: p[1], ox: G.ox, oy: G.oy, fg: FG ? Object.assign({}, FG) : null }; svg.classList.add('dragging'); return; }
       if (o) {
-        if (owner && sel !== o.id) { sel = o.id; drawObjs(); insp(); fightPanel(); }
+        if (owner && sel !== o.id) { sel = o.id; selDraw = true; insp(); fightPanel(); }
         if (canMove(o) && !(o.data && o.data.lk)) {
           var wv = toWorld(p[0], p[1]), ctr = o.kind === 'tok' ? tokCenter(o.data) : [G.ox + num(o.data.x, 0) * G.s, G.oy + num(o.data.y, 0) * G.s];
           mode = 'drag'; drag = { id: o.id, sx: p[0], sy: p[1], x0: num(o.data.x, 0), y0: num(o.data.y, 0), gx: wv[0] - ctr[0], gy: wv[1] - ctr[1], from: o.kind === 'tok' ? tokCell(o.data) : null, started: false };
@@ -1148,9 +1178,22 @@
         } else {
           o.data = Object.assign({}, o.data, { x: Math.round(((tx - G.ox) / G.s) * 2) / 2, y: Math.round(((ty - G.oy) / G.s) * 2) / 2 });
         }
-        drawObjs(); drawRuler();
+        placeEl(o); drawHl(); drawRuler();
       }
     });
+    /* durante o arrasto só o próprio desenho se move: redesenhar tiraria do lugar o elemento que está sob o dedo */
+    function objTf(d) {
+      var c = G.s, sh = d.sh || 'rect', x = G.ox + num(d.x, 0) * c, y = G.oy + num(d.y, 0) * c, w = Math.max(0.1, num(d.w, 1)) * c, h = Math.max(0.05, num(d.h, 1)) * c, rot = num(d.rot, 0);
+      if (sh === 'circle') return 'translate(' + x + ' ' + y + ')';
+      if (sh === 'cone') return 'translate(' + x + ' ' + y + ') rotate(' + rot + ')';
+      return 'translate(' + (x + w / 2) + ' ' + (y + h / 2) + ') rotate(' + rot + ')';
+    }
+    function placeEl(o) {
+      var g = svg.querySelector('[data-id="' + o.id + '"]'); if (!g) { drawObjs(); return; }
+      if (o.kind === 'tok') { var c = tokCenter(o.data); g.setAttribute('transform', 'translate(' + c[0].toFixed(2) + ' ' + c[1].toFixed(2) + ')'); }
+      else g.setAttribute('transform', objTf(o.data));
+      g.setAttribute('opacity', '0.8');
+    }
     function endPtr(e) {
       if (!pts[e.pointerId]) return;
       delete pts[e.pointerId];
@@ -1175,13 +1218,20 @@
           var nx = num(o.data.x, 0), ny = num(o.data.y, 0); o.data = Object.assign({}, o.data, { x: d.x0, y: d.y0 });
           if (nx !== d.x0 || ny !== d.y0) moveTo(o, nx, ny, d.from); else drawObjs();
           var keepR = ruler; setTimeout(function () { if (ruler === keepR) { ruler = null; drawRuler(); } }, 1400);
-        } else if (o) drawObjs();
+        } else drawObjs();
       }
+      else if (mode === 'tap') drawObjs();
       else if (mode === 'pan' && gest && !gest.moved) { if (owner && sel) { sel = null; drawObjs(); insp(); fightPanel(); } if (ruler && tool !== 'ruler') { ruler = null; drawRuler(); } }
       mode = null; gest = null;
+      if (selDraw) { selDraw = false; drawObjs(); }
     }
     svg.addEventListener('pointerup', endPtr);
     svg.addEventListener('pointercancel', endPtr);
+    svg.addEventListener('lostpointercapture', endPtr);
+    window.addEventListener('pointerup', endPtr);
+    window.addEventListener('pointercancel', endPtr);
+    ['gesturestart', 'gesturechange', 'gestureend'].forEach(function (t) { svg.addEventListener(t, function (e) { e.preventDefault(); }); });
+    svg.addEventListener('touchstart', function (e) { if (e.touches.length > 1 || mode) e.preventDefault(); }, { passive: false });
     svg.addEventListener('wheel', function (e) { e.preventDefault(); var p = rel(e); zoomAt(Math.exp(-e.deltaY * (e.ctrlKey ? 0.01 : 0.0018)), p[0], p[1]); }, { passive: false });
     svg.addEventListener('contextmenu', function (e) { e.preventDefault(); });
 
@@ -1237,12 +1287,14 @@
       else if (a === 'fout') { var o4 = selObj(); if (o4) fightAct('rm', o4.id); }
       else if (a === 'tokimgx') { var o2 = selObj(); if (o2) { queue(o2.id, { img: '' }); insp(); } }
       else if (a === 'fogon') setFogOn(true);
-      else if (a === 'fogall' || a === 'fognone') { if (!fog || !fog.on) return; fog.bits.fill(a === 'fogall' ? 255 : 0); fogChanged(); }
+      else if (a === 'fogall' || a === 'fognone') { if (!fog || !fog.on) return; fog.draft.fill(a === 'fogall' ? 255 : 0); fogChanged(); }
+      else if (a === 'fogsave') fogSave();
+      else if (a === 'fogundo') fogUndo();
       else if (a === 'fogprev') { fogPrev = !fogPrev; regeom(); drawAll(); fit(); bars(); panel(); }
     }
     function setFogOn(on) {
       if (!map || !FG) return;
-      fog = { on: on, bits: emptyBits() };
+      fog = { on: on, bits: emptyBits(), draft: emptyBits() }; fogChanged.had = false;
       if (!on) fogPrev = false;
       syncAllCells(); drawAll(); saveMap(); schedulePub(300); panel();
       if (on && tool !== 'fog') setTool('fog'); else bars();
@@ -1333,7 +1385,7 @@
         if (fogT) { clearTimeout(fogT); saveMap(); }
         if (pubT) { clearTimeout(pubT); publish(false); }
         dead = true; timers.forEach(clearInterval);
-        document.removeEventListener('keydown', onKey); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('resize', onResize);
+        document.removeEventListener('keydown', onKey); document.removeEventListener('visibilitychange', onVis); window.removeEventListener('resize', onResize); window.removeEventListener('pointerup', endPtr); window.removeEventListener('pointercancel', endPtr);
         boxes.forEach(function (el) { el.removeEventListener('click', onClick); el.removeEventListener('input', onIn); el.removeEventListener('change', onCh); });
         if (ro) ro.disconnect();
         Object.keys(sendT).forEach(function (id) { clearTimeout(sendT[id]); flush(id); });
