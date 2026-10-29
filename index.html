@@ -641,7 +641,7 @@ details.note[open] summary .caret { transform: rotate(180deg); }
 .pf-hope { display: inline-flex; align-items: center; gap: 4px; }
 .pf-hope i { width: 7px; height: 7px; transform: rotate(45deg); border: 1px solid var(--ok); }
 .pf-hope i.f { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
-.pb-acts { flex: none; display: grid; gap: 6px; align-content: center; }
+.pb-acts { flex: none; display: grid; grid-template-columns: repeat(2, auto); gap: 6px; align-content: center; }
 .pb-acts .btn { justify-content: flex-start; min-height: 34px; padding: 0 12px; }
 .pb-acts .btn svg { width: 16px; height: 16px; }
 .hist-b .cnt { min-width: 20px; height: 20px; padding: 0 6px; margin-left: auto; border-radius: 99px; background: var(--accent); color: var(--accent-ink); font-family: var(--font-mono); font-size: 11px; line-height: 20px; text-align: center; box-shadow: 0 0 10px -2px var(--accent); }
@@ -998,6 +998,9 @@ details.basic .add-bar { padding: 2px 0 14px; }
 .drawer-h h2 { font-family: var(--font-display); font-weight: 600; font-size: 18px; letter-spacing: 0.1em; text-transform: uppercase; color: #E9E6F7; }
 .drawer-h .btn { color: #E9E6F7; border-color: #2A2645; background: #1B1830; }
 .drawer iframe { flex: 1; width: 100%; border: 0; background: #0A0912; }
+.mapov { position: fixed; inset: 0; z-index: 46; display: flex; flex-direction: column; background: #0A0912; }
+.mapov[hidden] { display: none; }
+.mapov iframe { flex: 1; width: 100%; border: 0; background: #0A0912; }
 
 /* aviso */
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 60; max-width: calc(100% - 32px); padding: 10px 18px; border-radius: 999px; background: var(--fg); color: var(--bg); font-size: 15px; text-align: center; opacity: 0; pointer-events: none; transition: opacity 0.15s; }
@@ -1073,6 +1076,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
   </div>
 </div>
 <div class="gate dlg" id="advdlg" hidden role="dialog" aria-modal="true" aria-label="Aventuras"></div>
+<div class="mapov" id="mapov" hidden role="dialog" aria-label="Mapa da mesa"><div class="drawer-h"><h2>Mapa</h2><button type="button" class="btn quiet sm" data-action="mapClose">Fechar</button></div><iframe title="Mapa da mesa"></iframe></div>
 <aside class="drawer" id="jogdrawer" hidden aria-label="Jogadores"><div class="drawer-h"><h2>Jogadores</h2><button type="button" class="btn quiet sm" data-action="jogClose">Fechar</button></div><iframe title="Fichas e mochilas dos jogadores"></iframe></aside>
 <div class="gate dlg" id="prodlg" hidden role="dialog" aria-modal="true" aria-label="Perfil"></div>
 <div class="gate dlg" id="libdlg" hidden role="dialog" aria-modal="true" aria-label="Biblioteca"></div>
@@ -1099,7 +1103,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     }).join('');
   }
   /* ---------- ícones (traço simples, herdam a cor do texto) ---------- */
-  const APP_VER = '0.50';
+  const APP_VER = '0.51';
   const RAVEN = '<svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>';
   const SV = function (p, extra) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '>' + p + '</svg>'; };
   const ICO = {
@@ -1130,6 +1134,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     login: SV('<path d="M14 4h3.5A1.5 1.5 0 0 1 19 5.5v13a1.5 1.5 0 0 1-1.5 1.5H14"/><path d="M10 8l4 4-4 4M14 12H4"/>'),
     cloud: SV('<path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5H7z"/>', ' stroke-width="1.7"'),
     link: SV('<path d="M10 14a4.5 4.5 0 0 0 6.4 0l2.8-2.8a4.5 4.5 0 0 0-6.4-6.4L11.5 6"/><path d="M14 10a4.5 4.5 0 0 0-6.4 0l-2.8 2.8a4.5 4.5 0 0 0 6.4 6.4L12.5 18"/>'),
+    map: SV('<path d="M3.5 6.5 9 4l6 2.5L20.5 4v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/>'),
     bag: SV('<path d="M6 10a6 6 0 0 1 12 0v9a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2z"/><path d="M9.5 4.6V4a2.5 2.5 0 0 1 5 0v.6"/><path d="M9 14h6v4H9z"/>')
   };
   const safeUrl = function (u) { return /^https:\/\//i.test(u) ? u : '#'; };
@@ -2225,6 +2230,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     return bar('<div class="pfs" id="pfs" role="group" aria-label="Jogadores">' + framesHtml() + '</div>' +
       '<div class="pb-acts"><button type="button" class="btn quiet sm" data-action="jogOpen" data-t="fichas">' + ICO.people + 'Fichas</button>' +
       '<button type="button" class="btn quiet sm" data-action="jogOpen" data-t="mochilas">' + ICO.bag + 'Mochilas</button>' +
+      '<button type="button" class="btn quiet sm" data-action="mapOpen">' + ICO.map + 'Mapa</button>' +
       '<button type="button" class="btn quiet sm hist-b" id="histbtn" data-action="histOpen" aria-expanded="' + histIsOpen() + '" aria-controls="mhist">' + DIE + 'Rolagens<span class="cnt" id="histcnt"' + (histN ? '' : ' hidden') + '>' + (histN > 9 ? '9+' : histN) + '</span></button></div>');
   }
 
@@ -2353,6 +2359,14 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (h) h.hidden = true;
     histFresh = 0;
     const b = $('#histbtn'); if (b) b.setAttribute('aria-expanded', 'false');
+  }
+  window.addEventListener('message', function (e) { if (e.origin === location.origin && e.data && e.data.ht === 'mapclose') { const d = $('#mapov'); if (d) d.hidden = true; } });
+  function mapOpen() {
+    const d = $('#mapov');
+    if (!d) return;
+    const f = d.querySelector('iframe'), src = 'jogar.html?embed=mapa&adv=' + encodeURIComponent(A.id);
+    if (f.getAttribute('src') !== src) f.setAttribute('src', src);
+    d.hidden = false;
   }
   function jogOpen(t, uidv) {
     const d = $('#jogdrawer');
@@ -3862,6 +3876,8 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (a === 'ptab') { ptab = id; if (id === 'online' && (CAMP === undefined || campFor !== A.id) && !campBusy) campLoad(); render(); return; }
     if (a === 'profile') { profileOpen(); return; }
     if (a === 'jogOpen') { jogOpen(el.getAttribute('data-t')); return; }
+    if (a === 'mapOpen') { mapOpen(); return; }
+    if (a === 'mapClose') { $('#mapov').hidden = true; return; }
     if (a === 'pfOpen') { jogOpen('fichas', id); return; }
     if (a === 'histOpen') { if (histIsOpen()) histClose(); else histOpen(); return; }
     if (a === 'histClose') { histClose(); const b = $('#histbtn'); if (b) b.focus(); return; }
@@ -4046,6 +4062,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (e.key === 'Enter' && e.target && e.target.id === 'adv-rn') { e.preventDefault(); const b = $('[data-action="advRenameOk"]'); if (b) b.click(); }
     if (e.key === 'Escape' && pop) { pop = null; renderPop(); return; }
     if (e.key === 'Escape' && histIsOpen()) { histClose(); const b = $('#histbtn'); if (b) b.focus(); return; }
+    if (e.key === 'Escape' && !$('#mapov').hidden) { $('#mapov').hidden = true; return; }
     if (e.key === 'Escape' && !$('#jogdrawer').hidden) { $('#jogdrawer').hidden = true; return; }
     if (e.key === 'Escape' && libPick) { libPick = null; libStop(); renderPicker(); render(); }
     else if (e.key === 'Escape' && dlg) { dlg = null; renderDlg(); }

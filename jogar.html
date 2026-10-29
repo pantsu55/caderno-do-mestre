@@ -393,6 +393,10 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
   .tst.out { transform: none !important; }
   .tst-t { animation: tst-time var(--tt, 20s) linear forwards !important; }
 }
+main.wide { max-width: none; }
+.embed-map main { padding: 0; }
+.embed-map body { padding: 0; }
+.embed-map .pane { padding: 0; gap: 0; }
 @keyframes tst-time { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 /* ---- nuvem: mostra se o que você muda já está salvo (mesmo desenho do app do Mestre) ---- */
 .cloud { --active: var(--accent); position: relative; isolation: isolate; display: inline-grid; place-items: center; width: 42px; height: 42px; padding: 0; border: 0; border-radius: 12px; background: var(--line); color: var(--muted); cursor: pointer; transition: background 0.3s, box-shadow 0.6s, color 0.3s; }
@@ -458,6 +462,7 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
 </head>
 <body>
 <main id="app"></main>
+<script src="mapa.js"></script>
 <div class="dlg" id="dlg" hidden role="dialog" aria-modal="true"></div>
 <script>
 (function () {
@@ -469,8 +474,9 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
   const lsGet = function (k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } };
   const lsSet = function (k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* ok */ } };
   const app = $('#app');
-  const QS = new URLSearchParams(location.search), EMBED = QS.get('embed') === 'fichas', EMBED_ADV = QS.get('adv') || '';
+  const QS = new URLSearchParams(location.search), EMBED = QS.get('embed') === 'fichas' || QS.get('embed') === 'mapa', EMBED_MAP = QS.get('embed') === 'mapa', EMBED_ADV = QS.get('adv') || '';
   if (EMBED) document.documentElement.classList.add('embed');
+  if (EMBED_MAP) document.documentElement.classList.add('embed-map');
   let embTab = QS.get('tab') === 'mochilas' ? 'mochilas' : 'fichas';
   const UIDRE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
   window.addEventListener('message', function (e) {
@@ -572,7 +578,7 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
       '<button type="button" class="ghost" data-a="profile">Perfil</button><button type="button" class="ghost" data-a="out">Sair</button></div></div>';
   }
   function drawCamps() {
-    partyStop(); evStop(); stopBag(); stopStage();
+    partyStop(); evStop(); stopBag(); stopStage(); stopMap();
     if (camps === null) { app.innerHTML = topBar('Hollow Table') + '<div class="center"><p class="muted" role="status">' + (loadErr ? esc(loadErr) : 'Carregando suas mesas…') + '</p>' + (loadErr ? '<button class="btn q" data-a="retry">Tentar de novo</button>' : '') + '</div>'; return; }
     if (!camps.length) { app.innerHTML = topBar('Hollow Table') + '<div class="center"><h2>Nenhuma mesa ainda</h2><p class="muted">Peça ao Mestre para adicionar o seu e-mail (' + esc(me().email) + ') à mesa.</p></div>'; return; }
     app.innerHTML = topBar('Suas mesas') + '<div class="center" style="place-content:start center"><div class="camps">' + camps.map(function (c) {
@@ -584,6 +590,7 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
     return m ? m.name : (cur && cur.owner === u.id ? 'Mestre' : u.email);
   }
   const ICO = {
+    mapa: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M3.5 6.5 9 4l6 2.5L20.5 4v13.5L15 20l-6-2.5-5.5 2.5z"/><path d="M9 4v13.5M15 6.5V20"/></svg>',
     cloud: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4 4 0 0 1-.5 8.5H7z"/></svg>',
     dados: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M12 2.5l8.5 4.9v9.2L12 21.5l-8.5-4.9V7.4z"/><path d="M12 2.5v19M3.5 7.4l8.5 4.9 8.5-4.9"/></svg>',
     ficha: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><circle cx="12" cy="9.5" r="2.6"/><path d="M7.5 17c.8-2.3 2.5-3.4 4.5-3.4s3.7 1.1 4.5 3.4"/></svg>',
@@ -596,6 +603,7 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
   function isOwner() { return !!(cur && me() && cur.owner === me().id); }
   function drawLobby() {
     const u = me();
+    if (EMBED_MAP) { app.innerHTML = '<div class="pane one" id="pane"></div>'; tab = 'mapa'; drawPane(); return; }
     if (EMBED) {
       app.innerHTML = '<div class="emb-tabs" role="tablist" aria-label="Ver">' + [['fichas', 'Fichas'], ['mochilas', 'Mochilas']].map(function (t) { return '<button type="button" class="tab" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + t[1] + '</button>'; }).join('') + '</div><div class="pane one" id="pane"></div>';
       drawPane(); return;
@@ -604,17 +612,45 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
     histClose();
     app.innerHTML = topBar(cur.name, '<span class="sys">' + esc(SYS[cur.system] || cur.system) + '</span>') +
       '<div class="party" id="party" role="list" aria-label="Grupo: quem está na mesa"></div>' +
-      '<nav class="nav" role="tablist" aria-label="Ferramentas">' + [own ? ['fichas', 'Fichas', 'ficha'] : ['ficha', 'Ficha', 'ficha'], own ? ['mochilas', 'Mochilas', 'mochila'] : ['mochila', 'Mochila', 'mochila'], own ? null : ['memoria', 'Memória', 'memoria'], ['notas', 'Anotações', 'notas'], ['dados', 'Dados', 'dados']].filter(Boolean).map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + ICO[t[2]] + '<span>' + t[1] + '</span>' + (t[2] === 'mochila' ? '<span class="nb" id="nb-m" hidden></span>' : '') + '</button>'; }).join('') + '</nav>' +
+      '<nav class="nav" role="tablist" aria-label="Ferramentas">' + [own ? ['fichas', 'Fichas', 'ficha'] : ['ficha', 'Ficha', 'ficha'], own ? ['mochilas', 'Mochilas', 'mochila'] : ['mochila', 'Mochila', 'mochila'], own ? null : ['memoria', 'Memória', 'memoria'], ['mapa', 'Mapa', 'mapa'], ['notas', 'Anotações', 'notas'], ['dados', 'Dados', 'dados']].filter(Boolean).map(function (t) { return '<button type="button" role="tab" data-tab="' + t[0] + '" aria-selected="' + (tab === t[0]) + '">' + ICO[t[2]] + '<span>' + t[1] + '</span>' + (t[2] === 'mochila' ? '<span class="nb" id="nb-m" hidden></span>' : '') + '</button>'; }).join('') + '</nav>' +
       '<div class="pane" id="pane"></div>';
     partyStart();
     evStart();
     drawPane();
     startStage();
   }
+  /* ---------- mapa ---------- */
+  let mapCtl = null, mapPres = {};
+  function stopMap() { if (mapCtl) { try { mapCtl.destroy(); } catch (e) { /* ok */ } mapCtl = null; } }
+  async function mapLoadPresence() {
+    if (!cur || !isOwner()) return;
+    try {
+      const r = await api('/rest/v1/presence?campaign_id=eq.' + cur.id + '&select=user_id,info');
+      if (!r.ok) return;
+      (await r.json()).forEach(function (x) { mapPres[x.user_id] = x.info || {}; });
+    } catch (e) { /* ok */ }
+  }
+  function startMap() {
+    stopMap();
+    const host = $('#mapa');
+    if (!host || !window.HTMap) { if (host) host.innerHTML = '<p class="muted">Não consegui carregar o mapa. Recarregue a página.</p>'; return; }
+    mapLoadPresence();
+    mapCtl = window.HTMap.mount(host, {
+      api: api, cid: cur.id, uid: me().id, owner: isOwner(), full: EMBED_MAP,
+      imgUrl: imgUrl,
+      onEsc: EMBED_MAP ? function () { try { parent.postMessage({ ht: 'mapclose' }, location.origin); } catch (e) { /* ok */ } } : null,
+      toast: function (t, tone) { msgToast(t, tone); },
+      reserve: function () { const n = $('.nav'); return n && getComputedStyle(n).position === 'fixed' ? n.offsetHeight + 8 : 0; },
+      party: function () {
+        return partyRows().map(function (p) { const i = (PARTY && p.info && Object.keys(p.info).length ? p.info : mapPres[p.user_id]) || {}; return { user_id: p.user_id, name: p.name, mestre: !!p.mestre, info: i }; });
+      }
+    });
+  }
   function setTab(t) { tab = t; document.querySelectorAll('[data-tab]').forEach(function (b) { b.setAttribute('aria-selected', String(b.dataset.tab === tab)); }); drawPane(); }
   function drawPane() {
-    stopBag(); shPollStop();
+    stopBag(); shPollStop(); stopMap();
     const p = $('#pane');
+    app.classList.toggle('wide', tab === 'mapa');
     if (!p) return;
     p.classList.add('one');
     if (tab === 'dados') { p.innerHTML = diceHtml(); paintResult(); }
@@ -622,6 +658,7 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
     else if (tab === 'fichas') { p.innerHTML = fichasHtml(); loadSheet(shView, false); }
     else if (tab === 'mochila' || tab === 'mochilas') { p.innerHTML = '<div id="bag"></div>'; bagStart(); }
     else if (tab === 'memoria') { p.innerHTML = '<div id="mem" class="mem"></div>'; loadMem(); }
+    else if (tab === 'mapa') { p.innerHTML = '<div id="mapa"></div>'; startMap(); }
     else { p.innerHTML = notesHtml(); loadNotes(); }
   }
 
@@ -2792,7 +2829,7 @@ button.pf:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--line
     else if (a === 'cloud') { const k = cState(); msgToast('Nuvem: ' + CLOUD_LABEL[k] + '.', k === 'ok' ? 'good' : (k === 'busy' ? '' : 'bad')); }
     else if (a === 'profile') profile();
     else if (a === 'pclose') dlgClose();
-    else if (a === 'out') { partyStop(); evStop(); try { localStorage.removeItem('cdm-sb'); } catch (x) { /* ok */ } stopBag(); stopStage(); camps = null; cur = null; drawLogin(); }
+    else if (a === 'out') { partyStop(); evStop(); try { localStorage.removeItem('cdm-sb'); } catch (x) { /* ok */ } stopBag(); stopStage(); stopMap(); camps = null; cur = null; drawLogin(); }
     else if (a === 'nnew') { const n = { id: Date.now().toString(36), title: 'Nova nota', text: '', at: Date.now() }; notes.notes.unshift(n); noteId = n.id; noteDelArm = false; paintNotes(); saveSoon(); const f = $('#nt'); if (f) { f.focus(); f.select(); } }
     else if (a === 'ndel') { if (!noteDelArm) { noteDelArm = true; paintNotes(); return; } notes.notes = notes.notes.filter(function (n) { return n.id !== noteId; }); noteId = notes.notes[0] ? notes.notes[0].id : null; noteDelArm = false; paintNotes(); saveSoon(); }
   });
