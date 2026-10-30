@@ -1111,7 +1111,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <footer class="dock" id="dock" hidden></footer>
 
-<script src="mapa.js?v=0.55"></script>
+<script src="mapa.js?v=0.56"></script>
 <script>
 (function () {
   'use strict';
@@ -1131,7 +1131,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     }).join('');
   }
   /* ---------- ícones (traço simples, herdam a cor do texto) ---------- */
-  const APP_VER = '0.55';
+  const APP_VER = '0.56';
   const RAVEN = '<svg viewBox="96 180 344 220" aria-hidden="true"><path d="M40 392 C140 336 372 336 472 392" fill="none" stroke="currentColor" stroke-width="30" stroke-linecap="round" opacity=".55"/><path fill="currentColor" d="M112 252 C132 242 152 234 166 232 C170 210 196 196 224 200 C256 206 292 232 330 262 L424 322 L388 332 L422 356 L364 356 C332 372 292 360 262 338 C238 322 212 304 202 282 C194 270 178 264 164 266 C146 262 126 256 112 252 Z"/></svg>';
   const SV = function (p, extra) { return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"' + (extra || '') + '>' + p + '</svg>'; };
   const ICO = {
@@ -3425,6 +3425,22 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     const rows = PARTY || (CAMP && CAMP.members || []).map(function (m) { return { user_id: m.user_id, name: m.name, mestre: false, info: {} }; });
     return rows.map(function (p) { return { user_id: p.user_id, name: p.name, mestre: !!p.mestre, info: p.info || {} }; });
   }
+  /* adversários de todas as cenas (a cena atual primeiro), para pôr no mapa */
+  function jogoFoes() {
+    const seen = {}, out = [];
+    [A.cur].concat(A.scenes.map(function (_, i) { return i; }).filter(function (i) { return i !== A.cur; })).forEach(function (i) {
+      const sc = A.scenes[i];
+      (sc.foes || []).forEach(function (f) { const k = (f.id || '') + '|' + f.name; if (!f.name || seen[k]) return; seen[k] = 1; out.push({ id: f.id || '', n: f.name, hp: f.hp || 0, mins: f.mins || 0, scene: sc.title || '' }); });
+    });
+    return out;
+  }
+  /* trocar de cena abre o mapa ligado a ela (e mostra aos jogadores se já havia mapa na mesa) */
+  function jogoScene() {
+    if (!JOGO.ctl || !campHere() || JOGO.cid !== CAMP.id || JOGO.scene === A.cur) return;
+    JOGO.scene = A.cur;
+    if (S.map) JOGO.ctl.useMap(S.map, true);
+    JOGO.ctl.refreshPanel();
+  }
   function jogoDrop() { if (JOGO.ctl) { try { JOGO.ctl.destroy(); } catch (e) { /* ok */ } } JOGO.ctl = null; JOGO.el = JOGO.tools = JOGO.fight = null; JOGO.cid = ''; }
   function jogoEnsure() {
     if (!campHere() || !window.HTMap) { jogoDrop(); return false; }
@@ -3440,8 +3456,13 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
       toast: function (t) { toast(t); },
       myName: function () { return 'Mestre'; },
       onLog: function () { evPoll(true); },
-      party: jogoParty
+      onParty: function () { pingOff = 0; setTimeout(mPing, 300); },
+      party: jogoParty,
+      foes: jogoFoes,
+      scene: { name: function () { return S.title || ('Cena ' + (A.cur + 1)); }, mapId: function () { return S.map || ''; }, link: function (id) { if (id) { A.scenes.forEach(function (sc) { if (sc !== S && sc.map === id) sc.map = ''; }); } S.map = id || ''; JOGO.scene = A.cur; save(); } }
     });
+    JOGO.scene = A.cur;
+    if (S.map) JOGO.ctl.useMap(S.map, false);
     return true;
   }
   function jogoAttach() {
@@ -3789,6 +3810,7 @@ body[data-mode="mesa"] .toast { bottom: calc(100px + env(safe-area-inset-bottom,
     if (mode === 'mesa') renderDock();
     $$('textarea.auto', main).forEach(autoGrow);
     jogoAttach();
+    jogoScene();
   }
   function commit() { save(); render(); }
 
